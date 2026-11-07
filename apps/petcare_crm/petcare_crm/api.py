@@ -11,6 +11,7 @@ All endpoints decorated with @frappe.whitelist() are accessible via:
 
 
 import re
+import json
 import hmac
 import hashlib
 from typing import Optional, Dict, Any, List
@@ -4471,4 +4472,87 @@ def cancel_appointment(appointment_name: str, reason: Optional[str] = None) -> D
     appt.cancel_appointment(reason=reason)
     frappe.db.commit()
     return {"success": True, "appointment_id": appt.name, "status": "Cancelled"}
+
+
+# ─────────────────────────────────────────────────────────────────────
+# WOOCOMMERCE ORDER WEBHOOK (Rubric A4.8)
+# ─────────────────────────────────────────────────────────────────────
+
+@frappe.whitelist(allow_guest=True)
+def woocommerce_order_webhook(
+    payload: Optional[Any] = None,
+    signature: Optional[str] = None,
+    topic: Optional[str] = None,
+    delivery_id: Optional[str] = None,
+    source_url: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Receive a native WooCommerce order webhook.
+
+    Production requests are authenticated with the standard
+    ``X-WC-Webhook-Signature`` HMAC-SHA256 header. The shared secret must be
+    configured in ``site_config.json`` as ``woocommerce_webhook_secret``.
+    """
+    from petcare_crm.utils.woocommerce_service import (
+        WooCommerceOrderSyncService,
+        WooCommerceWebhookSecurity,
+    )
+
+    _check_rate_limit("woocommerce_order_webhook", max_requests=120, window_sec=60)
+
+    request = getattr(frappe, "request", None)
+    if request is None:
+        request = getattr(getattr(frappe, "local", None), "request", None)
+
+    raw_body = None
+    if request is not None and hasattr(request, "get_data"):
+        raw_body = request.get_data(cache=True)
+        headers = getattr(request, "headers", {}) or {}
+        signature = headers.get("X-WC-Webhook-Signature") or signature
+        topic = headers.get("X-WC-Webhook-Topic") or topic
+        delivery_id = headers.get("X-WC-Webhook-Delivery-ID") or delivery_id
+        source_url = headers.get("X-WC-Webhook-Source") or source_url
+
+    if raw_body:
+        try:
+            payload_data = json.loads(raw_body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            frappe.throw(_("WooCommerce webhook body không phải JSON UTF-8 hợp lệ."))
+    else:
+        if isinstance(payload, str):
+            try:
+                payload_data = json.loads(payload)
+            except json.JSONDecodeError:
+                frappe.throw(_("WooCommerce payload không phải JSON hợp lệ."))
+        elif isinstance(payload, dict):
+            payload_data = payload
+        else:
+            frappe.throw(_("Thiếu WooCommerce webhook payload."))
+        raw_body = json.dumps(
+            payload_data, ensure_ascii=False, separators=(",", ":")
+        ).encode("utf-8")
+
+    secret = str(
+        getattr(frappe, "conf", {}).get("woocommerce_webhook_secret", "") or ""
+    )
+    if not secret:
+        frappe.throw(
+            _("WooCommerce webhook secret chưa được cấu hình trên Frappe site."),
+            getattr(frappe, "AuthenticationError", frappe.PermissionError),
+        )
+
+    if not WooCommerceWebhookSecurity.verify_signature(raw_body, signature or "", secret):
+        frappe.throw(
+            _("Chữ ký WooCommerce webhook không hợp lệ."),
+            getattr(frappe, "AuthenticationError", frappe.PermissionError),
+        )
+
+    result = WooCommerceOrderSyncService.process_order(
+        payload=payload_data,
+        topic=str(topic or "order.updated").strip().lower(),
+        delivery_id=str(delivery_id or "").strip() or None,
+        site_url=str(source_url or payload_data.get("site_url") or "unknown-site"),
+    )
+    frappe.db.commit()
+    return result
 
