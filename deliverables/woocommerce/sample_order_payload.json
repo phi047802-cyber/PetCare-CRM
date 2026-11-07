@@ -1,0 +1,33 @@
+{
+  "id": 8451,
+  "number": "PC-8451",
+  "status": "processing",
+  "currency": "VND",
+  "total": "650000",
+  "date_created": "2026-11-07T10:30:00+07:00",
+  "customer_id": 78,
+  "customer_note": "Bé sợ tiếng máy sấy lớn",
+  "site_url": "https://shop.petcare.vn/",
+  "billing": {
+    "first_name": "Nguyễn Văn",
+    "last_name": "An",
+    "email": "an.nguyen@example.com",
+    "phone": "0912345678"
+  },
+  "line_items": [
+    {
+      "product_id": 101,
+      "variation_id": 0,
+      "sku": "SPA-FULL",
+      "name": "Gói Spa Toàn Diện",
+      "quantity": 1,
+      "total": "650000"
+    }
+  ],
+  "meta_data": [
+    {"key": "_petcare_pet_name", "value": "Milo"},
+    {"key": "_petcare_pet_species", "value": "Chó"},
+    {"key": "_petcare_pet_breed", "value": "Poodle"}
+  ]
+}
+
