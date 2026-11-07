@@ -140,3 +140,16 @@ Thư mục: `deliverables/wordpress/`
 | **HTTP 400 Bad Request** | Thiếu trường hoặc SĐT sai | Kiểm tra định dạng số điện thoại (phải là 10 số đầu 0 của VN). |
 | **HTTP 429 Rate Limit** | Gửi form quá 5 lần / 10 phút | Đợi hết thời gian chờ hoặc đổi mạng/IP khác để test tiếp. |
 | **Lead không thấy trên Desk** | Tài khoản API thiếu quyền | Đảm bảo User sở hữu API Key có Role `System Manager`, `PetCare Sales` hoặc `PetCare Manager`. |
+
+---
+
+## 7. MỞ RỘNG WOOCOMMERCE (PLUGIN 1.1.0)
+
+Từ phiên bản 1.1.0, plugin còn đồng bộ đơn WooCommerce sang CRM bằng HMAC-SHA256, lưu audit, chống xử lý trùng và tự retry khi mất kết nối. Tài liệu cài đặt và kịch bản demo chi tiết nằm tại:
+
+`deliverables/woocommerce/README_WOOCOMMERCE_INTEGRATION.md`
+
+Phần Lead Form và phần WooCommerce dùng chung URL Frappe nhưng có cơ chế xác thực khác nhau:
+
+- Lead Form: WordPress Server-Side Proxy sử dụng Frappe API Key/Secret.
+- WooCommerce Order: Webhook sử dụng shared secret và header chuẩn `X-WC-Webhook-Signature`.
