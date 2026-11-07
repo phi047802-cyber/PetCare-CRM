@@ -3,7 +3,7 @@
 > **Hệ Thống Quản Lý Quan Hệ Khách Hàng Chuyên Biệt Cho Ngành Chăm Sóc Thú Cưng**  
 > **Nền tảng**: Frappe Framework v15 (Desk Native Architecture)  
 > **Phiên bản hoàn thiện**: 2.0 (Prompt 10 Final Handover Release)  
-> **Kiểm thử tự động**: **58 / 58 Tests PASS (100.0%)** | Thời gian thực thi: **1.6s**  
+> **Kiểm thử tự động**: **99 / 99 Tests PASS (100.0%)**
 
 ---
 
@@ -16,6 +16,7 @@
 3. **Thẻ Hội Viên & Khấu Trừ Quyền Lợi (Membership & Loyalty)**: Cấu hình các gói hội viên linh hoạt (Bạc, Vàng, VIP), cấn trừ quyền lợi tự động (100% FREE, chiết khấu %), bảo vệ Idempotency chống trừ trùng lặp, bảo toàn số dư không bị âm và hỗ trợ Rollover khi gia hạn thẻ.
 4. **Trí Tuệ Chăm Sóc & Dự Đoán Tái Khám (Care Intelligence & Retention)**: Thuật toán Rule-based thống kê minh bạch kết hợp bộ lọc ngoại lai (Tukey IQR) và trung bình động hàm mũ (EWMA) để dự đoán chu kỳ chăm sóc, phát hiện thú cưng sắp đến hạn (`DUE_SOON`), khách hàng có nguy cơ rời bỏ (`AT_RISK`) và tự động giao nhiệm vụ cho nhân viên CSKH.
 5. **Giao Diện Frappe Desk Hoàn Chỉnh (Desk Native UI)**: Workspace nghiệp vụ PetCare CRM, List View, Form View, các nút hành động (Action Buttons), bộ lọc query filter và Báo cáo quản trị 8 chỉ số KPI chuẩn.
+6. **Tích Hợp WordPress & WooCommerce**: Thu Lead từ website và đồng bộ đơn WooCommerce bằng webhook HMAC-SHA256, chống xử lý trùng, tự động tạo Contact/Pet/Opportunity và cập nhật phễu theo trạng thái đơn.
 
 ---
 
@@ -29,7 +30,7 @@ Hệ thống được thiết kế theo mô hình Clean Architecture 8 tầng, �
 * **Tầng 3 (Domain Layer)**: Business logic OOP thuần túy (`CarePatternAnalyzer`, `VisitPredictionService`, `RiskDetectionService`, `PricingEngine`).
 * **Tầng 2 (DocType Layer)**: Controllers và Schema JSON định nghĩa các thực thể và quan hệ cơ sở dữ liệu.
 * **Tầng 1 (Infrastructure Layer)**: Frappe Framework v15, MariaDB 11.x, Redis Cache & Queues.
-* **Tầng 7 & 8 (Automation & Testing)**: Tác vụ nền định kỳ và bộ kiểm thử tự động 58 test cases.
+* **Tầng 7 & 8 (Automation & Testing)**: Tác vụ nền định kỳ và bộ kiểm thử tự động 99 test cases.
 
 ---
 
@@ -44,7 +45,7 @@ python start_preview.py
 ```
 * **Cổng Khách Hàng & Thu Ngân POS**: `http://127.0.0.1:8080/`
 * **Không Gian Làm Việc Frappe Desk**: `http://127.0.0.1:8080/desk` (hoặc `/app`)
-* **Chạy 88 Bài Test Tự Động (100% PASS)**:
+* **Chạy 99 Bài Test Tự Động (100% PASS)**:
   ```bash
   python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
   ```
@@ -80,7 +81,7 @@ bench start
 
 ## 🧪 Kiểm Thử Tự Động (Automated Testing)
 
-Toàn bộ 58 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
+Toàn bộ 99 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
 
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
@@ -98,8 +99,12 @@ Executing Suite 4: Care Intelligence, Pattern Analytics & Dedup ... [PASS] (11 p
 Executing Suite 5: Workflow Automation & Scheduled Jobs ... [PASS] (9 passed)
 Executing Suite 6: Security, RBAC Matrix & Analytics KPIs ... [PASS] (11 passed)
 Executing Suite 7: End-to-End (E2E) Scenarios A-F ... [PASS] (11 passed)
+Executing Suite 8: Advanced Extensions & Resolved Limitations ... [PASS] (10 passed)
+Executing Suite 9: WordPress Lead Capture Integration ... [PASS] (6 passed)
+Executing Suite 10: Audit Remediation & System Hardening ... [PASS] (14 passed)
+Executing Suite 11: WooCommerce Order Webhook Integration ... [PASS] (11 passed)
 ================================================================================
-Tổng số kịch bản kiểm thử : 58 | Thành công: 58 (100.0%) | Thời gian: ~1.6s
+Tổng số kịch bản kiểm thử : 99 | Thành công: 99 (100.0%)
 ================================================================================
 ```
 

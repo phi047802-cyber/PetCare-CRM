@@ -1,0 +1,42 @@
+{
+  "info": {
+    "name": "PetCare CRM - WooCommerce Webhook",
+    "description": "A4.8 demo collection. Set base_url and woo_webhook_secret before sending.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "WooCommerce order.updated - Valid HMAC",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.request.body.raw;",
+              "const secret = pm.environment.get('woo_webhook_secret');",
+              "const digest = CryptoJS.HmacSHA256(body, secret);",
+              "const signature = CryptoJS.enc.Base64.stringify(digest);",
+              "pm.request.headers.upsert({key: 'X-WC-Webhook-Signature', value: signature});",
+              "pm.request.headers.upsert({key: 'X-WC-Webhook-Delivery-ID', value: pm.environment.get('delivery_id') || 'demo-delivery-001'});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "X-WC-Webhook-Topic", "value": "order.updated"},
+          {"key": "X-WC-Webhook-Source", "value": "https://shop.petcare.vn/"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 8451,\n  \"number\": \"PC-8451\",\n  \"status\": \"processing\",\n  \"currency\": \"VND\",\n  \"total\": \"650000\",\n  \"billing\": {\"first_name\": \"Nguyễn Văn\", \"last_name\": \"An\", \"email\": \"an.nguyen@example.com\", \"phone\": \"0912345678\"},\n  \"line_items\": [{\"product_id\": 101, \"variation_id\": 0, \"sku\": \"SPA-FULL\", \"name\": \"Gói Spa Toàn Diện\", \"quantity\": 1, \"total\": \"650000\"}],\n  \"meta_data\": [{\"key\": \"_petcare_pet_name\", \"value\": \"Milo\"}, {\"key\": \"_petcare_pet_species\", \"value\": \"Chó\"}, {\"key\": \"_petcare_pet_breed\", \"value\": \"Poodle\"}]\n}"
+        },
+        "url": "{{base_url}}/api/method/petcare_crm.api.woocommerce_order_webhook"
+      }
+    }
+  ],
+  "variable": []
+}
