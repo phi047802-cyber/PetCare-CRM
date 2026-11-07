@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-10-06 18:15:36.084567",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "benefit_type",
+  "total_quantity",
+  "used_quantity",
+  "remaining_quantity",
+  "discount_type",
+  "discount_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "benefit_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Benefit Type",
+   "options": "Grooming\nSpa\nNail Care\nVaccination",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "total_quantity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Quantity",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "used_quantity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Used Quantity"
+  },
+  {
+   "fieldname": "remaining_quantity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Remaining Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Discount Type",
+   "options": "FREE\nPERCENTAGE\nFIXED",
+   "reqd": 1
+  },
+  {
+   "fieldname": "discount_value",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Discount Value"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-06 18:17:01.436301",
+ "modified_by": "Administrator",
+ "module": "PetCare CRM",
+ "name": "Membership Benefit",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

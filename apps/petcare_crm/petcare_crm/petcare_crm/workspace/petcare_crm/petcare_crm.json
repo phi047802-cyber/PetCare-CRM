@@ -1,0 +1,285 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"petcare_header\",\"type\":\"header\",\"data\":{\"text\":\"PetCare CRM Dashboard\",\"level\":4}},{\"id\":\"petcare_shortcuts\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Shortcuts\"}},{\"id\":\"petcare_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"petcare_cards\",\"type\":\"card\",\"data\":{\"card_name\":\"Modules\"}}]",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "heart",
+ "is_standard": 1,
+ "label": "PetCare CRM",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "CRM Core & Leads",
+   "links": [
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "PetCare Leads",
+     "link_count": 0,
+     "link_to": "PetCare Lead",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Sales Opportunities",
+     "link_count": 0,
+     "link_to": "PetCare Opportunity",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Customers & Contacts",
+     "link_count": 0,
+     "link_to": "Contact",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    }
+   ]
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pet & Service Operations",
+   "links": [
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Pet Profiles",
+     "link_count": 0,
+     "link_to": "Pet",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Service Catalog",
+     "link_count": 0,
+     "link_to": "PetCare Service",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Service Visits",
+     "link_count": 0,
+     "link_to": "Service Visit",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Service Cases & Complaints",
+     "link_count": 0,
+     "link_to": "PetCare Case",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Appointments / Scheduling",
+     "link_count": 0,
+     "link_to": "PetCare Appointment",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    }
+   ]
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Membership & Loyalty",
+   "links": [
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Membership Plans",
+     "link_count": 0,
+     "link_to": "Membership Plan",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Customer Memberships",
+     "link_count": 0,
+     "link_to": "Customer Membership",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Benefit Redemption Ledger",
+     "link_count": 0,
+     "link_to": "Benefit Redemption Ledger",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Wallet Transactions",
+     "link_count": 0,
+     "link_to": "Membership Transaction",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    }
+   ]
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Care Intelligence & Tasks",
+   "links": [
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Care Recommendations",
+     "link_count": 0,
+     "link_to": "Care Recommendation",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    },
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 0,
+     "label": "Staff Tasks / ToDos",
+     "link_count": 0,
+     "link_to": "ToDo",
+     "link_type": "DocType",
+     "onboard": 0,
+     "type": "Link"
+    }
+   ]
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Analytics & Reports",
+   "links": [
+    {
+     "dependencies": "",
+     "hidden": 0,
+     "is_query_report": 1,
+     "label": "PetCare KPI Overview",
+     "link_count": 0,
+     "link_to": "petcare_kpi_overview",
+     "link_type": "Report",
+     "onboard": 0,
+     "type": "Link"
+    }
+   ]
+  }
+ ],
+ "module": "PetCare CRM",
+ "name": "PetCare CRM",
+ "number_cards": [],
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "PetCare Manager"
+  },
+  {
+   "role": "PetCare Sales"
+  },
+  {
+   "role": "PetCare Technician"
+  },
+  {
+   "role": "PetCare Analyst"
+  }
+ ],
+ "sequence_id": 1,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "format": "{} Leads",
+   "label": "New Leads",
+   "link_to": "PetCare Lead",
+   "stats_filter": "[[\"PetCare Lead\",\"status\",\"=\",\"New\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} Due Soon",
+   "label": "Due Soon Pets",
+   "link_to": "Care Recommendation",
+   "stats_filter": "[[\"Care Recommendation\",\"recommendation_type\",\"=\",\"DUE_SOON\"],[\"Care Recommendation\",\"status\",\"=\",\"NEW\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} At Risk",
+   "label": "At Risk Pets",
+   "link_to": "Care Recommendation",
+   "stats_filter": "[[\"Care Recommendation\",\"recommendation_type\",\"=\",\"AT_RISK\"],[\"Care Recommendation\",\"status\",\"=\",\"NEW\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "format": "{} Active",
+   "label": "Active Memberships",
+   "link_to": "Customer Membership",
+   "stats_filter": "[[\"Customer Membership\",\"status\",\"=\",\"Active\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "format": "{} Open Cases",
+   "label": "Open Cases",
+   "link_to": "PetCare Case",
+   "stats_filter": "[[\"PetCare Case\",\"status\",\"in\",[\"Open\",\"In Progress\"]]]",
+   "type": "DocType"
+  }
+ ],
+ "title": "PetCare CRM"
+}

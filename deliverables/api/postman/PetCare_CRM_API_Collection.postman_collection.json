@@ -1,0 +1,1192 @@
+{
+  "info": {
+    "_postman_id": "petcare-crm-api-collection-2026",
+    "name": "PetCare CRM Comprehensive API Collection (Rubric A4.7)",
+    "description": "Bộ kiểm thử API và Webhook hoàn chỉnh cho PetCare CRM v15. Bao gồm cả kịch bản thành công (Happy Path), kiểm tra lỗi dữ liệu (Validation Error), từ chối truy cập (Auth Error), và bẫy bot Honeypot.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. Lead & Customer Conversion (TV1)",
+      "item": [
+        {
+          "name": "POST create_lead - Thành công (Happy Path)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.create_lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.create_lead"
+              ]
+            },
+            "description": "Tạo mới Lead với số điện thoại Việt Nam hợp lệ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lead_name\": \"Nguyễn Văn An\",\n  \"phone\": \"0912345678\",\n  \"lead_source\": \"Hotline\",\n  \"email\": \"nguyenvanan@example.com\",\n  \"initial_pet_info\": \"Bé Corgi 2 tuổi, cần tư vấn gói Spa & Cắt tỉa lông\",\n  \"priority\": \"Medium\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST create_lead - Thiếu thông tin bắt buộc (Validation 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.create_lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.create_lead"
+              ]
+            },
+            "description": "Kiểm tra hệ thống báo lỗi khi để trống trường bắt buộc lead_name.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lead_name\": \"\",\n  \"phone\": \"0912345678\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST create_lead - Số điện thoại không hợp lệ (Regex 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.create_lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.create_lead"
+              ]
+            },
+            "description": "Kiểm tra hệ thống chặn số điện thoại sai định dạng.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lead_name\": \"Khách Lỗi SĐT\",\n  \"phone\": \"1234abc\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST create_lead - Không có quyền / Thiếu Token (Auth 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.create_lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.create_lead"
+              ]
+            },
+            "description": "Không gửi Authorization header để kiểm tra bảo mật Frappe RBAC.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lead_name\": \"Hacker\",\n  \"phone\": \"0911223344\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST submit_website_lead - Public Guest Form",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.submit_website_lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.submit_website_lead"
+              ]
+            },
+            "description": "Public endpoint cho form website, tự động chuẩn hóa +84 -> 0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lead_name\": \"Trần Thị Mai\",\n  \"phone\": \"+84988776655\",\n  \"email\": \"mai.tran@example.com\",\n  \"service_type\": \"Tắm Spa & Cắt Tỉa Lông Toàn Diện\",\n  \"pet_notes\": \"Bé Poodle 4kg\",\n  \"hp_field\": \"\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST submit_website_lead - Bẫy Bot Spam Honeypot (Bot Trap)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.submit_website_lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.submit_website_lead"
+              ]
+            },
+            "description": "Bot điền trường ẩn hp_field -> Trả về success giả lập mà không ghi vào DB.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lead_name\": \"Spam Bot Casino\",\n  \"phone\": \"0911223344\",\n  \"hp_field\": \"http://spam-casino-link.com\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST convert_lead_to_customer - Chuyển đổi Lead sang Contact & Pet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.convert_lead_to_customer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.convert_lead_to_customer"
+              ]
+            },
+            "description": "Giao dịch ACID tạo đồng thời Contact và Pet.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lead_id\": \"LEAD-2026-00010\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET get_customer_360 - Xem hồ sơ khách hàng toàn diện",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.get_customer_360?contact_id=CONT-00102",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.get_customer_360?contact_id=CONT-00102"
+              ]
+            },
+            "description": "Trích xuất hồ sơ 360: thú cưng, dịch vụ, thẻ hội viên."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. Sales Opportunity Pipeline (TV2)",
+      "item": [
+        {
+          "name": "POST create_opportunity - Khởi tạo Deal Prospecting (10%)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.create_opportunity",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.create_opportunity"
+              ]
+            },
+            "description": "Khởi tạo cơ hội bán hàng giá trị cao trên Kanban Board.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": \"CONT-00102\",\n  \"title\": \"Tư vấn Gói Thẻ Hội Viên VIP 1 Năm cho bé Bơ\",\n  \"expected_amount\": 6500000.0,\n  \"stage\": \"Prospecting\",\n  \"expected_closing_date\": \"2026-11-20\",\n  \"pet\": \"Bơ\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST create_opportunity - Lỗi số tiền âm (Validation 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.create_opportunity",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.create_opportunity"
+              ]
+            },
+            "description": "Kiểm tra chặn giá trị kỳ vọng không hợp lệ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": \"CONT-00102\",\n  \"title\": \"Deal Lỗi\",\n  \"expected_amount\": -100000.0\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST update_opportunity_stage - Chuyển sang Proposal (50%)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.update_opportunity_stage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.update_opportunity_stage"
+              ]
+            },
+            "description": "Cập nhật giai đoạn phễu và xác suất tương ứng.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"opportunity_id\": \"OPP-2026-00018\",\n  \"new_stage\": \"Proposal\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST update_opportunity_stage - Closed Lost thiếu lost_reason (Error 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.update_opportunity_stage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.update_opportunity_stage"
+              ]
+            },
+            "description": "Cổng gating bắt buộc nhập lý do thất bại khi Closed Lost.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"opportunity_id\": \"OPP-2026-00018\",\n  \"new_stage\": \"Closed Lost\",\n  \"lost_reason\": \"\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST update_opportunity_stage - Chốt Won thành công (Closed Won 100%)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.update_opportunity_stage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.update_opportunity_stage"
+              ]
+            },
+            "description": "Chốt deal thành công, kích hoạt thủ tục tạo thẻ hội viên.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"opportunity_id\": \"OPP-2026-00018\",\n  \"new_stage\": \"Closed Won\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET get_pipeline_summary - Báo cáo tổng giá trị phễu bán hàng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.get_pipeline_summary",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.get_pipeline_summary"
+              ]
+            },
+            "description": "Xem tổng doanh thu kỳ vọng theo trọng số xác suất."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03. Service Visits & Catalog (TV3)",
+      "item": [
+        {
+          "name": "GET get_service_catalog - Danh mục dịch vụ spa & thú y",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.get_service_catalog?species=Chó",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.get_service_catalog?species=Chó"
+              ]
+            },
+            "description": "Lấy danh mục dịch vụ phù hợp với loài chó."
+          },
+          "response": []
+        },
+        {
+          "name": "POST record_pet_service_visit - Mở phiếu dịch vụ & Cấn trừ thẻ (Happy Path)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.record_pet_service_visit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.record_pet_service_visit"
+              ]
+            },
+            "description": "Mở phiếu dịch vụ, áp dụng Pessimistic Lock trừ lượt thẻ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pet\": \"Bơ\",\n  \"service_identifier\": \"SRV-GROOM-01\",\n  \"visit_date\": \"2026-10-27\",\n  \"technician\": \"Nguyễn Kỹ Thuật\",\n  \"weight_kg\": 5.4,\n  \"membership_id\": \"MEM-GOLD-0001\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST get_service_visit_payment_qr - Sinh mã Dynamic VietQR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.get_service_visit_payment_qr",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.get_service_visit_payment_qr"
+              ]
+            },
+            "description": "Sinh mã VietQR chuẩn EMVCo có cú pháp PETCARE_VISIT_{ID}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visit_id\": \"VISIT-2026-00125\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04. Membership & Benefits",
+      "item": [
+        {
+          "name": "GET get_available_plans - Danh sách gói thẻ hội viên",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.get_available_plans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.get_available_plans"
+              ]
+            },
+            "description": "Xem bảng quyền lợi và giá các gói hội viên khả dụng."
+          },
+          "response": []
+        },
+        {
+          "name": "POST register_membership - Đăng ký thẻ hội viên mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.register_membership",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.register_membership"
+              ]
+            },
+            "description": "Kích hoạt thẻ hội viên và nhân bản bảng quyền lợi Plan Benefit.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": \"CONT-00102\",\n  \"pet\": \"Bơ\",\n  \"plan_name\": \"Gói Spa Định Kỳ 10 Buổi\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST top_up_membership - Nạp tiền vào ví trả trước",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.top_up_membership",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.top_up_membership"
+              ]
+            },
+            "description": "Cộng dồn số dư ví trả trước đảm bảo số tiền dương.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"membership_name\": \"MEM-GOLD-0001\",\n  \"amount\": 2000000.0,\n  \"payment_method\": \"Chuyển khoản VietQR\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST renew_membership - Gia hạn thẻ bảo lưu lượt tồn (Rollover)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.renew_membership",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.renew_membership"
+              ]
+            },
+            "description": "Gia hạn gói hội viên và cộng dồn số lượt chưa sử dụng từ thẻ cũ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"membership_name\": \"MEM-GOLD-0001\",\n  \"allow_rollover\": 1\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05. Care Intelligence & Retention (TV4)",
+      "item": [
+        {
+          "name": "GET get_care_status - Tra cứu chu kỳ chăm sóc thú cưng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.get_care_status?pet_name=Bơ&service_type=Tắm%20Spa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.get_care_status?pet_name=Bơ&service_type=Tắm%20Spa"
+              ]
+            },
+            "description": "Đánh giá trạng thái STABLE, DUE_SOON hoặc AT_RISK."
+          },
+          "response": []
+        },
+        {
+          "name": "GET predict_next_service - Dự báo ngày tái khám kết hợp mùa vụ & tuổi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.predict_next_service?pet_name=Bơ&service_type=Tắm%20Spa&enable_seasonal_adjustment=1&enable_age_adjustment=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.predict_next_service?pet_name=Bơ&service_type=Tắm%20Spa&enable_seasonal_adjustment=1&enable_age_adjustment=1"
+              ]
+            },
+            "description": "Tính EWMA trọng số và nhân hệ số rụng lông mùa xuân/hè."
+          },
+          "response": []
+        },
+        {
+          "name": "POST run_care_intelligence_scan - Kích hoạt quét toàn bộ hệ thống",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.run_care_intelligence_scan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.run_care_intelligence_scan"
+              ]
+            },
+            "description": "Chạy tác vụ phân tích chu kỳ, tạo Care Recommendation chống trùng 7 ngày.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"check_date\": \"2026-10-27\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST update_recommendation_status - Chốt đặt lịch (Book Service)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.update_recommendation_status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.update_recommendation_status"
+              ]
+            },
+            "description": "Chuyển trạng thái đề xuất thành BOOKED và mở phiếu dịch vụ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recommendation_name\": \"REC-2026-00012\",\n  \"status\": \"BOOKED\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST update_recommendation_status - Từ chối chăm sóc (Dismiss)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.update_recommendation_status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.update_recommendation_status"
+              ]
+            },
+            "description": "Bắt buộc nhập lý do từ chối để tối ưu hóa dịch vụ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recommendation_name\": \"REC-2026-00012\",\n  \"status\": \"DISMISSED\",\n  \"notes\": \"Chủ bận đi công tác 2 tuần\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST send_omnichannel_notification - Gửi Zalo ZNS / SMS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.send_omnichannel_notification",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.send_omnichannel_notification"
+              ]
+            },
+            "description": "Gửi thông báo chăm sóc cá nhân hóa qua Zalo ZNS.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"Zalo ZNS\",\n  \"recipient\": \"0912345678\",\n  \"template_id\": \"ZNS_CARE_DUE_SOON\",\n  \"template_data\": {\n    \"pet_name\": \"Bé Bơ\",\n    \"due_date\": \"2026-10-30\"\n  }\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET get_omnichannel_outbox - Kiểm tra hộp thư đi Outbox",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "token {{api_key}}:{{api_secret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.get_omnichannel_outbox",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.get_omnichannel_outbox"
+              ]
+            },
+            "description": "Xem nhật ký tin nhắn đã phát và trạng thái gửi."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06. Payment Webhook IPN",
+      "item": [
+        {
+          "name": "POST payment_webhook - Gạch nợ thành công (Valid IPN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Signature",
+                "value": "VALID_HMAC_SHA256_HASH_STRING",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.payment_webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.payment_webhook"
+              ]
+            },
+            "description": "Ngân hàng phát Webhook IPN, CRM đối soát và gạch nợ phiếu Service Visit.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gateway\": \"VIETQR\",\n  \"transaction_id\": \"TXN_BANK_20261027_009988\",\n  \"amount\": 350000.0,\n  \"content\": \"PETCARE_VISIT_VISIT-2026-00125\",\n  \"signature\": \"VALID_HMAC_SHA256_HASH_STRING\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST payment_webhook - Gửi trùng lặp (Duplicate Replay Idempotency)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Signature",
+                "value": "VALID_HMAC_SHA256_HASH_STRING",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.payment_webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.payment_webhook"
+              ]
+            },
+            "description": "Gửi lại đúng mã transaction_id cũ -> Hệ thống trả về HTTP 200 duplicate: true, không cộng tiền lần 2.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gateway\": \"VIETQR\",\n  \"transaction_id\": \"TXN_BANK_20261027_009988\",\n  \"amount\": 350000.0,\n  \"content\": \"PETCARE_VISIT_VISIT-2026-00125\",\n  \"signature\": \"VALID_HMAC_SHA256_HASH_STRING\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST payment_webhook - Chữ ký không hợp lệ (Invalid HMAC 401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Signature",
+                "value": "FAKE_FORGED_SIGNATURE",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/petcare_crm.api.payment_webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "petcare_crm.api.payment_webhook"
+              ]
+            },
+            "description": "Giả mạo request -> Hệ thống phát hiện sai lệch HMAC và từ chối xử lý.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gateway\": \"VIETQR\",\n  \"transaction_id\": \"TXN_FAKE_999\",\n  \"amount\": 5000000.0,\n  \"content\": \"PETCARE_VISIT_VISIT-2026-00125\",\n  \"signature\": \"FAKE_FORGED_SIGNATURE\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

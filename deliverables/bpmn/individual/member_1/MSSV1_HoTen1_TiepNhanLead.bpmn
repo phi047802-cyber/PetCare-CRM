@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Mem1_Lead" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0">
+  <bpmn:collaboration id="Collab_Mem1">
+    <bpmn:participant id="Participant_Mem1" name="Quy trình Tiếp nhận Lead Đa kênh &amp; Chuyển đổi Khách hàng (FLOW-01)" processRef="Process_Mem1_Lead"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Mem1_Lead" name="Quy trình Tiếp nhận Lead Đa kênh &amp; Chuyển đổi Khách hàng" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_Mem1">
+      <bpmn:lane id="Lane_Mem1_KH" name="Khách hàng tiềm năng">
+        <bpmn:flowNodeRef>Start_LeadPhatSinh</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_KH_GuiThongTin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_LeadMerged</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem1_Sales" name="Tư vấn viên / Telesales (PetCare Sales)">
+        <bpmn:flowNodeRef>Task_Sales_TiepNhanForm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_BaoLoiSDT</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_LienKetContactCu</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_GoiDienTuVan</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_GhiNhanInteraction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_DanhGiaTiemNang</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_ChonUnqualified</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_LeadUnqualified</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_BamConvertLead</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem1_CRM" name="Hệ thống PetCare CRM (Engine &amp; MariaDB)">
+        <bpmn:flowNodeRef>Task_CRM_ChuanHoaSDT</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_SDTHopLe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_KiemTraTrungLap</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_CheckTrungLap</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_TaoLeadMoi</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_AtomicConversion</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_LeadConverted</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_LeadPhatSinh" name="Phát sinh nhu cầu chăm sóc"/>
+    <bpmn:userTask id="Task_KH_GuiThongTin" name="Gửi thông tin qua Website / Zalo / Hotline"/>
+    <bpmn:endEvent id="End_LeadMerged" name="Đã liên kết hồ sơ khách cũ"/>
+    <bpmn:userTask id="Task_Sales_TiepNhanForm" name="Mở Desk nhập Form PetCare Lead"/>
+    <bpmn:userTask id="Task_Sales_BaoLoiSDT" name="Yêu cầu kiểm tra &amp; sửa lại số điện thoại"/>
+    <bpmn:userTask id="Task_Sales_LienKetContactCu" name="Nối lịch sử tương tác vào Contact hiện hữu"/>
+    <bpmn:userTask id="Task_Sales_GoiDienTuVan" name="Gọi điện tư vấn thể trạng &amp; nhu cầu dịch vụ"/>
+    <bpmn:userTask id="Task_Sales_GhiNhanInteraction" name="Ghi nhận Timeline (Status: Contacted)"/>
+    <bpmn:exclusiveGateway id="Gateway_DanhGiaTiemNang" name="Đánh giá tiềm năng?"/>
+    <bpmn:userTask id="Task_Sales_ChonUnqualified" name="Chọn Unqualified &amp; bắt buộc nhập lý do"/>
+    <bpmn:endEvent id="End_LeadUnqualified" name="Đóng Lead không chuyển đổi"/>
+    <bpmn:userTask id="Task_Sales_BamConvertLead" name="Bấm hành động 'Convert Lead to Customer'"/>
+    <bpmn:serviceTask id="Task_CRM_ChuanHoaSDT" name="Tự động chuẩn hóa SĐT (+84 -> 0, regex 10 số)"/>
+    <bpmn:exclusiveGateway id="Gateway_SDTHopLe" name="SĐT hợp lệ?"/>
+    <bpmn:serviceTask id="Task_CRM_KiemTraTrungLap" name="Đối soát SĐT trong bảng Contact &amp; PetCare Lead"/>
+    <bpmn:exclusiveGateway id="Gateway_CheckTrungLap" name="Đã có trong CSDL?"/>
+    <bpmn:serviceTask id="Task_CRM_TaoLeadMoi" name="Tạo Lead mới (Status: New, gán Lead Owner)"/>
+    <bpmn:serviceTask id="Task_CRM_AtomicConversion" name="Giao dịch nguyên tử: Tạo Contact, Pet &amp; Link Lead"/>
+    <bpmn:endEvent id="End_LeadConverted" name="Chuyển đổi thành công sang Contact &amp; Pet"/>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="Start_LeadPhatSinh" targetRef="Task_KH_GuiThongTin"/>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_KH_GuiThongTin" targetRef="Task_Sales_TiepNhanForm"/>
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_Sales_TiepNhanForm" targetRef="Task_CRM_ChuanHoaSDT"/>
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_CRM_ChuanHoaSDT" targetRef="Gateway_SDTHopLe"/>
+    <bpmn:sequenceFlow id="Flow_5" name="Sai định dạng" sourceRef="Gateway_SDTHopLe" targetRef="Task_Sales_BaoLoiSDT"/>
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_Sales_BaoLoiSDT" targetRef="Task_Sales_TiepNhanForm"/>
+    <bpmn:sequenceFlow id="Flow_7" name="Hợp lệ" sourceRef="Gateway_SDTHopLe" targetRef="Task_CRM_KiemTraTrungLap"/>
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Task_CRM_KiemTraTrungLap" targetRef="Gateway_CheckTrungLap"/>
+    <bpmn:sequenceFlow id="Flow_9" name="Đã tồn tại" sourceRef="Gateway_CheckTrungLap" targetRef="Task_Sales_LienKetContactCu"/>
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_Sales_LienKetContactCu" targetRef="End_LeadMerged"/>
+    <bpmn:sequenceFlow id="Flow_11" name="Khách mới" sourceRef="Gateway_CheckTrungLap" targetRef="Task_CRM_TaoLeadMoi"/>
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Task_CRM_TaoLeadMoi" targetRef="Task_Sales_GoiDienTuVan"/>
+    <bpmn:sequenceFlow id="Flow_13" sourceRef="Task_Sales_GoiDienTuVan" targetRef="Task_Sales_GhiNhanInteraction"/>
+    <bpmn:sequenceFlow id="Flow_14" sourceRef="Task_Sales_GhiNhanInteraction" targetRef="Gateway_DanhGiaTiemNang"/>
+    <bpmn:sequenceFlow id="Flow_15" name="Không tiềm năng" sourceRef="Gateway_DanhGiaTiemNang" targetRef="Task_Sales_ChonUnqualified"/>
+    <bpmn:sequenceFlow id="Flow_16" sourceRef="Task_Sales_ChonUnqualified" targetRef="End_LeadUnqualified"/>
+    <bpmn:sequenceFlow id="Flow_17" name="Đồng ý dịch vụ" sourceRef="Gateway_DanhGiaTiemNang" targetRef="Task_Sales_BamConvertLead"/>
+    <bpmn:sequenceFlow id="Flow_18" sourceRef="Task_Sales_BamConvertLead" targetRef="Task_CRM_AtomicConversion"/>
+    <bpmn:sequenceFlow id="Flow_19" sourceRef="Task_CRM_AtomicConversion" targetRef="End_LeadConverted"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Mem1">
+    <bpmndi:BPMNPlane id="BPMNPlane_Mem1" bpmnElement="Collab_Mem1">
+      <bpmndi:BPMNShape id="Shape_Participant_Mem1" bpmnElement="Participant_Mem1" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1680" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem1_KH" bpmnElement="Lane_Mem1_KH" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1650" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem1_Sales" bpmnElement="Lane_Mem1_Sales" isHorizontal="true">
+        <dc:Bounds x="190" y="230" width="1650" height="190"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem1_CRM" bpmnElement="Lane_Mem1_CRM" isHorizontal="true">
+        <dc:Bounds x="190" y="420" width="1650" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_LeadPhatSinh" bpmnElement="Start_LeadPhatSinh">
+        <dc:Bounds x="232" y="132" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_KH_GuiThongTin" bpmnElement="Task_KH_GuiThongTin">
+        <dc:Bounds x="310" y="110" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_LeadMerged" bpmnElement="End_LeadMerged">
+        <dc:Bounds x="922" y="132" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_TiepNhanForm" bpmnElement="Task_Sales_TiepNhanForm">
+        <dc:Bounds x="310" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_BaoLoiSDT" bpmnElement="Task_Sales_BaoLoiSDT">
+        <dc:Bounds x="560" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_LienKetContactCu" bpmnElement="Task_Sales_LienKetContactCu">
+        <dc:Bounds x="875" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_GoiDienTuVan" bpmnElement="Task_Sales_GoiDienTuVan">
+        <dc:Bounds x="1080" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_GhiNhanInteraction" bpmnElement="Task_Sales_GhiNhanInteraction">
+        <dc:Bounds x="1245" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_DanhGiaTiemNang" bpmnElement="Gateway_DanhGiaTiemNang" isMarkerVisible="true">
+        <dc:Bounds x="1410" y="295" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_ChonUnqualified" bpmnElement="Task_Sales_ChonUnqualified">
+        <dc:Bounds x="1495" y="245" width="130" height="65"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_LeadUnqualified" bpmnElement="End_LeadUnqualified">
+        <dc:Bounds x="1672" y="260" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_BamConvertLead" bpmnElement="Task_Sales_BamConvertLead">
+        <dc:Bounds x="1495" y="335" width="130" height="65"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_ChuanHoaSDT" bpmnElement="Task_CRM_ChuanHoaSDT">
+        <dc:Bounds x="310" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_SDTHopLe" bpmnElement="Gateway_SDTHopLe" isMarkerVisible="true">
+        <dc:Bounds x="485" y="485" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_KiemTraTrungLap" bpmnElement="Task_CRM_KiemTraTrungLap">
+        <dc:Bounds x="670" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_CheckTrungLap" bpmnElement="Gateway_CheckTrungLap" isMarkerVisible="true">
+        <dc:Bounds x="840" y="485" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_TaoLeadMoi" bpmnElement="Task_CRM_TaoLeadMoi">
+        <dc:Bounds x="930" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_AtomicConversion" bpmnElement="Task_CRM_AtomicConversion">
+        <dc:Bounds x="1495" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_LeadConverted" bpmnElement="End_LeadConverted">
+        <dc:Bounds x="1672" y="492" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_1" bpmnElement="Flow_1">
+        <di:waypoint x="268" y="150"/>
+        <di:waypoint x="310" y="150"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_2" bpmnElement="Flow_2">
+        <di:waypoint x="375" y="190"/>
+        <di:waypoint x="375" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_3" bpmnElement="Flow_3">
+        <di:waypoint x="375" y="360"/>
+        <di:waypoint x="375" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_4" bpmnElement="Flow_4">
+        <di:waypoint x="440" y="510"/>
+        <di:waypoint x="485" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_5" bpmnElement="Flow_5">
+        <di:waypoint x="510" y="485"/>
+        <di:waypoint x="510" y="320"/>
+        <di:waypoint x="560" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_6" bpmnElement="Flow_6">
+        <di:waypoint x="560" y="300"/>
+        <di:waypoint x="440" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_7" bpmnElement="Flow_7">
+        <di:waypoint x="535" y="510"/>
+        <di:waypoint x="670" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_8" bpmnElement="Flow_8">
+        <di:waypoint x="800" y="510"/>
+        <di:waypoint x="840" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_9" bpmnElement="Flow_9">
+        <di:waypoint x="865" y="485"/>
+        <di:waypoint x="865" y="320"/>
+        <di:waypoint x="875" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_10" bpmnElement="Flow_10">
+        <di:waypoint x="940" y="280"/>
+        <di:waypoint x="940" y="168"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_11" bpmnElement="Flow_11">
+        <di:waypoint x="890" y="510"/>
+        <di:waypoint x="930" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_12" bpmnElement="Flow_12">
+        <di:waypoint x="1060" y="510"/>
+        <di:waypoint x="1145" y="510"/>
+        <di:waypoint x="1145" y="360"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_13" bpmnElement="Flow_13">
+        <di:waypoint x="1210" y="320"/>
+        <di:waypoint x="1245" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_14" bpmnElement="Flow_14">
+        <di:waypoint x="1375" y="320"/>
+        <di:waypoint x="1410" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_15" bpmnElement="Flow_15">
+        <di:waypoint x="1435" y="295"/>
+        <di:waypoint x="1435" y="275"/>
+        <di:waypoint x="1495" y="275"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_16" bpmnElement="Flow_16">
+        <di:waypoint x="1625" y="278"/>
+        <di:waypoint x="1672" y="278"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_17" bpmnElement="Flow_17">
+        <di:waypoint x="1435" y="345"/>
+        <di:waypoint x="1435" y="370"/>
+        <di:waypoint x="1495" y="370"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_18" bpmnElement="Flow_18">
+        <di:waypoint x="1560" y="400"/>
+        <di:waypoint x="1560" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_19" bpmnElement="Flow_19">
+        <di:waypoint x="1625" y="510"/>
+        <di:waypoint x="1672" y="510"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

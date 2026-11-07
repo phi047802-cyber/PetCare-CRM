@@ -1,0 +1,165 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "field:service_code",
+ "creation": "2026-10-26 13:50:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "service_code",
+  "service_name",
+  "category",
+  "standard_price",
+  "is_active",
+  "column_break_1",
+  "default_cycle_days",
+  "target_species",
+  "estimated_duration_minutes",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Service Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "service_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Service Name",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Grooming & Spa",
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "Grooming & Spa\nHealthcare & Clinic\nHotel & Boarding\nTraining",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "standard_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Standard Price (VNĐ)",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "fieldname": "default_cycle_days",
+   "fieldtype": "Int",
+   "label": "Default Care Cycle (Days)"
+  },
+  {
+   "default": "All",
+   "fieldname": "target_species",
+   "fieldtype": "Select",
+   "label": "Target Species",
+   "options": "All\nDog\nCat\nRabbit\nOther"
+  },
+  {
+   "default": "60",
+   "fieldname": "estimated_duration_minutes",
+   "fieldtype": "Int",
+   "label": "Estimated Duration (Minutes)"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-26 13:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "PetCare CRM",
+ "name": "PetCare Service",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Sales",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 0,
+   "print": 1,
+   "email": 0,
+   "share": 0
+  },
+  {
+   "role": "PetCare Technician",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 0,
+   "export": 0,
+   "print": 0,
+   "email": 0,
+   "share": 0
+  },
+  {
+   "role": "PetCare Analyst",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0
+  }
+ ],
+ "sort_field": "service_code",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

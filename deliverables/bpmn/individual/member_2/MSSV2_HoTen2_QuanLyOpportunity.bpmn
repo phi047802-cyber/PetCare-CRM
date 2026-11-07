@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Mem2_Opp" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0">
+  <bpmn:collaboration id="Collab_Mem2">
+    <bpmn:participant id="Participant_Mem2" name="Quy trình Quản lý Phễu Cơ hội Bán hàng &amp; Chốt Hợp đồng (FLOW-02)" processRef="Process_Mem2_Opportunity"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Mem2_Opportunity" name="Quy trình Quản lý Phễu Cơ hội Bán hàng &amp; Chốt Hợp đồng" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_Mem2">
+      <bpmn:lane id="Lane_Mem2_KH" name="Khách hàng (Customer)">
+        <bpmn:flowNodeRef>Task_KH_XemXetBaoGia</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem2_Sales" name="Chuyên viên Kinh doanh (PetCare Sales)">
+        <bpmn:flowNodeRef>Start_CoHoiBanHang</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_TaoOpportunity</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_SuaThongTin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_KhaoSatNhuCau</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_GuiBaoGia</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_DamPhan</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_KetQuaDamPhan</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_DongLost</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sales_ChotWon</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem2_Engine" name="Động cơ Quản lý Phễu &amp; Giao việc (Pipeline Engine)">
+        <bpmn:flowNodeRef>Task_Engine_ValidateAmount</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_HopLeOpportunity</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_CapNhatKanban</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_CapNhatForecastLost</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_OppLost</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_TriggerPostWon</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_OppWon</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_CoHoiBanHang" name="Phát sinh cơ hội bán thẻ/dịch vụ giá trị cao"/>
+    <bpmn:userTask id="Task_Sales_TaoOpportunity" name="Khởi tạo PetCare Opportunity (Giai đoạn: Prospecting 10%)"/>
+    <bpmn:serviceTask id="Task_Engine_ValidateAmount" name="Kiểm tra ràng buộc: Giá trị &gt; 0 &amp; Ngày chốt hợp lệ"/>
+    <bpmn:exclusiveGateway id="Gateway_HopLeOpportunity" name="Dữ liệu hợp lệ?"/>
+    <bpmn:userTask id="Task_Sales_SuaThongTin" name="Điều chỉnh giá trị kỳ vọng &amp; hạn chốt deal"/>
+    <bpmn:serviceTask id="Task_Engine_CapNhatKanban" name="Cập nhật Kanban Desk &amp; Khởi tạo ToDo theo dõi"/>
+    <bpmn:userTask id="Task_Sales_KhaoSatNhuCau" name="Khảo sát chi tiết nhu cầu thú cưng (Giai đoạn: Qualification 25%)"/>
+    <bpmn:userTask id="Task_Sales_GuiBaoGia" name="Gửi bảng báo giá gói dịch vụ &amp; ưu đãi (Giai đoạn: Proposal 50%)"/>
+    <bpmn:userTask id="Task_KH_XemXetBaoGia" name="Khách hàng xem xét đề xuất &amp; phản hồi"/>
+    <bpmn:userTask id="Task_Sales_DamPhan" name="Đàm phán lịch chăm sóc &amp; thanh toán (Giai đoạn: Negotiation 75%)"/>
+    <bpmn:exclusiveGateway id="Gateway_KetQuaDamPhan" name="Kết quả đàm phán?"/>
+    <bpmn:userTask id="Task_Sales_DongLost" name="Đóng Closed Lost &amp; Bắt buộc nhập Lost Reason"/>
+    <bpmn:serviceTask id="Task_Engine_CapNhatForecastLost" name="Ghi nhận tỷ lệ trượt &amp; Đối thủ cạnh tranh"/>
+    <bpmn:endEvent id="End_OppLost" name="Kết thúc cơ hội thất bại"/>
+    <bpmn:userTask id="Task_Sales_ChotWon" name="Xác nhận chốt deal (Giai đoạn: Closed Won 100%)"/>
+    <bpmn:serviceTask id="Task_Engine_TriggerPostWon" name="Kích hoạt tự động mở Form Đăng ký Thẻ / Mở Phiếu Dịch vụ"/>
+    <bpmn:endEvent id="End_OppWon" name="Cơ hội chốt thành công - Chuyển sang Vận hành"/>
+    <bpmn:sequenceFlow id="Flow_O1" sourceRef="Start_CoHoiBanHang" targetRef="Task_Sales_TaoOpportunity"/>
+    <bpmn:sequenceFlow id="Flow_O2" sourceRef="Task_Sales_TaoOpportunity" targetRef="Task_Engine_ValidateAmount"/>
+    <bpmn:sequenceFlow id="Flow_O3" sourceRef="Task_Engine_ValidateAmount" targetRef="Gateway_HopLeOpportunity"/>
+    <bpmn:sequenceFlow id="Flow_O4" name="Dữ liệu không hợp lệ" sourceRef="Gateway_HopLeOpportunity" targetRef="Task_Sales_SuaThongTin"/>
+    <bpmn:sequenceFlow id="Flow_O5" sourceRef="Task_Sales_SuaThongTin" targetRef="Task_Sales_TaoOpportunity"/>
+    <bpmn:sequenceFlow id="Flow_O6" name="Hợp lệ" sourceRef="Gateway_HopLeOpportunity" targetRef="Task_Engine_CapNhatKanban"/>
+    <bpmn:sequenceFlow id="Flow_O7" sourceRef="Task_Engine_CapNhatKanban" targetRef="Task_Sales_KhaoSatNhuCau"/>
+    <bpmn:sequenceFlow id="Flow_O8" sourceRef="Task_Sales_KhaoSatNhuCau" targetRef="Task_Sales_GuiBaoGia"/>
+    <bpmn:sequenceFlow id="Flow_O9" sourceRef="Task_Sales_GuiBaoGia" targetRef="Task_KH_XemXetBaoGia"/>
+    <bpmn:sequenceFlow id="Flow_O10" sourceRef="Task_KH_XemXetBaoGia" targetRef="Task_Sales_DamPhan"/>
+    <bpmn:sequenceFlow id="Flow_O11" sourceRef="Task_Sales_DamPhan" targetRef="Gateway_KetQuaDamPhan"/>
+    <bpmn:sequenceFlow id="Flow_O12" name="Khách từ chối" sourceRef="Gateway_KetQuaDamPhan" targetRef="Task_Sales_DongLost"/>
+    <bpmn:sequenceFlow id="Flow_O13" sourceRef="Task_Sales_DongLost" targetRef="Task_Engine_CapNhatForecastLost"/>
+    <bpmn:sequenceFlow id="Flow_O14" sourceRef="Task_Engine_CapNhatForecastLost" targetRef="End_OppLost"/>
+    <bpmn:sequenceFlow id="Flow_O15" name="Khách đồng ý" sourceRef="Gateway_KetQuaDamPhan" targetRef="Task_Sales_ChotWon"/>
+    <bpmn:sequenceFlow id="Flow_O16" sourceRef="Task_Sales_ChotWon" targetRef="Task_Engine_TriggerPostWon"/>
+    <bpmn:sequenceFlow id="Flow_O17" sourceRef="Task_Engine_TriggerPostWon" targetRef="End_OppWon"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Mem2">
+    <bpmndi:BPMNPlane id="BPMNPlane_Mem2" bpmnElement="Collab_Mem2">
+      <bpmndi:BPMNShape id="Shape_Participant_Mem2" bpmnElement="Participant_Mem2" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1620" height="520"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem2_KH" bpmnElement="Lane_Mem2_KH" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1590" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem2_Sales" bpmnElement="Lane_Mem2_Sales" isHorizontal="true">
+        <dc:Bounds x="190" y="230" width="1590" height="190"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem2_Engine" bpmnElement="Lane_Mem2_Engine" isHorizontal="true">
+        <dc:Bounds x="190" y="420" width="1590" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_CoHoiBanHang" bpmnElement="Start_CoHoiBanHang">
+        <dc:Bounds x="222" y="302" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_TaoOpportunity" bpmnElement="Task_Sales_TaoOpportunity">
+        <dc:Bounds x="290" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_SuaThongTin" bpmnElement="Task_Sales_SuaThongTin">
+        <dc:Bounds x="440" y="280" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_ValidateAmount" bpmnElement="Task_Engine_ValidateAmount">
+        <dc:Bounds x="290" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_HopLeOpportunity" bpmnElement="Gateway_HopLeOpportunity" isMarkerVisible="true">
+        <dc:Bounds x="475" y="485" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_CapNhatKanban" bpmnElement="Task_Engine_CapNhatKanban">
+        <dc:Bounds x="570" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_KhaoSatNhuCau" bpmnElement="Task_Sales_KhaoSatNhuCau">
+        <dc:Bounds x="730" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_GuiBaoGia" bpmnElement="Task_Sales_GuiBaoGia">
+        <dc:Bounds x="890" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_KH_XemXetBaoGia" bpmnElement="Task_KH_XemXetBaoGia">
+        <dc:Bounds x="890" y="115" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_DamPhan" bpmnElement="Task_Sales_DamPhan">
+        <dc:Bounds x="1050" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_KetQuaDamPhan" bpmnElement="Gateway_KetQuaDamPhan" isMarkerVisible="true">
+        <dc:Bounds x="1215" y="295" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_DongLost" bpmnElement="Task_Sales_DongLost">
+        <dc:Bounds x="1295" y="245" width="130" height="65"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_CapNhatForecastLost" bpmnElement="Task_Engine_CapNhatForecastLost">
+        <dc:Bounds x="1295" y="470" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_OppLost" bpmnElement="End_OppLost">
+        <dc:Bounds x="1462" y="492" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sales_ChotWon" bpmnElement="Task_Sales_ChotWon">
+        <dc:Bounds x="1295" y="335" width="130" height="65"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_TriggerPostWon" bpmnElement="Task_Engine_TriggerPostWon">
+        <dc:Bounds x="1460" y="328" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_OppWon" bpmnElement="End_OppWon">
+        <dc:Bounds x="1622" y="350" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_O1" bpmnElement="Flow_O1">
+        <di:waypoint x="258" y="320"/>
+        <di:waypoint x="290" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O2" bpmnElement="Flow_O2">
+        <di:waypoint x="355" y="360"/>
+        <di:waypoint x="355" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O3" bpmnElement="Flow_O3">
+        <di:waypoint x="420" y="510"/>
+        <di:waypoint x="475" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O4" bpmnElement="Flow_O4">
+        <di:waypoint x="500" y="485"/>
+        <di:waypoint x="500" y="360"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O5" bpmnElement="Flow_O5">
+        <di:waypoint x="440" y="320"/>
+        <di:waypoint x="420" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O6" bpmnElement="Flow_O6">
+        <di:waypoint x="525" y="510"/>
+        <di:waypoint x="570" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O7" bpmnElement="Flow_O7">
+        <di:waypoint x="700" y="510"/>
+        <di:waypoint x="795" y="510"/>
+        <di:waypoint x="795" y="360"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O8" bpmnElement="Flow_O8">
+        <di:waypoint x="860" y="320"/>
+        <di:waypoint x="890" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O9" bpmnElement="Flow_O9">
+        <di:waypoint x="955" y="280"/>
+        <di:waypoint x="955" y="195"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O10" bpmnElement="Flow_O10">
+        <di:waypoint x="1020" y="155"/>
+        <di:waypoint x="1115" y="155"/>
+        <di:waypoint x="1115" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O11" bpmnElement="Flow_O11">
+        <di:waypoint x="1180" y="320"/>
+        <di:waypoint x="1215" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O12" bpmnElement="Flow_O12">
+        <di:waypoint x="1240" y="295"/>
+        <di:waypoint x="1240" y="278"/>
+        <di:waypoint x="1295" y="278"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O13" bpmnElement="Flow_O13">
+        <di:waypoint x="1360" y="310"/>
+        <di:waypoint x="1360" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O14" bpmnElement="Flow_O14">
+        <di:waypoint x="1425" y="510"/>
+        <di:waypoint x="1462" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O15" bpmnElement="Flow_O15">
+        <di:waypoint x="1240" y="345"/>
+        <di:waypoint x="1240" y="368"/>
+        <di:waypoint x="1295" y="368"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O16" bpmnElement="Flow_O16">
+        <di:waypoint x="1425" y="368"/>
+        <di:waypoint x="1460" y="368"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_O17" bpmnElement="Flow_O17">
+        <di:waypoint x="1590" y="368"/>
+        <di:waypoint x="1622" y="368"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

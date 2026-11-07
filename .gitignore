@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Virtual Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Temporary & Log files
+*.log
+*.tmp
+*.temp
+scratch/
+
+# AI Prompts & Scratch Notes (Không thuộc mã nguồn sản phẩm)
+_prompts/
+*.pdf
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.bak

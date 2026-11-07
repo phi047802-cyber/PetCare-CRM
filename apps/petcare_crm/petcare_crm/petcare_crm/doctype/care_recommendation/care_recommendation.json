@@ -1,0 +1,178 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "REC-.YYYY.-.#####",
+ "creation": "2026-10-06 18:17:01.941493",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "pet",
+  "service_type",
+  "recommendation_type",
+  "recommendation_date",
+  "priority",
+  "reason",
+  "suggested_action",
+  "status",
+  "membership"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Contact",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "pet",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Pet",
+   "options": "Pet",
+   "reqd": 0,
+   "search_index": 1
+  },
+  {
+   "fieldname": "service_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Service Type",
+   "options": "Grooming\nSpa\nNail Care\nVaccination\nMembership Renewal",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "recommendation_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Recommendation Type",
+   "options": "DUE_SOON\nAT_RISK\nRENEWAL",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "recommendation_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Recommendation Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Priority",
+   "options": "High\nMedium\nLow",
+   "search_index": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Long Text",
+   "label": "Reason"
+  },
+  {
+   "fieldname": "suggested_action",
+   "fieldtype": "Small Text",
+   "label": "Suggested Action"
+  },
+  {
+   "default": "NEW",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "NEW\nASSIGNED\nCONTACTED\nCONVERTED\nDISMISSED",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "membership",
+   "fieldtype": "Link",
+   "label": "Linked Membership",
+   "options": "Customer Membership"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-06 18:17:01.941493",
+ "modified_by": "Administrator",
+ "module": "PetCare CRM",
+ "name": "Care Recommendation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Sales",
+   "read": 1,
+   "write": 1,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 0,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Technician",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 0,
+   "export": 0,
+   "print": 0,
+   "email": 0,
+   "share": 0
+  },
+  {
+   "role": "PetCare Analyst",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

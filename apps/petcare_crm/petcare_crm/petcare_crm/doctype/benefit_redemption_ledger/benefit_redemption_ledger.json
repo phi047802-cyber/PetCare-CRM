@@ -1,0 +1,186 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 0,
+ "allow_rename": 0,
+ "autoname": "BRL-.YYYY.-.#####",
+ "creation": "2026-10-26 14:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "membership",
+  "service_visit",
+  "benefit_type",
+  "discount_type",
+  "quantity_redeemed",
+  "discount_applied",
+  "status",
+  "column_break_1",
+  "redemption_time",
+  "idempotency_key",
+  "reverted_time",
+  "reverted_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "membership",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer Membership",
+   "options": "Customer Membership",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "service_visit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Visit",
+   "options": "Service Visit",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "benefit_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Benefit Type",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "discount_type",
+   "fieldtype": "Select",
+   "label": "Discount Type",
+   "options": "FREE\nPERCENTAGE\nFIXED"
+  },
+  {
+   "default": "1",
+   "fieldname": "quantity_redeemed",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Quantity Redeemed",
+   "reqd": 1
+  },
+  {
+   "fieldname": "discount_applied",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Discount Applied (VNĐ)",
+   "reqd": 1
+  },
+  {
+   "default": "Applied",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Applied\nReverted",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "redemption_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Redemption Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "idempotency_key",
+   "fieldtype": "Data",
+   "label": "Idempotency Key",
+   "unique": 0
+  },
+  {
+   "fieldname": "reverted_time",
+   "fieldtype": "Datetime",
+   "label": "Reverted Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reverted_reason",
+   "fieldtype": "Small Text",
+   "label": "Reverted Reason"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-26 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "PetCare CRM",
+ "name": "Benefit Redemption Ledger",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "cancel": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Manager",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "cancel": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0
+  },
+  {
+   "role": "PetCare Sales",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 0,
+   "print": 1,
+   "email": 0,
+   "share": 0
+  },
+  {
+   "role": "PetCare Technician",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 0,
+   "export": 0,
+   "print": 0,
+   "email": 0,
+   "share": 0
+  },
+  {
+   "role": "PetCare Analyst",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0
+  }
+ ],
+ "sort_field": "redemption_time",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

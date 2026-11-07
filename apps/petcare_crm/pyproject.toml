@@ -1,0 +1,17 @@
+[project]
+name = "petcare_crm"
+authors = [
+    { name = "PetCare Team", email = "team@petcare.com"}
+]
+description = "PetCare CRM - Membership & Care Engine Module"
+requires-python = ">=3.10"
+readme = "README.md"
+dynamic = ["version"]
+dependencies = []
+
+[project.license]
+text = "MIT"
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"

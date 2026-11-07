@@ -1,0 +1,188 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 0,
+ "autoname": "OPP-.YYYY.-.#####",
+ "creation": "2026-10-26 13:42:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "opportunity_title",
+  "customer",
+  "pet",
+  "stage",
+  "sales_person",
+  "expected_closing",
+  "column_break_1",
+  "expected_amount",
+  "probability",
+  "weighted_amount",
+  "source_lead",
+  "section_break_lost",
+  "lost_reason",
+  "lost_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "opportunity_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Opportunity Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Contact",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "pet",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Pet",
+   "options": "Pet"
+  },
+  {
+   "default": "Prospecting",
+   "fieldname": "stage",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Pipeline Stage",
+   "options": "Prospecting\nQualification\nProposal\nNegotiation\nClosed Won\nClosed Lost",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Person",
+   "options": "User"
+  },
+  {
+   "fieldname": "expected_closing",
+   "fieldtype": "Date",
+   "label": "Expected Closing Date"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expected_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Expected Amount (VNĐ)",
+   "reqd": 1
+  },
+  {
+   "default": "20",
+   "fieldname": "probability",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Probability (%)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "weighted_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Weighted Amount (VNĐ)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_lead",
+   "fieldtype": "Link",
+   "label": "Source Lead",
+   "options": "PetCare Lead",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.stage=='Closed Lost'",
+   "fieldname": "section_break_lost",
+   "fieldtype": "Section Break",
+   "label": "Lost Details"
+  },
+  {
+   "depends_on": "eval:doc.stage=='Closed Lost'",
+   "fieldname": "lost_reason",
+   "fieldtype": "Select",
+   "label": "Lost Reason",
+   "options": "Price Too High\nCompetitor\nNo Longer Has Pet\nRelocated\nOther"
+  },
+  {
+   "depends_on": "eval:doc.stage=='Closed Lost'",
+   "fieldname": "lost_notes",
+   "fieldtype": "Small Text",
+   "label": "Lost Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-26 13:42:00.000000",
+ "modified_by": "Administrator",
+ "module": "PetCare CRM",
+ "name": "PetCare Opportunity",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Sales",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 0,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Analyst",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1
+}

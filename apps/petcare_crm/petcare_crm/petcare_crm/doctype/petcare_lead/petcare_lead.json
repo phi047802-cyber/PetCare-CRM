@@ -1,0 +1,198 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 0,
+ "autoname": "LEAD-.YYYY.-.#####",
+ "creation": "2026-10-26 13:40:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "lead_name",
+  "phone",
+  "email",
+  "lead_source",
+  "status",
+  "lead_owner",
+  "priority",
+  "column_break_1",
+  "initial_pet_info",
+  "unqualified_reason",
+  "section_break_conv",
+  "converted_contact",
+  "converted_pet",
+  "converted_opportunity",
+  "converted_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "lead_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Lead Name",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Phone Number",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "search_index": 1
+  },
+  {
+   "default": "Hotline",
+   "fieldname": "lead_source",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Lead Source",
+   "options": "Facebook Ads\nZalo\nHotline\nWalk-in\nReferral\nWebsite",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "New",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "New\nContacted\nQualified\nUnqualified\nConverted",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "lead_owner",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Lead Owner",
+   "options": "User",
+   "search_index": 1
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "initial_pet_info",
+   "fieldtype": "Small Text",
+   "label": "Initial Pet Information"
+  },
+  {
+   "depends_on": "eval:doc.status=='Unqualified'",
+   "fieldname": "unqualified_reason",
+   "fieldtype": "Small Text",
+   "label": "Reason for Unqualified"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_conv",
+   "fieldtype": "Section Break",
+   "label": "Conversion Details"
+  },
+  {
+   "fieldname": "converted_contact",
+   "fieldtype": "Link",
+   "label": "Converted Contact",
+   "options": "Contact",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "converted_pet",
+   "fieldtype": "Link",
+   "label": "Converted Pet",
+   "options": "Pet",
+   "read_only": 1
+  },
+  {
+   "fieldname": "converted_opportunity",
+   "fieldtype": "Link",
+   "label": "Converted Opportunity",
+   "options": "PetCare Opportunity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "converted_date",
+   "fieldtype": "Datetime",
+   "label": "Converted Date",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-26 13:40:00.000000",
+ "modified_by": "Administrator",
+ "module": "PetCare CRM",
+ "name": "PetCare Lead",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Sales",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 0,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "PetCare Analyst",
+   "read": 1,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1
+}

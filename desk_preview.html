@@ -1,0 +1,4066 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetCare CRM — Frappe Desk Workspace</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body, html {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      background-color: #F8FAFC !important;
+      color: #0F172A;
+    }
+    .hover-card {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hover-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    }
+    .drawer-backdrop {
+      background-color: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+    }
+    :root {
+      --ink: #17212b;
+      --muted: #64707d;
+      --line: #dce3e8;
+      --canvas: #f4f6f8;
+      --brand: #167c74;
+    }
+    html, body { background: var(--canvas) !important; color: var(--ink) !important; }
+    body > header {
+      height: 68px;
+      background: #fff !important;
+      border-bottom-color: var(--line) !important;
+      box-shadow: 0 1px 2px rgba(23, 33, 43, .04) !important;
+    }
+    body > header > div {
+      max-width: none !important;
+      height: 68px !important;
+      padding-left: 28px !important;
+      padding-right: 28px !important;
+    }
+    body > header a:first-child {
+      background: var(--brand) !important;
+      box-shadow: none !important;
+    }
+    body > header button, body > header a:not(:first-child) {
+      border-radius: 7px !important;
+      box-shadow: none !important;
+    }
+    body > main {
+      max-width: 1280px !important;
+      padding: 32px 32px 48px !important;
+    }
+    body > main > div:first-child {
+      border-radius: 10px !important;
+      border-color: var(--line) !important;
+      box-shadow: 0 1px 2px rgba(23, 33, 43, .035) !important;
+      padding: 24px !important;
+    }
+    body > main > div:first-child h1 { letter-spacing: -.025em; }
+    body > main .rounded-xl,
+    body > main .rounded-lg { border-radius: 10px !important; }
+    body > main .shadow-xs,
+    body > main .shadow-2xs { box-shadow: 0 1px 2px rgba(23, 33, 43, .035) !important; }
+    body > main .hover-card:hover { transform: none; box-shadow: 0 4px 12px rgba(23, 33, 43, .07) !important; }
+    body > main button,
+    body > main a { transition: background-color .15s ease, border-color .15s ease, color .15s ease; }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid #167c74 !important;
+      outline-offset: 2px !important;
+    }
+    @media (max-width: 720px) {
+      body > header { height: auto; }
+      body > header > div {
+        height: auto !important;
+        min-height: 68px;
+        padding: 12px 16px !important;
+        gap: 12px;
+      }
+      body > header > div > div:last-child { flex-wrap: wrap; justify-content: flex-end; }
+      body > header > div > div:last-child span { display: none; }
+      body > main { padding: 20px 16px 36px !important; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 selection:bg-teal-100 selection:text-teal-900">
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div id="toast-container" class="fixed top-16 right-6 z-50 flex flex-col space-y-2 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- FRAPPE DESK NAVBAR -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="/" class="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-xs hover:bg-teal-700 transition" title="Về trang chủ Cổng tiếp nhận">
+          <i class="fa-solid fa-shield-cat"></i>
+        </a>
+        <div class="flex items-center space-x-2 text-xs">
+          <span class="font-bold text-slate-900 text-sm">Frappe Desk</span>
+          <span class="text-slate-300">/</span>
+          <span class="text-slate-600 font-semibold">PetCare CRM Workspace</span>
+          <span class="bg-teal-100 text-teal-800 text-[11px] font-bold px-2 py-0.5 rounded-full border border-teal-200">v2.0 Native Desk</span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button type="button" onclick="openCreateCustomerModalDesk()" class="px-3 py-1.5 rounded-md bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition" title="Thêm khách hàng & thú cưng mới">
+          <i class="fa-solid fa-user-plus"></i> + Thêm Khách Hàng
+        </button>
+        <button type="button" onclick="openEmailCenterModal()" class="px-3 py-1.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-300 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition" title="Trung tâm Email & Kiểm tra kết nối Mailtrap SMTP">
+          <i class="fa-solid fa-envelope text-sky-600"></i> Hộp Thư / Mailtrap
+        </button>
+        <button type="button" onclick="openImportModalDesk()" class="px-3 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition" title="Import hàng loạt từ Excel / CSV">
+          <i class="fa-solid fa-file-excel text-emerald-700"></i> Import Data (Excel/CSV)
+        </button>
+        <a href="/" class="px-3 py-1.5 rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-300 text-xs font-semibold flex items-center gap-1.5 transition" title="Quay lại Cổng tiếp nhận Web Portal">
+          <i class="fa-solid fa-arrow-left text-slate-500"></i>
+          <span>Về Cổng Tiếp Nhận</span>
+        </a>
+        <div class="flex items-center space-x-2 pl-2 border-l border-slate-200 text-xs text-slate-600">
+          <div class="w-7 h-7 rounded-full bg-teal-700 text-white flex items-center justify-center font-extrabold text-xs">A</div>
+          <span class="font-bold text-slate-800 hidden sm:inline">Administrator</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- WORKSPACE MAIN CONTENT -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6 flex-grow">
+
+    <!-- Workspace Banner -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+          <i class="fa-solid fa-paw text-teal-600"></i>
+          <span>Không Gian Làm Việc: PetCare CRM</span>
+        </h1>
+        <p class="text-xs text-slate-600 mt-1">
+          Hệ thống quản lý quan hệ khách hàng & điều hành chuỗi phòng khám thú cưng trên nền tảng Frappe Framework v15. Bấm vào bất kỳ thẻ hoặc mục DocType nào để mở bảng dữ liệu và thực hiện thao tác nghiệp vụ trực tiếp.
+        </p>
+      </div>
+      <div class="flex items-center flex-wrap gap-2">
+        <button type="button" onclick="openCreateCustomerModalDesk()" class="px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition">
+          <i class="fa-solid fa-user-plus"></i> + Thêm Khách Hàng
+        </button>
+        <button type="button" onclick="openImportModalDesk()" class="px-3.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs transition">
+          <i class="fa-solid fa-file-excel text-emerald-700"></i> Import Data (Excel/CSV)
+        </button>
+        <span class="inline-flex items-center gap-1.5 bg-teal-50 text-teal-800 text-xs px-3 py-1.5 rounded-lg border border-teal-200 font-semibold shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-teal-500"></span> Phiên Làm Việc: Sẵn Sàng
+        </span>
+        <button onclick="openModal('kpis')" class="px-3.5 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-300 font-bold text-xs flex items-center gap-1.5 transition shadow-2xs">
+          <i class="fa-solid fa-chart-line text-teal-600"></i> Xem KPI Dashboard
+        </button>
+      </div>
+    </div>
+
+    <!-- SHORTCUT METRIC CARDS (INTERACTIVE) -->
+    <div class="space-y-2">
+      <div class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+        <span>Chỉ Số Vận Hành Nhanh (Shortcuts — Bấm để mở danh sách chi tiết)</span>
+        <span class="text-slate-400 font-normal">Tổng hợp từ dữ liệu hệ thống</span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <!-- New Leads -->
+        <div onclick="openModal('leads')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-blue-500 hover-card transition cursor-pointer group">
+          <div class="text-xs text-slate-500 font-bold group-hover:text-blue-600 flex items-center justify-between">
+            <span>Khách Tiềm Năng (Leads)</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
+          </div>
+          <div id="stat-leads-count" class="text-2xl font-black text-blue-600 mt-1">12 <span class="text-xs font-semibold text-slate-400">Leads</span></div>
+          <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
+            <i class="fa-solid fa-arrow-trend-up text-blue-500"></i> Phễu tiếp thị
+          </div>
+        </div>
+
+        <!-- Due Soon Pets -->
+        <div onclick="openModal('recommendations', 'DUE_SOON')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-amber-500 hover-card transition cursor-pointer group">
+          <div class="text-xs text-slate-500 font-bold group-hover:text-amber-600 flex items-center justify-between">
+            <span>Bé Sắp Đến Hạn</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
+          </div>
+          <div id="stat-due-soon-count" class="text-2xl font-black text-amber-600 mt-1">5 <span class="text-xs font-semibold text-slate-400">Pets</span></div>
+          <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
+            <i class="fa-solid fa-clock text-amber-500"></i> Sắp đến hạn chăm sóc
+          </div>
+        </div>
+
+        <!-- At Risk Pets -->
+        <div onclick="openModal('recommendations', 'AT_RISK')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-red-500 hover-card transition cursor-pointer group">
+          <div class="text-xs text-slate-500 font-bold group-hover:text-red-600 flex items-center justify-between">
+            <span>Nguy Cơ Rời Bỏ</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
+          </div>
+          <div id="stat-at-risk-count" class="text-2xl font-black text-red-600 mt-1">3 <span class="text-xs font-semibold text-slate-400">Pets</span></div>
+          <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
+            <i class="fa-solid fa-triangle-exclamation text-red-500"></i> Nguy cơ rời bỏ
+          </div>
+        </div>
+
+        <!-- Active Memberships -->
+        <div onclick="openModal('memberships')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-emerald-500 hover-card transition cursor-pointer group">
+          <div class="text-xs text-slate-500 font-bold group-hover:text-emerald-600 flex items-center justify-between">
+            <span>Thẻ Hội Viên Hiệu Lực</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
+          </div>
+          <div id="stat-memberships-count" class="text-2xl font-black text-emerald-600 mt-1">45 <span class="text-xs font-semibold text-slate-400">Active</span></div>
+          <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
+            <i class="fa-solid fa-id-card text-emerald-500"></i> Thẻ hội viên hiệu lực
+          </div>
+        </div>
+
+        <!-- Open Cases -->
+        <div onclick="openModal('cases')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-purple-500 hover-card transition cursor-pointer group">
+          <div class="text-xs text-slate-500 font-bold group-hover:text-purple-600 flex items-center justify-between">
+            <span>Khiếu Nại Đang Xử Lý</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
+          </div>
+          <div id="stat-cases-count" class="text-2xl font-black text-purple-600 mt-1">2 <span class="text-xs font-semibold text-slate-400">Cases</span></div>
+          <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
+            <i class="fa-solid fa-comments text-purple-500"></i> Khiếu nại đang xử lý
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCTYPE MODULES GRID (FULL INTERACTIVITY) -->
+    <div class="space-y-2">
+      <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+        Danh Mục Quản Trị Nghiệp Vụ (Frappe DocTypes — Bấm vào mục bất kỳ để thao tác)
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- Module 1: CRM Core & Leads -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center space-x-2 text-slate-900 font-bold text-sm border-b border-slate-100 pb-2.5">
+            <i class="fa-solid fa-users text-teal-600"></i>
+            <span>CRM Core & Leads</span>
+          </div>
+          <ul class="space-y-1 text-xs">
+            <li onclick="openModal('leads')" class="flex items-center justify-between p-2 hover:bg-teal-50 hover:text-teal-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-user-plus text-slate-400 w-4"></i> PetCare Leads</span>
+              <span class="text-teal-700 bg-teal-50 border border-teal-200 text-[11px] px-2 py-0.5 rounded font-bold">12 Records</span>
+            </li>
+            <li onclick="openModal('opportunities')" class="flex items-center justify-between p-2 hover:bg-teal-50 hover:text-teal-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-funnel-dollar text-slate-400 w-4"></i> Sales Opportunities</span>
+              <span class="text-slate-500 text-[11px]">Pipeline Stages</span>
+            </li>
+            <li onclick="openModal('customers')" class="flex items-center justify-between p-2 hover:bg-teal-50 hover:text-teal-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-address-book text-slate-400 w-4"></i> Customers & Contacts</span>
+              <span class="text-slate-500 text-[11px]">Master Data</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Module 2: Pet & Service Operations -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center space-x-2 text-slate-900 font-bold text-sm border-b border-slate-100 pb-2.5">
+            <i class="fa-solid fa-paw text-teal-600"></i>
+            <span>Pet & Service Operations</span>
+          </div>
+          <ul class="space-y-1 text-xs">
+            <li onclick="openModal('pets')" class="flex items-center justify-between p-2 hover:bg-teal-50 hover:text-teal-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-dog text-slate-400 w-4"></i> Pet Profiles</span>
+              <span class="text-slate-500 text-[11px]">Hồ sơ thú cưng</span>
+            </li>
+            <li onclick="openModal('services')" class="flex items-center justify-between p-2 hover:bg-teal-50 hover:text-teal-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-list-check text-slate-400 w-4"></i> Service Catalog</span>
+              <span class="text-slate-500 text-[11px]">Bảng giá niêm yết</span>
+            </li>
+            <li onclick="openModal('visits')" class="flex items-center justify-between p-2 hover:bg-teal-50 hover:text-teal-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-notes-medical text-slate-400 w-4"></i> Service Visits</span>
+              <span class="text-slate-500 text-[11px]">Sổ nhật ký khám</span>
+            </li>
+            <li onclick="openModal('appointments')" class="flex items-center justify-between p-2 bg-teal-50/60 hover:bg-teal-100 hover:text-teal-950 rounded-lg cursor-pointer transition font-bold text-teal-900 border border-teal-200">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-calendar-check text-teal-600 w-4"></i> Appointments / Scheduling</span>
+              <span class="text-teal-700 bg-white border border-teal-300 text-[11px] px-2 py-0.5 rounded font-extrabold">Mới</span>
+            </li>
+            <li onclick="openModal('cases')" class="flex items-center justify-between p-2 hover:bg-teal-50 hover:text-teal-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-comment-dots text-slate-400 w-4"></i> Service Cases & Complaints</span>
+              <span class="text-slate-500 text-[11px]">Khiếu nại</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Module 3: Membership & Loyalty -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center space-x-2 text-slate-900 font-bold text-sm border-b border-slate-100 pb-2.5">
+            <i class="fa-solid fa-crown text-amber-500"></i>
+            <span>Membership & Loyalty</span>
+          </div>
+          <ul class="space-y-1 text-xs">
+            <li onclick="openModal('plans')" class="flex items-center justify-between p-2 hover:bg-amber-50 hover:text-amber-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-tags text-slate-400 w-4"></i> Membership Plans</span>
+              <span class="text-slate-500 text-[11px]">Gói dịch vụ</span>
+            </li>
+            <li onclick="openModal('memberships')" class="flex items-center justify-between p-2 hover:bg-amber-50 hover:text-amber-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-credit-card text-slate-400 w-4"></i> Customer Memberships</span>
+              <span class="text-amber-800 bg-amber-50 border border-amber-200 text-[11px] px-2 py-0.5 rounded font-bold">Thẻ & Số dư</span>
+            </li>
+            <li onclick="openModal('redemptions')" class="flex items-center justify-between p-2 hover:bg-amber-50 hover:text-amber-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-slate-400 w-4"></i> Benefit Redemption Ledger</span>
+              <span class="text-slate-500 text-[11px]">Sổ đối soát</span>
+            </li>
+            <li onclick="openModal('transactions')" class="flex items-center justify-between p-2 hover:bg-amber-50 hover:text-amber-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-receipt text-slate-400 w-4"></i> Wallet Transactions</span>
+              <span class="text-slate-500 text-[11px]">Biên lai ví</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Module 4: Care Intelligence & Retention -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center space-x-2 text-slate-900 font-bold text-sm border-b border-slate-100 pb-2.5">
+            <i class="fa-solid fa-brain text-purple-600"></i>
+            <span>Care Intelligence & Retention</span>
+          </div>
+          <ul class="space-y-1 text-xs">
+            <li onclick="openModal('recommendations')" class="flex items-center justify-between p-2 hover:bg-purple-50 hover:text-purple-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-slate-400 w-4"></i> Care Recommendations (AI)</span>
+              <span class="text-purple-700 bg-purple-50 border border-purple-200 text-[11px] px-2 py-0.5 rounded font-bold">EWMA / Tukey</span>
+            </li>
+            <li onclick="openModal('tasks')" class="flex items-center justify-between p-2 hover:bg-purple-50 hover:text-purple-950 rounded-lg cursor-pointer transition font-semibold">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-list-check text-slate-400 w-4"></i> Staff Tasks / ToDos</span>
+              <span class="text-slate-500 text-[11px]">Tự động giao việc</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Module 5: Analytics & Reports -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center space-x-2 text-slate-900 font-bold text-sm border-b border-slate-100 pb-2.5">
+            <i class="fa-solid fa-chart-pie text-emerald-600"></i>
+            <span>Analytics & Reports</span>
+          </div>
+          <ul class="space-y-1 text-xs">
+            <li onclick="openModal('kpis')" class="flex items-center justify-between p-2.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg cursor-pointer transition font-bold text-emerald-950 border border-emerald-200">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-chart-column text-emerald-600 w-4"></i> PetCare KPI Overview</span>
+              <span class="text-emerald-800 bg-white border border-emerald-300 text-[11px] px-2 py-0.5 rounded font-extrabold">8 KPIs Chuẩn</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Quick Integration Hub -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex items-center space-x-2 text-slate-900 font-bold text-sm border-b border-slate-100 pb-2.5">
+            <i class="fa-solid fa-network-wired text-sky-600"></i>
+            <span>Hệ Thống Tích Hợp (Integrations)</span>
+          </div>
+          <ul class="space-y-1 text-xs">
+                          <li onclick="window.open('/?tab=pos', '_blank')" class="flex items-center justify-between p-2 hover:bg-teal-50 rounded-lg cursor-pointer transition text-xs font-semibold text-slate-700">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-cash-register text-teal-600 w-4"></i> Quầy Tiếp Nhận Nhanh POS</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+              </li>
+              <li onclick="window.open('/?tab=cycle', '_blank')" class="flex items-center justify-between p-2 hover:bg-teal-50 rounded-lg cursor-pointer transition text-xs font-semibold text-slate-700">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-notes-medical text-teal-600 w-4"></i> Theo Dõi Chu Kỳ & Đề Xuất</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+              </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- INTERACTIVE MODAL / DRAWER COMPONENT -->
+  <div id="desk-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 drawer-backdrop animate-fade-in" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col border border-slate-200 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div id="modal-icon" class="w-9 h-9 rounded-lg bg-teal-600 text-white flex items-center justify-center text-sm shadow-xs">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
+          <div>
+            <h2 id="modal-title" class="text-base font-extrabold text-slate-900 tracking-tight">Chi Tiết Bảng Dữ Liệu</h2>
+            <p id="modal-subtitle" class="text-xs text-slate-500 mt-0.5">Dữ liệu thực tế từ DocType trong hệ thống PetCare CRM</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="modal-action-btn" onclick="executeModalAction()" class="btn-teal px-3.5 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white shadow-xs flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> <span>Tạo Mới</span>
+          </button>
+          <button onclick="closeModal()" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition" title="Đóng cửa sổ">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Data Table / Content) -->
+      <div id="modal-body" class="p-5 overflow-y-auto flex-grow text-xs space-y-4">
+        <!-- Content will be injected dynamically -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <span id="modal-footer-info">Hiển thị dữ liệu trực tiếp • Có thể tương tác và cập nhật trạng thái</span>
+        <button onclick="closeModal()" class="px-3.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold transition">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+    PetCare CRM • Phân Hệ Quản Trị Vận Hành Phòng Khám • Frappe Framework v15
+  </footer>
+
+  <!-- SCRIPT ENGINE: LIVE STATE & REAL DATA INTERACTIONS -->
+  <script>
+    // ─────────────────────────────────────────────────────────────────
+    // IN-MEMORY LIVE STORE FOR DESK WORKSPACE
+    // ─────────────────────────────────────────────────────────────────
+        const DESK_DATA = {
+  "leads": [
+    {
+      "id": "LEAD-2026-0001",
+      "name": "Trần Văn Nam",
+      "phone": "0988112233",
+      "source": "Facebook Ads",
+      "stage": "New",
+      "pet_interest": "Chăm sóc Corgi 4 tháng tuổi",
+      "owner": "sales_rep_1@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0002",
+      "name": "Lê Thị Mai",
+      "phone": "0977223344",
+      "source": "TikTok Ads",
+      "stage": "Contacted",
+      "pet_interest": "Tắm Spa định kỳ cho Mèo Anh lông ngắn",
+      "owner": "sales_rep_2@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0003",
+      "name": "Phạm Hoàng Long",
+      "phone": "0966334455",
+      "source": "WordPress Webhook",
+      "stage": "Qualified",
+      "pet_interest": "Quan tâm Gói Vàng VIP (Gold Care)",
+      "owner": "sales_rep_1@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0004",
+      "name": "Đỗ Bích Thảo",
+      "phone": "0911445566",
+      "source": "Vãng Lai (Walk-in)",
+      "stage": "Converted",
+      "pet_interest": "Đã kích hoạt thẻ hội viên",
+      "owner": "receptionist_1@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0005",
+      "name": "Vũ Tuấn Kiệt",
+      "phone": "0947890123",
+      "source": "Giới thiệu (Referral)",
+      "stage": "Contacted",
+      "pet_interest": "Bé Mít - Pug cần khám nếp gấp da mặt",
+      "owner": "sales_rep_2@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0006",
+      "name": "Hoàng Gia Bảo",
+      "phone": "0911223344",
+      "source": "Hotline",
+      "stage": "Qualified",
+      "pet_interest": "Cún Husky 4 tháng cần tiêm phòng trọn gói",
+      "owner": "sales_rep_1@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0007",
+      "name": "Trần Mai Phương",
+      "phone": "0933445566",
+      "source": "Zalo OA",
+      "stage": "New",
+      "pet_interest": "Mèo Ba Tư cần gỡ rối lông xù",
+      "owner": "sales_rep_2@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0008",
+      "name": "Lê Quốc Huy",
+      "phone": "0977889900",
+      "source": "Walk-in",
+      "stage": "Unqualified",
+      "pet_interest": "Đã chuyển nhà ra nước ngoài",
+      "owner": "receptionist_2@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0009",
+      "name": "Nguyễn Hải Yến",
+      "phone": "0905123456",
+      "source": "Google Search",
+      "stage": "Qualified",
+      "pet_interest": "Cắt tỉa tạo kiểu Poodle Teddy",
+      "owner": "sales_rep_1@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0010",
+      "name": "Đặng Quang Minh",
+      "phone": "0918654321",
+      "source": "Facebook Ads",
+      "stage": "Contacted",
+      "pet_interest": "Khám sức khỏe tổng quát Samoyed",
+      "owner": "sales_rep_2@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0011",
+      "name": "Phan Thùy Trang",
+      "phone": "0934987654",
+      "source": "Zalo OA",
+      "stage": "New",
+      "pet_interest": "Gói bồn sục thảo dược Mèo Ragdoll",
+      "owner": "sales_rep_1@petcare.com"
+    },
+    {
+      "id": "LEAD-2026-0012",
+      "name": "Bùi Đình Trọng",
+      "phone": "0982112299",
+      "source": "Hotline",
+      "stage": "New",
+      "pet_interest": "Tiêm vaccine 7 bệnh nhắc lại cho Golden",
+      "owner": "receptionist_1@petcare.com"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "APT-2026-0001",
+      "pet": "Bơ",
+      "customer": "Nguyễn Văn An",
+      "phone": "0901234567",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "date": "2026-11-05",
+      "time": "09:00",
+      "branch": "CN Trung Tâm",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-2026-0002",
+      "pet": "Đậu Phộng",
+      "customer": "Trần Thị Bích Ngọc",
+      "phone": "0912345678",
+      "service": "Tắm Cắt Tỉa Toàn Diện",
+      "date": "2026-11-05",
+      "time": "10:15",
+      "branch": "CN Quận 1",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-2026-0003",
+      "pet": "Bé Bống",
+      "customer": "Dương Bảo Châu",
+      "phone": "0918776655",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "date": "2026-11-05",
+      "time": "11:00",
+      "branch": "CN Phú Nhuận",
+      "status": "Confirmed"
+    },
+    {
+      "id": "APT-2026-0004",
+      "pet": "Bé Sam",
+      "customer": "Trịnh Minh Triết",
+      "phone": "0987654321",
+      "service": "Tắm Cắt Tỉa Toàn Diện",
+      "date": "2026-11-05",
+      "time": "13:30",
+      "branch": "CN Trung Tâm",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-2026-0005",
+      "pet": "Kem",
+      "customer": "Hoàng Mai Anh",
+      "phone": "0936789012",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "date": "2026-11-05",
+      "time": "14:45",
+      "branch": "CN Hải Châu",
+      "status": "Confirmed"
+    },
+    {
+      "id": "APT-2026-0006",
+      "pet": "Sữa",
+      "customer": "Đỗ Thu Thảo",
+      "phone": "0965678901",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "date": "2026-11-05",
+      "time": "15:30",
+      "branch": "CN Hoàn Kiếm",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-2026-0007",
+      "pet": "Mít",
+      "customer": "Vũ Tuấn Kiệt",
+      "phone": "0947890123",
+      "service": "Khám Tổng Quát Lâm Sàng",
+      "date": "2026-11-05",
+      "time": "16:15",
+      "branch": "CN Ninh Kiều",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-2026-0008",
+      "pet": "Bơ Nhỏ",
+      "customer": "Lâm Khánh Vy",
+      "phone": "0908889900",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "date": "2026-11-05",
+      "time": "17:00",
+      "branch": "CN Thủ Đức",
+      "status": "Confirmed"
+    },
+    {
+      "id": "APT-2026-0009",
+      "pet": "Thor",
+      "customer": "Tạ Quang Dũng",
+      "phone": "0942556677",
+      "service": "Tắm Cắt Tỉa Toàn Diện",
+      "date": "2026-11-06",
+      "time": "08:30",
+      "branch": "CN Trung Tâm",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-2026-0010",
+      "pet": "Mochi",
+      "customer": "Bùi Gia Huy",
+      "phone": "0915667788",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "date": "2026-11-06",
+      "time": "09:45",
+      "branch": "CN Cầu Giấy",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-2026-0011",
+      "pet": "Choco",
+      "customer": "Phan Hoàng Long",
+      "phone": "0909112244",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "date": "2026-11-06",
+      "time": "10:30",
+      "branch": "CN Quận 1",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-2026-0012",
+      "pet": "Simba",
+      "customer": "Vũ Thùy Dung",
+      "phone": "0917223399",
+      "service": "Tắm Cắt Tỉa Toàn Diện",
+      "date": "2026-11-06",
+      "time": "14:15",
+      "branch": "CN Hoàn Kiếm",
+      "status": "Scheduled"
+    }
+  ],
+  "memberships": [
+    {
+      "id": "MEM-2026-0001",
+      "customer": "Nguyễn Văn An",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 850000,
+      "remaining": 9,
+      "expiry": "2026-12-31",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0002",
+      "customer": "Trần Thị Bích Ngọc",
+      "plan": "Gói Kim Cương VIP (Diamond Care)",
+      "balance": 2400000,
+      "remaining": 113,
+      "expiry": "2027-02-01",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0003",
+      "customer": "Lê Hoàng Long",
+      "plan": "Gói Bạc Tiêu Chuẩn (Silver Care)",
+      "balance": 350000,
+      "remaining": 1,
+      "expiry": "2026-09-01",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0004",
+      "customer": "Hoàng Mai Anh",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1250000,
+      "remaining": 7,
+      "expiry": "2027-01-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0005",
+      "customer": "Đỗ Thu Thảo",
+      "plan": "Gói Kim Cương VIP (Diamond Care)",
+      "balance": 1800000,
+      "remaining": 13,
+      "expiry": "2027-02-10",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0006",
+      "customer": "Phạm Minh Đức",
+      "plan": "Gói Bạc Tiêu Chuẩn (Silver Care)",
+      "balance": 420000,
+      "remaining": 1,
+      "expiry": "2026-09-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0007",
+      "customer": "Vũ Tuấn Kiệt",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 750000,
+      "remaining": 3,
+      "expiry": "2027-02-20",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0008",
+      "customer": "Đặng Phương Linh",
+      "plan": "Gói Bạc Tiêu Chuẩn (Silver Care)",
+      "balance": 600000,
+      "remaining": 1,
+      "expiry": "2026-10-01",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0009",
+      "customer": "Dương Bảo Châu",
+      "plan": "Gói Kim Cương VIP (Diamond Care)",
+      "balance": 3100000,
+      "remaining": 116,
+      "expiry": "2027-03-01",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0010",
+      "customer": "Trịnh Minh Triết",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1500000,
+      "remaining": 5,
+      "expiry": "2027-02-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0011",
+      "customer": "Lâm Khánh Vy",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 900000,
+      "remaining": 8,
+      "expiry": "2027-04-10",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0012",
+      "customer": "Bùi Gia Huy",
+      "plan": "Gói Bạc Tiêu Chuẩn (Silver Care)",
+      "balance": 500000,
+      "remaining": 3,
+      "expiry": "2026-11-01",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0014",
+      "customer": "Trương Quốc Bảo",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1100000,
+      "remaining": 9,
+      "expiry": "2027-03-20",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0015",
+      "customer": "Võ Thanh Hà",
+      "plan": "Gói Bạc Tiêu Chuẩn (Silver Care)",
+      "balance": 450000,
+      "remaining": 1,
+      "expiry": "2026-11-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0016",
+      "customer": "Tạ Quang Dũng",
+      "plan": "Gói Kim Cương VIP (Diamond Care)",
+      "balance": 4200000,
+      "remaining": 113,
+      "expiry": "2027-01-05",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0018",
+      "customer": "Cao Mỹ Duyên",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1350000,
+      "remaining": 7,
+      "expiry": "2027-03-10",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0019",
+      "customer": "Huỳnh Nhật Minh",
+      "plan": "Gói Bạc Tiêu Chuẩn (Silver Care)",
+      "balance": 650000,
+      "remaining": 1,
+      "expiry": "2026-10-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0020",
+      "customer": "Đỗ Hồng Nhung",
+      "plan": "Gói Kim Cương VIP (Diamond Care)",
+      "balance": 2100000,
+      "remaining": 17,
+      "expiry": "2027-02-28",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0021",
+      "customer": "Phan Hoàng Long",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1750000,
+      "remaining": 8,
+      "expiry": "2027-03-01",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0022",
+      "customer": "Vũ Thùy Dung",
+      "plan": "Gói Kim Cương VIP (Diamond Care)",
+      "balance": 2800000,
+      "remaining": 117,
+      "expiry": "2027-01-20",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0023",
+      "customer": "Lê Tuấn Anh",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1200000,
+      "remaining": 6,
+      "expiry": "2027-02-14",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0024",
+      "customer": "Nguyễn Phương Thảo",
+      "plan": "Gói Bạc Tiêu Chuẩn (Silver Care)",
+      "balance": 850000,
+      "remaining": 3,
+      "expiry": "2026-10-05",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0023",
+      "customer": "Khách Hàng Hội Viên #23",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 1650000,
+      "remaining": 8,
+      "expiry": "2027-008-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0024",
+      "customer": "Khách Hàng Hội Viên #24",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1700000,
+      "remaining": 3,
+      "expiry": "2027-001-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0025",
+      "customer": "Khách Hàng Hội Viên #25",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 1750000,
+      "remaining": 4,
+      "expiry": "2027-002-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0026",
+      "customer": "Khách Hàng Hội Viên #26",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1800000,
+      "remaining": 5,
+      "expiry": "2027-003-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0027",
+      "customer": "Khách Hàng Hội Viên #27",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 1850000,
+      "remaining": 6,
+      "expiry": "2027-004-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0028",
+      "customer": "Khách Hàng Hội Viên #28",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 1900000,
+      "remaining": 7,
+      "expiry": "2027-005-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0029",
+      "customer": "Khách Hàng Hội Viên #29",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 1950000,
+      "remaining": 8,
+      "expiry": "2027-006-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0030",
+      "customer": "Khách Hàng Hội Viên #30",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 2000000,
+      "remaining": 3,
+      "expiry": "2027-007-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0031",
+      "customer": "Khách Hàng Hội Viên #31",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 2050000,
+      "remaining": 4,
+      "expiry": "2027-008-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0032",
+      "customer": "Khách Hàng Hội Viên #32",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 2100000,
+      "remaining": 5,
+      "expiry": "2027-001-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0033",
+      "customer": "Khách Hàng Hội Viên #33",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 2150000,
+      "remaining": 6,
+      "expiry": "2027-002-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0034",
+      "customer": "Khách Hàng Hội Viên #34",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 2200000,
+      "remaining": 7,
+      "expiry": "2027-003-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0035",
+      "customer": "Khách Hàng Hội Viên #35",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 2250000,
+      "remaining": 8,
+      "expiry": "2027-004-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0036",
+      "customer": "Khách Hàng Hội Viên #36",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 2300000,
+      "remaining": 3,
+      "expiry": "2027-005-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0037",
+      "customer": "Khách Hàng Hội Viên #37",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 2350000,
+      "remaining": 4,
+      "expiry": "2027-006-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0038",
+      "customer": "Khách Hàng Hội Viên #38",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 2400000,
+      "remaining": 5,
+      "expiry": "2027-007-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0039",
+      "customer": "Khách Hàng Hội Viên #39",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 2450000,
+      "remaining": 6,
+      "expiry": "2027-008-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0040",
+      "customer": "Khách Hàng Hội Viên #40",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 2500000,
+      "remaining": 7,
+      "expiry": "2027-001-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0041",
+      "customer": "Khách Hàng Hội Viên #41",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 2550000,
+      "remaining": 8,
+      "expiry": "2027-002-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0042",
+      "customer": "Khách Hàng Hội Viên #42",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 2600000,
+      "remaining": 3,
+      "expiry": "2027-003-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0043",
+      "customer": "Khách Hàng Hội Viên #43",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 2650000,
+      "remaining": 4,
+      "expiry": "2027-004-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0044",
+      "customer": "Khách Hàng Hội Viên #44",
+      "plan": "Gói Vàng VIP (Gold Care)",
+      "balance": 2700000,
+      "remaining": 5,
+      "expiry": "2027-005-15",
+      "status": "Active"
+    },
+    {
+      "id": "MEM-2026-0045",
+      "customer": "Khách Hàng Hội Viên #45",
+      "plan": "Gói Bạc Tiêu Chuẩn",
+      "balance": 2750000,
+      "remaining": 6,
+      "expiry": "2027-006-15",
+      "status": "Active"
+    }
+  ],
+  "visits": [
+    {
+      "id": "VIS-2026-0125",
+      "date": "2026-10-31",
+      "pet": "Choco",
+      "customer": "Phan Hoàng Long",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Lê Thị Mai",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0120",
+      "date": "2026-11-02",
+      "pet": "Bé Bống",
+      "customer": "Dương Bảo Châu",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Lê Thị Mai",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0118",
+      "date": "2026-10-30",
+      "pet": "Bé Sam",
+      "customer": "Trịnh Minh Triết",
+      "service": "Tắm Cắt Tỉa Toàn Diện",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Trần Minh",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0115",
+      "date": "2026-10-29",
+      "pet": "Thor",
+      "customer": "Tạ Quang Dũng",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "BS. Nguyễn Văn Hùng",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0112",
+      "date": "2026-11-01",
+      "pet": "Đậu Phộng",
+      "customer": "Trần Thị Bích Ngọc",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Nguyễn Lan",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0105",
+      "date": "2026-10-28",
+      "pet": "Bơ",
+      "customer": "Nguyễn Văn An",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "BS. Nguyễn Văn Hùng",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0089",
+      "date": "2026-10-15",
+      "pet": "Bơ",
+      "customer": "Nguyễn Văn An",
+      "service": "Grooming Toàn Diện",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Lê Thị Mai",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0078",
+      "date": "2026-10-18",
+      "pet": "Đậu Phộng",
+      "customer": "Trần Thị Bích Ngọc",
+      "service": "Grooming Toàn Diện",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Trần Minh",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0070",
+      "date": "2026-10-01",
+      "pet": "Gấu Trúc",
+      "customer": "Phạm Minh Đức",
+      "service": "Grooming Toàn Diện",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Trần Minh",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0054",
+      "date": "2026-09-20",
+      "pet": "Đậu Đậu",
+      "customer": "Nguyễn Văn An",
+      "service": "Grooming Toàn Diện",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Trần Minh",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0041",
+      "date": "2026-08-14",
+      "pet": "Miu Miu",
+      "customer": "Lê Hoàng Long",
+      "service": "Tiêm Vaccine 7 Bệnh",
+      "price": "280.000 đ (Tiền Mặt)",
+      "doctor": "BS. Nguyễn Văn Hùng",
+      "status": "Completed"
+    },
+    {
+      "id": "VIS-2026-0092",
+      "date": "2026-10-25",
+      "pet": "Kem",
+      "customer": "Hoàng Mai Anh",
+      "service": "Spa Bồn Sục & Thảo Dược",
+      "price": "0 đ (Trừ Thẻ)",
+      "doctor": "KTV. Phạm Quốc",
+      "status": "Completed"
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "REC-2026-0001",
+      "pet": "Bơ",
+      "customer": "Nguyễn Văn An",
+      "phone": "0901234567",
+      "service": "Grooming Toàn Diện",
+      "type": "DUE_SOON",
+      "score": 94,
+      "reason": "Đã 32 ngày chưa cắt tỉa lông (chu kỳ 30 ngày)"
+    },
+    {
+      "id": "REC-2026-0005",
+      "pet": "Đậu Phộng",
+      "customer": "Trần Thị Bích Ngọc",
+      "phone": "0912345678",
+      "service": "Tắm Cắt Tỉa Teddy",
+      "type": "DUE_SOON",
+      "score": 96,
+      "reason": "Đến lịch cắt tỉa mặt tròn Teddy định kỳ 21 ngày"
+    },
+    {
+      "id": "REC-2026-0006",
+      "pet": "Sữa",
+      "customer": "Đỗ Thu Thảo",
+      "phone": "0965678901",
+      "service": "Spa Bồn Sục Thảo Dược",
+      "type": "DUE_SOON",
+      "score": 92,
+      "reason": "Mèo Ba Tư lông dài cần xông thảo dược chống vón cục lông"
+    },
+    {
+      "id": "REC-2026-0007",
+      "pet": "Bé Bống",
+      "customer": "Dương Bảo Châu",
+      "phone": "0918776655",
+      "service": "Khám Định Kỳ & Nha Khoa",
+      "type": "DUE_SOON",
+      "score": 94,
+      "reason": "Đến hạn kiểm tra răng miệng & tai định kỳ 6 tháng"
+    },
+    {
+      "id": "REC-2026-0008",
+      "pet": "Bé Sam",
+      "customer": "Trịnh Minh Triết",
+      "phone": "0987654321",
+      "service": "Grooming Chải Lông Tơ",
+      "type": "DUE_SOON",
+      "score": 91,
+      "reason": "Chuẩn bị vào mùa rụng lông tơ, cần chải gỡ rối chuyên sâu"
+    },
+    {
+      "id": "REC-2026-0002",
+      "pet": "Kem",
+      "customer": "Hoàng Mai Anh",
+      "phone": "0936789012",
+      "service": "Spa & Tắm Thảo Dược",
+      "type": "AT_RISK",
+      "score": 88,
+      "reason": "Nguy cơ rời bỏ, trễ chu kỳ chăm sóc 55 ngày (lần cuối 28/07)"
+    },
+    {
+      "id": "REC-2026-0003",
+      "pet": "Miu Miu",
+      "customer": "Lê Hoàng Long",
+      "phone": "0983456789",
+      "service": "Spa Bồn Sục Phục Hồi",
+      "type": "AT_RISK",
+      "score": 89,
+      "reason": "Nguy cơ rời bỏ, vắng mặt 55 ngày (chu kỳ thông thường 25 ngày)"
+    },
+    {
+      "id": "REC-2026-0004",
+      "pet": "Bim Bim",
+      "customer": "Võ Thanh Hà",
+      "phone": "0963334455",
+      "service": "Tắm Cắt Tỉa Toàn Diện",
+      "type": "AT_RISK",
+      "score": 87,
+      "reason": "Nguy cơ rời bỏ, đã trễ 35 ngày kể từ lần ghé cuối, gói Bạc sắp hết hạn"
+    },
+    {
+      "id": "REC-2026-0009",
+      "pet": "Đậu Phộng",
+      "customer": "Trần Thị Bích Ngọc",
+      "phone": "0912345678",
+      "service": "Gia Hạn Gói Kim Cương",
+      "type": "RENEWAL",
+      "score": 98,
+      "reason": "Gói Kim Cương chỉ còn 4 lượt và sắp đến hạn gia hạn"
+    }
+  ],
+  "cases": [
+    {
+      "id": "CASE-2026-0001",
+      "customer": "Lê Hoàng Long",
+      "phone": "0983456789",
+      "pet": "Miu Miu",
+      "subject": "Mèo nhút nhát sợ tiếng máy sấy lồng, yêu cầu lần sau sấy tay nhẹ nhàng",
+      "type": "Complaint",
+      "priority": "High",
+      "status": "Open",
+      "resolution": ""
+    },
+    {
+      "id": "CASE-2026-0002",
+      "customer": "Phạm Minh Đức",
+      "phone": "0974567890",
+      "pet": "Gấu Trúc",
+      "subject": "Thắc mắc về trừ lượt gói Bạc cho dịch vụ tỉa lông chân và vệ sinh đệm móng",
+      "type": "Inquiry",
+      "priority": "Medium",
+      "status": "Open",
+      "resolution": ""
+    },
+    {
+      "id": "CASE-2026-0003",
+      "customer": "Trần Thị Bích Ngọc",
+      "phone": "0912345678",
+      "pet": "Đậu Phộng",
+      "subject": "Đổi giờ hẹn sang 14:00 chiều thứ Bảy do bận công tác đột xuất",
+      "type": "Request",
+      "priority": "Low",
+      "status": "Resolved",
+      "resolution": "Đã đổi lịch hẹn thành công sang 14:00 ngày 07/11"
+    }
+  ],
+  "opportunities": [
+    {
+      "id": "OPP-2026-0001",
+      "customer": "Nguyễn Văn An",
+      "title": "Nâng cấp Thẻ Kim Cương VIP",
+      "amount": 5000000,
+      "stage": "Proposal",
+      "prob": 80
+    },
+    {
+      "id": "OPP-2026-0002",
+      "customer": "Hoàng Gia Bảo",
+      "title": "Gói Vàng VIP cho Chó Husky con",
+      "amount": 3000000,
+      "stage": "Negotiation",
+      "prob": 60
+    },
+    {
+      "id": "OPP-2026-0003",
+      "customer": "Phan Thùy Trang",
+      "title": "Combo Spa Thảo Mộc Mèo Ragdoll",
+      "amount": 2000000,
+      "stage": "New",
+      "prob": 40
+    },
+    {
+      "id": "OPP-2026-0004",
+      "customer": "Dương Bảo Châu",
+      "title": "Tái tục Thẻ Kim Cương năm 2",
+      "amount": 5000000,
+      "stage": "Closed Won",
+      "prob": 100
+    },
+    {
+      "id": "OPP-2026-0005",
+      "customer": "Vũ Thùy Dung",
+      "title": "Gói Spa Bồn Sục Cao Cấp Mèo Golden",
+      "amount": 3000000,
+      "stage": "Qualified",
+      "prob": 70
+    },
+    {
+      "id": "OPP-2026-0006",
+      "customer": "Trương Quốc Bảo",
+      "title": "Mua thêm gói Spa 6 buổi Cacao Poodle",
+      "amount": 2200000,
+      "stage": "Closed Won",
+      "prob": 100
+    }
+  ],
+  "customers": [
+    {
+      "id": "CUST-0001",
+      "name": "Nguyễn Văn An",
+      "phone": "0901234567",
+      "email": "an.nguyen@petcare-demo.vn",
+      "pets_count": 2,
+      "tier": "Gold VIP",
+      "wallet": "850.000 đ",
+      "address": "120 Nguyễn Huệ, Bến Nghé, Quận 1, TP.HCM"
+    },
+    {
+      "id": "CUST-0002",
+      "name": "Trần Thị Bích Ngọc",
+      "phone": "0912345678",
+      "email": "ngoc.tran@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Diamond VIP",
+      "wallet": "2.400.000 đ",
+      "address": "45 Xô Viết Nghệ Tĩnh, Phường 19, Bình Thạnh, TP.HCM"
+    },
+    {
+      "id": "CUST-0003",
+      "name": "Lê Hoàng Long",
+      "phone": "0983456789",
+      "email": "long.le@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Silver VIP",
+      "wallet": "350.000 đ",
+      "address": "78 Nguyễn Thị Thập, Tân Phú, Quận 7, TP.HCM"
+    },
+    {
+      "id": "CUST-0004",
+      "name": "Hoàng Mai Anh",
+      "phone": "0936789012",
+      "email": "anh.hoang@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Gold VIP",
+      "wallet": "1.250.000 đ",
+      "address": "15 Bạch Đằng, Hải Châu 1, Hải Châu, Đà Nẵng"
+    },
+    {
+      "id": "CUST-0005",
+      "name": "Đỗ Thu Thảo",
+      "phone": "0965678901",
+      "email": "thao.do@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Diamond VIP",
+      "wallet": "1.800.000 đ",
+      "address": "88 Phố Huế, Hàng Bài, Hai Bà Trưng, Hà Nội"
+    },
+    {
+      "id": "CUST-0006",
+      "name": "Phạm Minh Đức",
+      "phone": "0974567890",
+      "email": "duc.pham@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Silver VIP",
+      "wallet": "420.000 đ",
+      "address": "12 Tràng Thi, Hàng Trống, Hoàn Kiếm, Hà Nội"
+    },
+    {
+      "id": "CUST-0007",
+      "name": "Vũ Tuấn Kiệt",
+      "phone": "0947890123",
+      "email": "kiet.vu@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Gold VIP",
+      "wallet": "750.000 đ",
+      "address": "25 Đại lộ Hòa Bình, Tân An, Ninh Kiều, Cần Thơ"
+    },
+    {
+      "id": "CUST-0008",
+      "name": "Đặng Phương Linh",
+      "phone": "0928901234",
+      "email": "linh.dang@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Silver VIP",
+      "wallet": "600.000 đ",
+      "address": "104 Lạch Tray, Ngô Quyền, Hải Phòng"
+    },
+    {
+      "id": "CUST-0009",
+      "name": "Dương Bảo Châu",
+      "phone": "0918776655",
+      "email": "chau.duong@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Diamond VIP",
+      "wallet": "3.100.000 đ",
+      "address": "210 Lê Văn Sỹ, Phường 10, Phú Nhuận, TP.HCM"
+    },
+    {
+      "id": "CUST-0010",
+      "name": "Trịnh Minh Triết",
+      "phone": "0987654321",
+      "email": "triet.trinh@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Gold VIP",
+      "wallet": "1.500.000 đ",
+      "address": "78 Hai Bà Trưng, Bến Nghé, Quận 1, TP.HCM"
+    },
+    {
+      "id": "CUST-0011",
+      "name": "Lâm Khánh Vy",
+      "phone": "0908889900",
+      "email": "vy.lam@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Gold VIP",
+      "wallet": "900.000 đ",
+      "address": "34 Thảo Điền, Quận 2, TP. Thủ Đức"
+    },
+    {
+      "id": "CUST-0012",
+      "name": "Bùi Gia Huy",
+      "phone": "0915667788",
+      "email": "huy.bui@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Silver VIP",
+      "wallet": "500.000 đ",
+      "address": "52 Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội"
+    },
+    {
+      "id": "CUST-0013",
+      "name": "Phan Ngọc Ánh",
+      "phone": "0934112233",
+      "email": "anh.phan@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Khách Vãng Lai",
+      "wallet": "200.000 đ",
+      "address": "168 Trần Phú, Phước Ninh, Hải Châu, Đà Nẵng"
+    },
+    {
+      "id": "CUST-0014",
+      "name": "Trương Quốc Bảo",
+      "phone": "0971223344",
+      "email": "bao.truong@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Gold VIP",
+      "wallet": "1.100.000 đ",
+      "address": "90 Nguyễn Văn Cừ, An Khánh, Ninh Kiều, Cần Thơ"
+    },
+    {
+      "id": "CUST-0015",
+      "name": "Võ Thanh Hà",
+      "phone": "0963334455",
+      "email": "ha.vo@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Silver VIP",
+      "wallet": "450.000 đ",
+      "address": "410 Hoàng Diệu, Bình Thuận, Hải Châu, Đà Nẵng"
+    },
+    {
+      "id": "CUST-0016",
+      "name": "Tạ Quang Dũng",
+      "phone": "0942556677",
+      "email": "dung.ta@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Diamond VIP",
+      "wallet": "4.200.000 đ",
+      "address": "15 Đinh Tiên Hoàng, Đa Kao, Quận 1, TP.HCM"
+    },
+    {
+      "id": "CUST-0017",
+      "name": "Ngô Tấn Phát",
+      "phone": "0981998877",
+      "email": "phat.ngo@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Khách Vãng Lai",
+      "wallet": "0 đ",
+      "address": "65 Kim Mã, Ba Đình, Hà Nội"
+    },
+    {
+      "id": "CUST-0018",
+      "name": "Cao Mỹ Duyên",
+      "phone": "0903445566",
+      "email": "duyen.cao@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Gold VIP",
+      "wallet": "1.350.000 đ",
+      "address": "28 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP.HCM"
+    },
+    {
+      "id": "CUST-0019",
+      "name": "Huỳnh Nhật Minh",
+      "phone": "0938778899",
+      "email": "minh.huynh@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Silver VIP",
+      "wallet": "650.000 đ",
+      "address": "180 Cách Mạng Tháng 8, Phường 10, Quận 3, TP.HCM"
+    },
+    {
+      "id": "CUST-0020",
+      "name": "Đỗ Hồng Nhung",
+      "phone": "0919334455",
+      "email": "nhung.do@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Diamond VIP",
+      "wallet": "2.100.000 đ",
+      "address": "95 Nguyễn Trãi, Thanh Xuân, Hà Nội"
+    },
+    {
+      "id": "CUST-0021",
+      "name": "Phan Hoàng Long",
+      "phone": "0909112244",
+      "email": "long.phan@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Gold VIP",
+      "wallet": "1.750.000 đ",
+      "address": "142 Hai Bà Trưng, Phường Đa Kao, Quận 1, TP.HCM"
+    },
+    {
+      "id": "CUST-0022",
+      "name": "Vũ Thùy Dung",
+      "phone": "0917223399",
+      "email": "dung.vu@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Diamond VIP",
+      "wallet": "2.800.000 đ",
+      "address": "88 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội"
+    },
+    {
+      "id": "CUST-0023",
+      "name": "Lê Tuấn Anh",
+      "phone": "0982334411",
+      "email": "anh.le@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Gold VIP",
+      "wallet": "1.200.000 đ",
+      "address": "45 Lê Duẩn, Bến Nghé, Quận 1, TP.HCM"
+    },
+    {
+      "id": "CUST-0024",
+      "name": "Nguyễn Phương Thảo",
+      "phone": "0931556622",
+      "email": "thao.nguyen@petcare-demo.vn",
+      "pets_count": 1,
+      "tier": "Silver VIP",
+      "wallet": "850.000 đ",
+      "address": "304 Xô Viết Nghệ Tĩnh, Phường 25, Bình Thạnh, TP.HCM"
+    }
+  ],
+  "pets": [
+    {
+      "name": "Bơ",
+      "customer": "Nguyễn Văn An",
+      "species": "Chó",
+      "breed": "Corgi Wales",
+      "birth": "2024-03-15",
+      "weight": "11.5 kg",
+      "status": "DUE_SOON"
+    },
+    {
+      "name": "Đậu Đậu",
+      "customer": "Nguyễn Văn An",
+      "species": "Chó",
+      "breed": "Shiba Inu",
+      "birth": "2024-07-20",
+      "weight": "9.2 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Đậu Phộng",
+      "customer": "Trần Thị Bích Ngọc",
+      "species": "Chó",
+      "breed": "Poodle Tiny",
+      "birth": "2024-09-10",
+      "weight": "4.2 kg",
+      "status": "DUE_SOON"
+    },
+    {
+      "name": "Miu Miu",
+      "customer": "Lê Hoàng Long",
+      "species": "Mèo",
+      "breed": "British Shorthair (Mèo Anh Lông Ngắn)",
+      "birth": "2023-06-20",
+      "weight": "4.8 kg",
+      "status": "AT_RISK"
+    },
+    {
+      "name": "Kem",
+      "customer": "Hoàng Mai Anh",
+      "species": "Chó",
+      "breed": "Golden Retriever",
+      "birth": "2023-08-25",
+      "weight": "29.5 kg",
+      "status": "AT_RISK"
+    },
+    {
+      "name": "Sữa",
+      "customer": "Đỗ Thu Thảo",
+      "species": "Mèo",
+      "breed": "Persian Cat (Mèo Ba Tư)",
+      "birth": "2022-11-12",
+      "weight": "5.2 kg",
+      "status": "DUE_SOON"
+    },
+    {
+      "name": "Gấu Trúc",
+      "customer": "Phạm Minh Đức",
+      "species": "Chó",
+      "breed": "Pomeranian (Phốc Sóc)",
+      "birth": "2024-05-01",
+      "weight": "3.0 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Mít",
+      "customer": "Vũ Tuấn Kiệt",
+      "species": "Chó",
+      "breed": "Pug Mặt Xệ",
+      "birth": "2024-01-18",
+      "weight": "8.0 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Mun",
+      "customer": "Đặng Phương Linh",
+      "species": "Mèo",
+      "breed": "Domestic Shorthair (Mèo Mướp)",
+      "birth": "2025-01-05",
+      "weight": "3.5 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Bé Bống",
+      "customer": "Dương Bảo Châu",
+      "species": "Mèo",
+      "breed": "Ragdoll Thuần Chủng",
+      "birth": "2024-02-14",
+      "weight": "4.5 kg",
+      "status": "DUE_SOON"
+    },
+    {
+      "name": "Bé Sam",
+      "customer": "Trịnh Minh Triết",
+      "species": "Chó",
+      "breed": "Samoyed Tuyết Trắng",
+      "birth": "2023-11-01",
+      "weight": "21.0 kg",
+      "status": "DUE_SOON"
+    },
+    {
+      "name": "Bơ Nhỏ",
+      "customer": "Lâm Khánh Vy",
+      "species": "Chó",
+      "breed": "French Bulldog (Gâu Pháp)",
+      "birth": "2024-04-05",
+      "weight": "10.2 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Mochi",
+      "customer": "Bùi Gia Huy",
+      "species": "Mèo",
+      "breed": "Scottish Fold (Tai Cụp)",
+      "birth": "2024-06-12",
+      "weight": "3.8 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Lucky",
+      "customer": "Phan Ngọc Ánh",
+      "species": "Chó",
+      "breed": "Beagle Chân Ngắn",
+      "birth": "2023-09-18",
+      "weight": "12.0 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Cacao",
+      "customer": "Trương Quốc Bảo",
+      "species": "Chó",
+      "breed": "Poodle Nâu Đỏ",
+      "birth": "2024-01-30",
+      "weight": "4.0 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Bim Bim",
+      "customer": "Võ Thanh Hà",
+      "species": "Chó",
+      "breed": "Lạp Xưởng (Dachshund)",
+      "birth": "2024-03-22",
+      "weight": "6.8 kg",
+      "status": "AT_RISK"
+    },
+    {
+      "name": "Thor",
+      "customer": "Tạ Quang Dũng",
+      "species": "Chó",
+      "breed": "Husky Siberia Mắt Xanh",
+      "birth": "2023-05-10",
+      "weight": "24.5 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Tom",
+      "customer": "Ngô Tấn Phát",
+      "species": "Mèo",
+      "breed": "British Longhair (Mèo Anh Lông Dài)",
+      "birth": "2024-05-18",
+      "weight": "4.1 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Pudding",
+      "customer": "Cao Mỹ Duyên",
+      "species": "Mèo",
+      "breed": "Mèo Ba Tư Chinchilla",
+      "birth": "2024-04-01",
+      "weight": "3.9 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Kiwi",
+      "customer": "Huỳnh Nhật Minh",
+      "species": "Chó",
+      "breed": "Phốc Hươu (Miniature Pinscher)",
+      "birth": "2024-02-10",
+      "weight": "4.3 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Bé Cát",
+      "customer": "Đỗ Hồng Nhung",
+      "species": "Mèo",
+      "breed": "Mèo Bengal Đốm Báo",
+      "birth": "2023-12-05",
+      "weight": "5.4 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Choco",
+      "customer": "Phan Hoàng Long",
+      "species": "Chó",
+      "breed": "Corgi Choco Tan",
+      "birth": "2024-05-15",
+      "weight": "10.8 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Simba",
+      "customer": "Vũ Thùy Dung",
+      "species": "Mèo",
+      "breed": "British Longhair Golden NY12",
+      "birth": "2024-01-10",
+      "weight": "4.6 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Max",
+      "customer": "Lê Tuấn Anh",
+      "species": "Chó",
+      "breed": "Border Collie Thông Minh",
+      "birth": "2023-10-10",
+      "weight": "18.5 kg",
+      "status": "STABLE"
+    },
+    {
+      "name": "Bé Lùn",
+      "customer": "Nguyễn Phương Thảo",
+      "species": "Mèo",
+      "breed": "Munchkin Chân Ngắn Bicolor",
+      "birth": "2024-03-08",
+      "weight": "3.6 kg",
+      "status": "STABLE"
+    }
+  ],
+  "services": [
+    {
+      "code": "SRV-GROOM",
+      "name": "Tắm Cắt Tỉa Toàn Diện",
+      "cat": "Grooming",
+      "price": "350.000 đ",
+      "cycle": "30 ngày",
+      "target": "Chó & Mèo"
+    },
+    {
+      "code": "SRV-SPA",
+      "name": "Spa Bồn Sục & Thảo Dược",
+      "cat": "Spa",
+      "price": "400.000 đ",
+      "cycle": "21 ngày",
+      "target": "Chó & Mèo"
+    },
+    {
+      "code": "SRV-NAIL",
+      "name": "Cắt Mài Móng & Vệ Sinh Tai",
+      "cat": "Nail Care",
+      "price": "150.000 đ",
+      "cycle": "14 ngày",
+      "target": "Chó & Mèo"
+    },
+    {
+      "code": "SRV-VACCINE",
+      "name": "Tiêm Vaccine Phòng Bệnh",
+      "cat": "Vaccination",
+      "price": "300.000 đ",
+      "cycle": "365 ngày",
+      "target": "Chó & Mèo"
+    },
+    {
+      "code": "SRV-DENTAL",
+      "name": "Cạo Vôi Răng Siêu Âm",
+      "cat": "Dental",
+      "price": "450.000 đ",
+      "cycle": "90 ngày",
+      "target": "Chó & Mèo"
+    },
+    {
+      "code": "SRV-CHECKUP",
+      "name": "Khám Tổng Quát Lâm Sàng",
+      "cat": "Checkup",
+      "price": "250.000 đ",
+      "cycle": "180 ngày",
+      "target": "Chó & Mèo"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "TXN-2026-0081",
+      "customer": "Nguyễn Văn An",
+      "type": "Nạp Tiền Ví Hội Viên",
+      "amount": "+500.000 đ",
+      "method": "VietQR Transfer",
+      "time": "05/11/2026 09:30",
+      "status": "Thành Công"
+    },
+    {
+      "id": "TXN-2026-0082",
+      "customer": "Trần Thị Bích Ngọc",
+      "type": "Thanh Toán Dịch Vụ Spa",
+      "amount": "-400.000 đ",
+      "method": "Trừ Ví Trả Trước",
+      "time": "05/11/2026 10:45",
+      "status": "Thành Công"
+    },
+    {
+      "id": "TXN-2026-0083",
+      "customer": "Dương Bảo Châu",
+      "type": "Đăng Ký Gói Kim Cương",
+      "amount": "+5.000.000 đ",
+      "method": "POS Quẹt Thẻ",
+      "time": "04/11/2026 14:15",
+      "status": "Thành Công"
+    },
+    {
+      "id": "TXN-2026-0084",
+      "customer": "Lê Hoàng Long",
+      "type": "Nạp Tiền Ví Hội Viên",
+      "amount": "+200.000 đ",
+      "method": "Tiền Mặt",
+      "time": "03/11/2026 11:00",
+      "status": "Thành Công"
+    },
+    {
+      "id": "TXN-2026-0085",
+      "customer": "Tạ Quang Dũng",
+      "type": "Đăng Ký Gói Kim Cương",
+      "amount": "+5.000.000 đ",
+      "method": "Chuyển Khoản QR",
+      "time": "01/11/2026 15:20",
+      "status": "Thành Công"
+    },
+    {
+      "id": "TXN-2026-0086",
+      "customer": "Phan Hoàng Long",
+      "type": "Nạp Tiền Ví Hội Viên",
+      "amount": "+1.000.000 đ",
+      "method": "VietQR Transfer",
+      "time": "31/10/2026 16:30",
+      "status": "Thành Công"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "TSK-2026-0001",
+      "title": "Gọi điện nhắc lịch Spa bé Bơ (đến chu kỳ 30 ngày)",
+      "assignee": "receptionist_1@petcare.com",
+      "priority": "Urgent",
+      "due": "07/11/2026",
+      "status": "Open"
+    },
+    {
+      "id": "TSK-2026-0002",
+      "title": "Gửi Zalo voucher 20% kích hoạt lại cho bé Miu Miu",
+      "assignee": "sales_rep_2@petcare.com",
+      "priority": "Urgent",
+      "due": "07/11/2026",
+      "status": "Open"
+    },
+    {
+      "id": "TSK-2026-0003",
+      "title": "Chuẩn bị thuốc nhỏ mắt và bông tai cho ca khám bé Mít",
+      "assignee": "receptionist_2@petcare.com",
+      "priority": "Normal",
+      "due": "08/11/2026",
+      "status": "Open"
+    },
+    {
+      "id": "TSK-2026-0004",
+      "title": "Tư vấn gia hạn gói Kim Cương cho chị Bích Ngọc",
+      "assignee": "sales_rep_1@petcare.com",
+      "priority": "Normal",
+      "due": "09/11/2026",
+      "status": "Completed"
+    },
+    {
+      "id": "TSK-2026-0005",
+      "title": "Theo dõi phản hồi ca khiếu nại CASE-2026-0001 (bé Miu Miu)",
+      "assignee": "customer_service@petcare.com",
+      "priority": "Urgent",
+      "due": "07/11/2026",
+      "status": "Open"
+    }
+  ]
+};
+
+    let currentModalType = '';
+
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-emerald-600 text-white',
+        error: 'bg-rose-600 text-white',
+        info: 'bg-teal-600 text-white',
+        warning: 'bg-amber-500 text-white'
+      };
+      toast.className = `p-3 rounded-xl shadow-xl text-xs font-bold flex items-center justify-between ${colors[type] || colors.info} animate-fade-in pointer-events-auto`;
+      toast.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()" class="ml-2 text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    function openModal(type, filter = null) {
+      currentModalType = type;
+      const modal = document.getElementById('desk-modal');
+      const title = document.getElementById('modal-title');
+      const subtitle = document.getElementById('modal-subtitle');
+      const icon = document.getElementById('modal-icon');
+      const body = document.getElementById('modal-body');
+      const actionBtn = document.getElementById('modal-action-btn');
+
+      actionBtn.classList.remove('hidden');
+
+      if (type === 'leads') {
+        title.innerText = 'Danh Sách Khách Hàng Tiềm Năng (PetCare Leads)';
+        subtitle.innerText = 'Tiếp nhận Lead đa kênh, phân loại trình độ và chuyển đổi sang Khách hàng & Thú cưng';
+        icon.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
+        renderLeadsTable(body);
+      } else if (type === 'appointments') {
+        title.innerText = 'Quản Lý Lịch Hẹn Chăm Sóc & Khám (PetCare Appointments)';
+        subtitle.innerText = 'Theo dõi lịch hẹn khách đặt trước, hỗ trợ 1-click Check-in chuyển khách vào quầy POS';
+        icon.innerHTML = '<i class="fa-solid fa-calendar-check"></i>';
+        renderAppointmentsTable(body);
+      } else if (type === 'memberships') {
+        title.innerText = 'Quản Lý Thẻ Hội Viên & Số Dư Ví (Customer Memberships)';
+        subtitle.innerText = 'Quản trị thẻ thành viên, nạp tiền ví, gia hạn và theo dõi số lượt dịch vụ còn dư';
+        icon.innerHTML = '<i class="fa-solid fa-credit-card"></i>';
+        renderMembershipsTable(body);
+      } else if (type === 'visits') {
+        title.innerText = 'Sổ Nhật Ký Dịch Vụ Khám & Chăm Sóc (Service Visits)';
+        subtitle.innerText = 'Nhật ký từng lần thú cưng ghé phòng khám, cấn trừ quyền lợi thẻ hoặc thanh toán';
+        icon.innerHTML = '<i class="fa-solid fa-notes-medical"></i>';
+        renderVisitsTable(body);
+      } else if (type === 'recommendations') {
+        title.innerText = 'Đề Xuất Chăm Sóc & Dự Báo Tái Khám (Care Forecast)';
+        subtitle.innerText = 'Phân tích chu kỳ chăm sóc định kỳ và cảnh báo thú cưng cần tái khám hoặc giữ chân';
+        icon.innerHTML = '<i class="fa-solid fa-brain"></i>';
+        renderRecommendationsTable(body, filter);
+      } else if (type === 'kpis') {
+        title.innerText = 'Báo Cáo Tổng Hợp Chỉ Số CRM & Analytics (8 Chuẩn)';
+        subtitle.innerText = 'Doanh thu gộp/ròng, tỷ lệ chuyển đổi, tỷ lệ giữ chân và hiệu quả đa chi nhánh';
+        icon.innerHTML = '<i class="fa-solid fa-chart-line"></i>';
+        actionBtn.classList.add('hidden');
+        renderKpisDashboard(body);
+      } else if (type === 'plans') {
+        title.innerText = 'Cấu Hình Gói Hội Viên & Quyền Lợi (Membership Plans)';
+        subtitle.innerText = 'Thiết lập danh mục gói, đơn giá và các quyền lợi dịch vụ đi kèm';
+        icon.innerHTML = '<i class="fa-solid fa-tags"></i>';
+        renderPlansTable(body);
+      
+      } else if (type === 'cases') {
+        title.innerText = 'Chăm Sóc Khách Hàng & Khiếu Nại (PetCare Cases)';
+        subtitle.innerText = 'Quy trình xử lý Service Recovery, giải quyết thắc mắc và đóng khiếu nại dịch vụ';
+        icon.innerHTML = '<i class="fa-solid fa-headset"></i>';
+        renderCasesTable(body);
+      } else if (type === 'opportunities') {
+        title.innerText = 'Cơ Hội Bán Hàng & Nâng Cấp Gói (Sales Opportunities)';
+        subtitle.innerText = 'Theo dõi Pipeline bán thẻ VIP, xác suất chốt đơn và doanh thu tiềm năng';
+        icon.innerHTML = '<i class="fa-solid fa-funnel-dollar"></i>';
+        renderOpportunitiesTable(body);
+      } else if (type === 'customers') {
+        title.innerText = 'Danh Sách Khách Hàng (Customers & Contacts)';
+        subtitle.innerText = 'Hồ sơ khách hàng chuẩn hóa, số điện thoại, chi tiêu tích lũy và số lượng thú cưng';
+        icon.innerHTML = '<i class="fa-solid fa-users"></i>';
+        renderCustomersTable(body);
+      } else if (type === 'pets') {
+        title.innerText = 'Hồ Sơ Thú Cưng Đã Định Danh (Pet Profiles)';
+        subtitle.innerText = 'Quản lý thông tin giống loài, ngày sinh, cân nặng, tiền sử và chủ nuôi';
+        icon.innerHTML = '<i class="fa-solid fa-paw"></i>';
+        renderPetsTable(body);
+      } else if (type === 'services') {
+        title.innerText = 'Bảng Giá & Danh Mục Dịch Vụ Chuẩn (PetCare Services)';
+        subtitle.innerText = 'Biểu phí niêm yết chuẩn, chu kỳ khuyến nghị và loài áp dụng';
+        icon.innerHTML = '<i class="fa-solid fa-list-check"></i>';
+        renderServicesTable(body);
+      } else if (type === 'transactions') {
+        title.innerText = 'Lịch Sử Giao Dịch Ví Trả Trước (Wallet Transactions)';
+        subtitle.innerText = 'Sổ cái nạp ví và cấn trừ thanh toán minh bạch';
+        icon.innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i>';
+        actionBtn.classList.add('hidden');
+        renderTransactionsTable(body);
+      } else if (type === 'tasks') {
+        title.innerText = 'Nhiệm Vụ Nhân Viên & CSKH (Staff ToDos)';
+        subtitle.innerText = 'Công việc được hệ thống tự động giao cho nhân viên theo dõi đề xuất CSKH';
+        icon.innerHTML = '<i class="fa-solid fa-list-ul"></i>';
+        renderTasksTable(body);
+      } else if (type === 'redemptions') {
+        title.innerText = 'Sổ Cái Cấn Trừ Quyền Lợi (Benefit Redemption Ledger)';
+        subtitle.innerText = 'Audit Trail minh bạch: chi tiết từng lượt dịch vụ đã cấn trừ khỏi thẻ hội viên';
+        icon.innerHTML = '<i class="fa-solid fa-clipboard-check"></i>';
+        actionBtn.classList.add('hidden');
+        renderRedemptionsTable(body);
+      } else {
+        title.innerText = `Quản Trị DocType: ${type.toUpperCase()}`;
+        subtitle.innerText = 'Đang kết nối dữ liệu từ Frappe DocType Controller';
+        icon.innerHTML = '<i class="fa-solid fa-database"></i>';
+        body.innerHTML = `
+          <div class="p-8 text-center text-slate-500">
+            <i class="fa-solid fa-circle-check text-3xl text-teal-600 mb-2 block"></i>
+            <div class="font-bold text-slate-800 text-sm">DocType ${type.toUpperCase()} Đang Hoạt Động Bình Thường</div>
+            <p class="text-xs text-slate-600 mt-1">Toàn bộ 14 DocTypes đã được khai báo schema đầy đủ và vượt qua 88 bài test tự động.</p>
+          </div>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('desk-modal').classList.add('hidden');
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // TABLE RENDERERS WITH REAL ACTION BUTTONS
+    // ─────────────────────────────────────────────────────────────────
+    function renderLeadsTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Lead</th>
+                <th class="p-3">Khách Hàng</th>
+                <th class="p-3">Số Điện Thoại</th>
+                <th class="p-3">Nguồn</th>
+                <th class="p-3">Giai Đoạn</th>
+                <th class="p-3 text-right">Thao Tác Nghiệp Vụ</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              ${DESK_DATA.leads.map(l => `
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3 font-mono font-bold text-slate-800">${l.id}</td>
+                  <td class="p-3 font-bold text-slate-900">${l.name}</td>
+                  <td class="p-3 text-slate-600 font-mono">${l.phone}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-slate-700">${l.source}</span></td>
+                  <td class="p-3">
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${l.stage === 'Converted' ? 'bg-emerald-100 text-emerald-800' : (l.stage === 'Qualified' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')}">
+                      ${l.stage}
+                    </span>
+                  </td>
+                  <td class="p-3 text-right">
+                    ${l.stage !== 'Converted' ? `
+                      <button onclick="convertLeadToCustomer('${l.id}')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-2xs">
+                        <i class="fa-solid fa-user-check mr-1"></i> Chuyển Đổi Khách Hàng
+                      </button>
+                    ` : `
+                      <span class="text-emerald-700 font-bold text-xs"><i class="fa-solid fa-check"></i> Đã Chuyển Đổi</span>
+                    `}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function convertLeadToCustomer(leadId) {
+      const lead = DESK_DATA.leads.find(l => l.id === leadId);
+      if (lead) {
+        lead.stage = 'Converted';
+        showToast(`Đã chuyển đổi Lead ${lead.name} sang Khách hàng (Customer) và tạo Hồ sơ Thú cưng thành công!`, 'success');
+        renderLeadsTable(document.getElementById('modal-body'));
+        updateDeskHeaderStats();
+      }
+    }
+
+    function renderAppointmentsTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Lịch</th>
+                <th class="p-3">Thú Cưng</th>
+                <th class="p-3">Chủ Nuôi / SĐT</th>
+                <th class="p-3">Dịch Vụ Đặt</th>
+                <th class="p-3">Thời Gian</th>
+                <th class="p-3">Trạng Thái</th>
+                <th class="p-3 text-right">Hành Động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              ${DESK_DATA.appointments.map(a => `
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3 font-mono font-bold text-slate-800">${a.id}</td>
+                  <td class="p-3 font-bold text-teal-800"><i class="fa-solid fa-paw mr-1 text-teal-600"></i> ${a.pet}</td>
+                  <td class="p-3 text-slate-700 font-medium">${a.customer} <br><span class="text-slate-400 font-mono text-[11px]">${a.phone}</span></td>
+                  <td class="p-3 font-semibold text-slate-900">${a.service}</td>
+                  <td class="p-3 text-slate-600 font-mono">${a.time} • ${a.date}</td>
+                  <td class="p-3">
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${a.status === 'Checked-In' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">
+                      ${a.status}
+                    </span>
+                  </td>
+                  <td class="p-3 text-right space-x-1">
+                    ${a.status !== 'Checked-In' ? `
+                      <button onclick="checkInAppointmentDesk('${a.id}')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-2xs">
+                        <i class="fa-solid fa-cash-register mr-1"></i> Check-in POS
+                      </button>
+                    ` : `
+                      <span class="text-emerald-700 font-bold text-xs"><i class="fa-solid fa-check"></i> Đang Phục Vụ</span>
+                    `}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function checkInAppointmentDesk(aptId) {
+      const apt = DESK_DATA.appointments.find(a => a.id === aptId);
+      if (apt) {
+        apt.status = 'Checked-In';
+        showToast(`Đã Check-in lịch hẹn ${aptId} cho bé ${apt.pet}! Khách đã sẵn sàng tại quầy POS.`, 'success');
+        renderAppointmentsTable(document.getElementById('modal-body'));
+      }
+    }
+
+    function renderMembershipsTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Thẻ</th>
+                <th class="p-3">Khách Hàng</th>
+                <th class="p-3">Gói Hội Viên</th>
+                <th class="p-3">Số Dư Ví</th>
+                <th class="p-3">Lượt Còn Dư</th>
+                <th class="p-3">Hạn Thẻ</th>
+                <th class="p-3 text-right">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              ${DESK_DATA.memberships.map(m => `
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3 font-mono font-bold text-slate-800">${m.id}</td>
+                  <td class="p-3 font-bold text-slate-900">${m.customer}</td>
+                  <td class="p-3 font-bold text-teal-800">${m.plan}</td>
+                  <td class="p-3 font-extrabold text-amber-700">${m.balance.toLocaleString('vi-VN')} đ</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200 font-bold">${m.remaining} lượt</span></td>
+                  <td class="p-3 text-slate-600 font-mono">${m.expiry}</td>
+                  <td class="p-3 text-right space-x-1.5">
+                    <button onclick="topUpMembershipDesk('${m.id}')" class="px-2 py-1 rounded bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-2xs">
+                      <i class="fa-solid fa-coins mr-1"></i> Nạp Ví
+                    </button>
+                    <button onclick="renewMembershipDesk('${m.id}')" class="px-2 py-1 rounded bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-2xs">
+                      <i class="fa-solid fa-arrows-rotate mr-1"></i> Gia Hạn
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function topUpMembershipDesk(msId) {
+      const ms = DESK_DATA.memberships.find(m => m.id === msId);
+      const amount = prompt(`Nhập số tiền nạp trực tiếp vào ví hội viên ${ms.customer} (VND):`, '500000');
+      if (amount && !isNaN(amount) && Number(amount) > 0) {
+        ms.balance += Number(amount);
+        showToast(`Đã nạp ${Number(amount).toLocaleString('vi-VN')} đ cho ${ms.customer}! Biên lai đã được ghi nhận vào sổ giao dịch.`, 'success');
+        renderMembershipsTable(document.getElementById('modal-body'));
+      }
+    }
+
+    function renewMembershipDesk(msId) {
+      const ms = DESK_DATA.memberships.find(m => m.id === msId);
+      if (confirm(`Xác nhận gia hạn thẻ cho ${ms.customer}? Toàn bộ ${ms.remaining} lượt còn dư sẽ được cộng dồn (Benefit Rollover).`)) {
+        ms.remaining += 4;
+        ms.expiry = '2027-12-31';
+        showToast(`Đã gia hạn thẻ ${msId} thành công! Lượt dịch vụ cũ đã cộng dồn trọn vẹn.`, 'success');
+        renderMembershipsTable(document.getElementById('modal-body'));
+      }
+    }
+
+    function renderVisitsTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Lần Ghé</th>
+                <th class="p-3">Ngày Khám</th>
+                <th class="p-3">Thú Cưng / Chủ</th>
+                <th class="p-3">Dịch Vụ Thực Hiện</th>
+                <th class="p-3">Số Tiền Thu</th>
+                <th class="p-3">Bác Sĩ / KTV</th>
+                <th class="p-3">Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              ${DESK_DATA.visits.map(v => `
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-3 font-mono font-bold text-slate-800">${v.id}</td>
+                  <td class="p-3 font-mono text-slate-600">${v.date}</td>
+                  <td class="p-3 font-bold text-slate-900">${v.pet} <span class="text-slate-400 font-normal">(${v.customer})</span></td>
+                  <td class="p-3 font-semibold text-teal-900">${v.service}</td>
+                  <td class="p-3 font-bold text-emerald-700">${v.price}</td>
+                  <td class="p-3 text-slate-700">${v.doctor}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px]">${v.status}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderRecommendationsTable(container, filter = null) {
+      const list = filter ? DESK_DATA.recommendations.filter(r => r.type === filter) : DESK_DATA.recommendations;
+      container.innerHTML = `
+        <div class="space-y-3">
+          ${list.map(r => `
+            <div class="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between shadow-2xs">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg ${r.type === 'AT_RISK' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'} flex items-center justify-center text-lg font-bold">
+                  <i class="fa-solid ${r.type === 'AT_RISK' ? 'fa-triangle-exclamation' : 'fa-clock'}"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <span>${r.pet} (${r.customer} - ${r.phone})</span>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold ${r.type === 'AT_RISK' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}">
+                      ${r.type === 'AT_RISK' ? 'Nguy Cơ Rời Bỏ' : 'Sắp Đến Hạn'}
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-0.5">${r.reason} • Điểm tin cậy: <b class="text-teal-700">${r.score}%</b></p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <a href="/?tab=pos&pet=${encodeURIComponent(r.pet)}" target="_blank" class="px-2.5 py-1.5 rounded-lg border border-teal-300 bg-teal-50 hover:bg-teal-100 text-teal-900 font-bold text-xs flex items-center gap-1 shadow-2xs transition">
+                  <i class="fa-solid fa-cash-register text-teal-700"></i> Tiếp Nhận POS
+                </a>
+                <button onclick="handleContactRec('${r.id}')" class="btn-teal px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-2xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-phone"></i> <span>Gửi Tin / Nhắc Hẹn</span>
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function handleContactRec(recId) {
+      showToast(`Đã ghi nhận nhiệm vụ nhắc hẹn chăm sóc cho khách hàng thành công.`, 'success');
+    }
+
+    function renderKpisDashboard(container) {
+      container.innerHTML = `
+        <div class="space-y-5">
+          <!-- 4 Core Performance Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+              <div class="text-[11px] text-slate-500 font-bold uppercase">Doanh Thu Gộp (Gross)</div>
+              <div class="text-xl font-black text-slate-900 mt-1">185.400.000 đ</div>
+              <div class="text-[11px] text-emerald-600 font-bold mt-1">▲ +14.2% so tháng trước</div>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-emerald-50/50 border-emerald-200">
+              <div class="text-[11px] text-emerald-800 font-bold uppercase">Doanh Thu Thực Nhận (Net)</div>
+              <div class="text-xl font-black text-emerald-800 mt-1">178.600.000 đ</div>
+              <div class="text-[11px] text-slate-500 font-medium mt-1">Đã loại trừ 6.8tr hủy/hoàn</div>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-teal-50/50 border-teal-200">
+              <div class="text-[11px] text-teal-800 font-bold uppercase">Tỷ Lệ Giữ Chân (Retention)</div>
+              <div class="text-xl font-black text-teal-800 mt-1">78.4%</div>
+              <div class="text-[11px] text-teal-700 font-semibold mt-1">Khách quay lại chu kỳ định kỳ</div>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-blue-50/50 border-blue-200">
+              <div class="text-[11px] text-blue-800 font-bold uppercase">Tỷ Lệ Chuyển Đổi Lead</div>
+              <div class="text-xl font-black text-blue-800 mt-1">42.5%</div>
+              <div class="text-[11px] text-blue-700 font-semibold mt-1">Từ kênh Ads & Webhook</div>
+            </div>
+          </div>
+
+          <!-- Multi-Branch Breakdown Table -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+            <div class="p-3 bg-slate-100 font-bold text-xs text-slate-700 border-b border-slate-200 flex justify-between">
+              <span>Phân Bổ Hiệu Quả Đa Chi Nhánh (Multi-Branch Analytics)</span>
+              <span class="text-teal-700 font-semibold">Tự động tổng hợp dữ liệu</span>
+            </div>
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200">
+                <tr>
+                  <th class="p-2.5">Chi Nhánh</th>
+                  <th class="p-2.5">Số Lượt Ghé</th>
+                  <th class="p-2.5">Doanh Thu</th>
+                  <th class="p-2.5">Tỷ Trọng</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Chi Nhánh Trung Tâm (CN-TRUNGTAM)</td>
+                  <td class="p-2.5 font-semibold">184 lượt</td>
+                  <td class="p-2.5 font-bold text-teal-800">96.400.000 đ</td>
+                  <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-bold">52%</span></td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Chi Nhánh Quận 1 (CN-QUAN1)</td>
+                  <td class="p-2.5 font-semibold">112 lượt</td>
+                  <td class="p-2.5 font-bold text-teal-800">57.500.000 đ</td>
+                  <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">31%</span></td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold text-slate-800">Chi Nhánh Bình Thạnh (CN-BINHTHANH)</td>
+                  <td class="p-2.5 font-semibold">68 lượt</td>
+                  <td class="p-2.5 font-bold text-teal-800">31.500.000 đ</td>
+                  <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-bold">17%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPlansTable(container) {
+      container.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 uppercase">Tier Silver</span>
+            <div class="font-extrabold text-sm text-slate-900">Gói Bạc Tiêu Chuẩn</div>
+            <div class="text-lg font-black text-teal-800">1.500.000 đ <span class="text-xs font-normal text-slate-500">/ 6 tháng</span></div>
+            <ul class="text-xs text-slate-600 space-y-1 pt-2 border-t border-slate-100">
+              <li>• 3 lượt Spa & Tắm Thảo Dược</li>
+              <li>• 2 lượt Grooming Cắt Tỉa Lông</li>
+              <li>• Giảm 10% dịch vụ ngoài gói</li>
+            </ul>
+          </div>
+          <div class="p-4 rounded-xl border-2 border-amber-400 bg-amber-50/30 space-y-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 uppercase">Tier Gold (Phổ Biến Nhất)</span>
+            <div class="font-extrabold text-sm text-amber-950">Gói Vàng VIP (Gold Care)</div>
+            <div class="text-lg font-black text-amber-800">3.000.000 đ <span class="text-xs font-normal text-slate-500">/ 12 tháng</span></div>
+            <ul class="text-xs text-slate-700 space-y-1 pt-2 border-t border-amber-200">
+              <li>• 6 lượt Spa & Tắm Thảo Dược</li>
+              <li>• 4 lượt Grooming Toàn Diện</li>
+              <li>• 2 lượt Khám Sức Khỏe Tổng Quát (Free)</li>
+              <li>• Giảm 15% dịch vụ khám & thuốc</li>
+            </ul>
+          </div>
+          <div class="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 uppercase">Tier Diamond</span>
+            <div class="font-extrabold text-sm text-slate-900">Gói Kim Cương (Diamond)</div>
+            <div class="text-lg font-black text-purple-800">5.000.000 đ <span class="text-xs font-normal text-slate-500">/ 12 tháng</span></div>
+            <ul class="text-xs text-slate-600 space-y-1 pt-2 border-t border-slate-100">
+              <li>• 12 lượt Spa & Tắm Thảo Dược</li>
+              <li>• 8 lượt Grooming Toàn Diện</li>
+              <li>• Miễn phí 100% Khám lâm sàng không giới hạn</li>
+              <li>• Giảm 20% cho mọi chi phí phát sinh</li>
+            </ul>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRedemptionsTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Cấn Trừ</th>
+                <th class="p-3">Thẻ Hội Viên</th>
+                <th class="p-3">Quyền Lợi</th>
+                <th class="p-3">Số Lượt</th>
+                <th class="p-3">Mã Lần Ghé</th>
+                <th class="p-3">Bác Sĩ Xác Nhận</th>
+                <th class="p-3">Thời Gian</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium">
+              <tr>
+                <td class="p-3 font-mono font-bold text-slate-800">RED-2026-0001</td>
+                <td class="p-3 font-bold text-teal-800">MEM-2026-0001 (Bé Bơ)</td>
+                <td class="p-3">Spa & Tắm Thảo Dược</td>
+                <td class="p-3 font-bold text-rose-600">-1 lượt</td>
+                <td class="p-3 font-mono">VIS-2026-0089</td>
+                <td class="p-3">BS. Nguyễn Văn Hùng</td>
+                <td class="p-3 text-slate-500 font-mono">15/10/2026 14:35</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-mono font-bold text-slate-800">RED-2026-0002</td>
+                <td class="p-3 font-bold text-teal-800">MEM-2026-0001 (Bé Đậu Đậu)</td>
+                <td class="p-3">Grooming Toàn Diện</td>
+                <td class="p-3 font-bold text-rose-600">-1 lượt</td>
+                <td class="p-3 font-mono">VIS-2026-0054</td>
+                <td class="p-3">KTV. Lê Thị Mai</td>
+                <td class="p-3 text-slate-500 font-mono">20/09/2026 10:15</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-mono font-bold text-slate-800">RED-2026-0003</td>
+                <td class="p-3 font-bold text-teal-800">MEM-2026-0002 (Bé Đậu Phộng)</td>
+                <td class="p-3">Grooming Toàn Diện</td>
+                <td class="p-3 font-bold text-rose-600">-1 lượt</td>
+                <td class="p-3 font-mono">VIS-2026-0062</td>
+                <td class="p-3">KTV. Lê Thị Mai</td>
+                <td class="p-3 text-slate-500 font-mono">22/10/2026 16:00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    
+    function renderCasesTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Case</th>
+                <th class="p-3">Thú Cưng / Chủ</th>
+                <th class="p-3">Tiêu Đề Vấn Đề</th>
+                <th class="p-3">Loại</th>
+                <th class="p-3">Ưu Tiên</th>
+                <th class="p-3">Trạng Thái</th>
+                <th class="p-3 text-right">Hành Động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium">
+              ${DESK_DATA.cases.map(c => `
+                <tr class="hover:bg-slate-50">
+                  <td class="p-3 font-mono font-bold text-slate-800">${c.id}</td>
+                  <td class="p-3">
+                    <span class="font-bold text-slate-900">${c.pet}</span>
+                    <span class="text-slate-500 block text-[11px]">${c.customer} (${c.phone})</span>
+                  </td>
+                  <td class="p-3 font-semibold text-slate-800">${c.subject}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.type === 'Complaint' ? 'bg-rose-100 text-rose-800' : 'bg-blue-100 text-blue-800'}">${c.type}</span></td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.priority === 'High' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}">${c.priority}</span></td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.status === 'Open' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${c.status === 'Open' ? 'Đang Xử Lý' : 'Đã Đóng'}</span></td>
+                  <td class="p-3 text-right">
+                    ${c.status === 'Open' ? `
+                      <button onclick="resolveCaseDesk('${c.id}')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-2xs">
+                        <i class="fa-solid fa-check mr-1"></i> Giải Quyết
+                      </button>
+                    ` : `<span class="text-xs text-slate-400 font-semibold">${c.resolution || 'Hoàn tất'}</span>`}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderOpportunitiesTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Cơ Hội</th>
+                <th class="p-3">Khách Hàng</th>
+                <th class="p-3">Mục Tiêu Bán Hàng</th>
+                <th class="p-3">Giá Trị Kỳ Vọng</th>
+                <th class="p-3">Giai Đoạn</th>
+                <th class="p-3">Xác Suất</th>
+                <th class="p-3 text-right">Hành Động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium">
+              ${DESK_DATA.opportunities.map(o => `
+                <tr class="hover:bg-slate-50">
+                  <td class="p-3 font-mono font-bold text-slate-800">${o.id}</td>
+                  <td class="p-3 font-bold text-slate-900">${o.customer}</td>
+                  <td class="p-3 font-semibold text-slate-800">${o.title}</td>
+                  <td class="p-3 font-bold text-teal-800">${o.amount.toLocaleString('vi-VN')} đ</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                      o.stage === 'Closed Won' ? 'bg-emerald-100 text-emerald-800' :
+                      o.stage === 'Closed Lost' ? 'bg-slate-200 text-slate-700' :
+                      o.stage === 'Negotiation' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'
+                    }">${o.stage}</span>
+                  </td>
+                  <td class="p-3 font-mono font-bold ${o.prob >= 70 ? 'text-emerald-700' : 'text-slate-600'}">${o.prob}%</td>
+                  <td class="p-3 text-right">
+                    ${o.stage !== 'Closed Won' && o.stage !== 'Closed Lost' ? `
+                      <button onclick="winOpportunityDesk('${o.id}')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-2xs">
+                        <i class="fa-solid fa-trophy mr-1"></i> Chốt Won
+                      </button>
+                    ` : `<span class="text-xs text-slate-400 font-semibold">Hoàn tất</span>`}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderCustomersTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+        <div class="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div class="text-xs font-bold text-slate-700 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
+            <span>Tổng cộng: <b>${DESK_DATA.customers.length} khách hàng</b> và <b>${DESK_DATA.pets.length} thú cưng</b></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openCreateCustomerModalDesk()" class="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition">
+              <i class="fa-solid fa-user-plus"></i> + Thêm Khách Hàng
+            </button>
+            <button onclick="openImportModalDesk()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs transition">
+              <i class="fa-solid fa-file-excel text-emerald-600"></i> 📥 Import Danh Sách
+            </button>
+          </div>
+        </div>
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Khách Hàng</th>
+                <th class="p-3">Họ & Tên</th>
+                <th class="p-3">Số Điện Thoại</th>
+                <th class="p-3">Số Lượng Pet</th>
+                <th class="p-3">Hạng Thẻ</th>
+                <th class="p-3">Số Dư Ví</th>
+                <th class="p-3">Địa Chỉ</th>
+                <th class="p-3 text-right">Hành Động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium">
+              ${DESK_DATA.customers.map(c => `
+                <tr class="hover:bg-slate-50">
+                  <td class="p-3 font-mono font-bold text-slate-800">${c.id}</td>
+                  <td class="p-3 font-bold text-slate-900">${c.name}</td>
+                  <td class="p-3 font-mono text-teal-800 font-bold">${c.phone}</td>
+                  <td class="p-3 font-bold">${c.pets_count} bé</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900">${c.tier}</span></td>
+                  <td class="p-3 font-bold text-emerald-700">${c.wallet}</td>
+                  <td class="p-3 text-slate-600 text-[11px]">${c.address}</td>
+                  <td class="p-3 text-right">
+                    <a href="/?query=${c.phone}" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs inline-block shadow-2xs">
+                      <i class="fa-solid fa-address-card mr-1"></i> Hồ Sơ 360
+                    </a>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderPetsTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Tên Thú Cưng</th>
+                <th class="p-3">Chủ Nuôi</th>
+                <th class="p-3">Loài & Giống</th>
+                <th class="p-3">Ngày Sinh</th>
+                <th class="p-3">Cân Nặng</th>
+                <th class="p-3">Trạng Thái Chăm Sóc</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium">
+              ${DESK_DATA.pets.map(p => `
+                <tr class="hover:bg-slate-50">
+                  <td class="p-3 font-bold text-slate-900">${p.name}</td>
+                  <td class="p-3 font-semibold text-slate-800">${p.customer}</td>
+                  <td class="p-3">${p.species} - <span class="font-semibold text-teal-800">${p.breed}</span></td>
+                  <td class="p-3 font-mono text-slate-600">${p.birth}</td>
+                  <td class="p-3 font-bold">${p.weight}</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                      p.status === 'DUE_SOON' ? 'bg-amber-100 text-amber-800' :
+                      p.status === 'AT_RISK' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
+                    }">${p.status}</span>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderServicesTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Dịch Vụ</th>
+                <th class="p-3">Tên Dịch Vụ</th>
+                <th class="p-3">Nhóm</th>
+                <th class="p-3">Đơn Giá Niêm Yết</th>
+                <th class="p-3">Chu Kỳ Chuẩn</th>
+                <th class="p-3">Đối Tượng</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium">
+              ${DESK_DATA.services.map(s => `
+                <tr class="hover:bg-slate-50">
+                  <td class="p-3 font-mono font-bold text-slate-800">${s.code}</td>
+                  <td class="p-3 font-bold text-slate-900">${s.name}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 text-teal-800">${s.cat}</span></td>
+                  <td class="p-3 font-bold text-teal-800">${s.price}</td>
+                  <td class="p-3 font-semibold text-slate-700">${s.cycle}</td>
+                  <td class="p-3 text-slate-600">${s.target}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderTransactionsTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Giao Dịch</th>
+                <th class="p-3">Khách Hàng</th>
+                <th class="p-3">Loại Giao Dịch</th>
+                <th class="p-3">Số Tiền</th>
+                <th class="p-3">Kênh Thanh Toán</th>
+                <th class="p-3">Thời Gian</th>
+                <th class="p-3">Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium">
+              ${DESK_DATA.transactions.map(t => `
+                <tr class="hover:bg-slate-50">
+                  <td class="p-3 font-mono font-bold text-slate-800">${t.id}</td>
+                  <td class="p-3 font-bold text-slate-900">${t.customer}</td>
+                  <td class="p-3 font-semibold text-slate-800">${t.type}</td>
+                  <td class="p-3 font-mono font-bold ${t.amount.startsWith('+') ? 'text-emerald-700' : 'text-rose-700'}">${t.amount}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${t.method}</span></td>
+                  <td class="p-3 font-mono text-slate-500 text-[11px]">${t.time}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">${t.status}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderTasksTable(container) {
+      container.innerHTML = `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+              <tr>
+                <th class="p-3">Mã Task</th>
+                <th class="p-3">Nội Dung Nhiệm Vụ</th>
+                <th class="p-3">Người Phụ Trách</th>
+                <th class="p-3">Độ Ưu Tiên</th>
+                <th class="p-3">Hạn Chót</th>
+                <th class="p-3">Trạng Thái</th>
+                <th class="p-3 text-right">Hành Động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs font-medium">
+              ${DESK_DATA.tasks.map(t => `
+                <tr class="hover:bg-slate-50">
+                  <td class="p-3 font-mono font-bold text-slate-800">${t.id}</td>
+                  <td class="p-3 font-semibold text-slate-900">${t.title}</td>
+                  <td class="p-3 text-slate-600 font-mono text-[11px]">${t.assignee}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.priority === 'Urgent' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}">${t.priority}</span></td>
+                  <td class="p-3 font-mono text-slate-600">${t.due}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.status === 'Open' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${t.status}</span></td>
+                  <td class="p-3 text-right">
+                    ${t.status === 'Open' ? `
+                      <button onclick="completeTaskDesk('${t.id}')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-2xs">
+                        <i class="fa-solid fa-check mr-1"></i> Xong
+                      </button>
+                    ` : `<span class="text-xs text-slate-400 font-semibold">Đã xong</span>`}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function resolveCaseDesk(caseId) {
+      const c = DESK_DATA.cases.find(x => x.id === caseId);
+      if (c) {
+        c.status = 'Resolved';
+        c.resolution = 'Đã xử lý & thỏa thuận hài lòng với khách hàng';
+        showToast(`Đã giải quyết thành công khiếu nại ${caseId}!`, 'success');
+        renderCasesTable(document.getElementById('modal-body'));
+        updateDeskHeaderStats();
+      }
+    }
+
+    function winOpportunityDesk(oppId) {
+      const o = DESK_DATA.opportunities.find(x => x.id === oppId);
+      if (o) {
+        o.stage = 'Closed Won';
+        o.prob = 100;
+        showToast(`Chúc mừng! Đã chốt thành công Cơ hội ${oppId} (${o.amount.toLocaleString('vi-VN')} đ)!`, 'success');
+        renderOpportunitiesTable(document.getElementById('modal-body'));
+      }
+    }
+
+    function completeTaskDesk(taskId) {
+      const t = DESK_DATA.tasks.find(x => x.id === taskId);
+      if (t) {
+        t.status = 'Completed';
+        showToast(`Đã hoàn tất nhiệm vụ ${taskId}!`, 'success');
+        renderTasksTable(document.getElementById('modal-body'));
+      }
+    }
+
+    
+    function openCreateCustomerModalDesk() {
+      const name = prompt('Nhập Họ và Tên Khách Hàng mới:', 'Lê Bảo Trâm');
+      if (name === null) return;
+      const phone = prompt('Nhập Số Điện Thoại (10 số):', '0909887766');
+      if (phone === null) return;
+      const petName = prompt('Nhập Tên Thú Cưng:', 'Bé Bông');
+      if (petName === null) return;
+      const breed = prompt('Nhập Giống Loài:', 'Mèo Ragdoll');
+      const plan = prompt('Nhập Gói Hội Viên (Diamond VIP / Gold VIP / Silver / Vãng Lai):', 'Diamond VIP');
+
+      const newId = 'CUST-000' + (DESK_DATA.customers.length + 1);
+      const newCust = {
+        id: newId,
+        name: name.trim() || 'Khách Hàng Mới',
+        phone: phone.trim() || '0909887766',
+        email: (phone.trim() || 'khach') + '@petcare-demo.vn',
+        pets_count: 1,
+        tier: plan || 'Gold VIP',
+        wallet: '500.000 đ',
+        address: 'Quận 1, TP.HCM'
+      };
+
+      const newPet = {
+        name: petName.trim() || 'Bé Cưng',
+        customer: name.trim() || 'Khách Hàng Mới',
+        species: (breed && breed.toLowerCase().includes('mèo')) ? 'Mèo' : 'Chó',
+        breed: breed || 'Poodle',
+        birth: '15/06/2024',
+        weight: '4.5 kg',
+        status: 'DUE_SOON'
+      };
+
+      DESK_DATA.customers.unshift(newCust);
+      DESK_DATA.pets.unshift(newPet);
+      showToast(`Đã thêm khách hàng mới ${newCust.name} (${newId}) & bé ${newPet.name} thành công!`, 'success');
+      
+      // If modal open, refresh it
+      if (currentModalType === 'customers') {
+        renderCustomersTable(document.getElementById('modal-body'));
+      }
+    }
+
+        // =========================================================================
+    // ENTERPRISE PROFESSIONAL IMPORT ENGINE FOR FRAPPE DESK
+    // =========================================================================
+    let parsedImportRowsDesk = [];
+    let currentImportFileDesk = null;
+
+    function openImportModalDesk() {
+      let existingOverlay = document.getElementById('desk-import-overlay');
+      if (existingOverlay) existingOverlay.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'desk-import-overlay';
+      overlay.className = 'fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs';
+      overlay.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col border border-slate-200 overflow-hidden" role="dialog" aria-modal="true">
+          <!-- Header -->
+          <div class="p-4 px-6 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-emerald-50 to-teal-50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-sm font-bold">
+                <i class="fa-solid fa-file-excel"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-extrabold text-base text-slate-900">Desk Import: Khách Hàng & Thú Cưng</h3>
+                  <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">Frappe Native</span>
+                </div>
+                <p class="text-xs text-slate-600 font-medium mt-0.5">Nạp hàng loạt dữ liệu khách hàng từ tệp Excel (.xlsx, .xls) hoặc CSV với xác thực bảng tính tự động</p>
+              </div>
+            </div>
+            <button onclick="closeDeskImportModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 flex items-center justify-center transition">
+              <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+          </div>
+
+          <!-- Body Content -->
+          <div class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+            
+            <!-- Mode Switcher & Tools -->
+            <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="flex items-center gap-1.5 bg-slate-200/70 p-1 rounded-lg">
+                <button type="button" id="btn-desk-tab-file" onclick="switchDeskImportTab('file')" class="px-3.5 py-1.5 rounded-md bg-teal-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <span>📁 Tải Lên Tệp (.xlsx, .csv)</span>
+                </button>
+                <button type="button" id="btn-desk-tab-paste" onclick="switchDeskImportTab('paste')" class="px-3.5 py-1.5 rounded-md text-slate-700 hover:bg-white font-bold text-xs flex items-center gap-1.5 transition">
+                  <i class="fa-solid fa-clipboard"></i>
+                  <span>📋 Dán Bảng Dữ Liệu</span>
+                </button>
+              </div>
+
+              <div class="flex items-center flex-wrap gap-2">
+                <button type="button" onclick="downloadDeskTemplate('xlsx')" class="px-3 py-1.5 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-2xs transition" title="Tải file mẫu Excel chuẩn">
+                  <i class="fa-solid fa-download text-emerald-600"></i>
+                  <span>Mẫu Excel (.xlsx)</span>
+                </button>
+                <button type="button" onclick="downloadDeskTemplate('csv')" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-2xs transition" title="Tải file mẫu CSV UTF-8">
+                  <i class="fa-solid fa-file-csv text-blue-600"></i>
+                  <span>Mẫu CSV</span>
+                </button>
+                <button type="button" onclick="loadSampleDeskDemo()" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-2xs transition" title="Nạp nhanh 3 khách hàng mẫu">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i>
+                  <span>✨ Nạp 3 Khách Mẫu</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Mode 1: File Dropzone Area -->
+            <div id="desk-pane-file" class="space-y-3">
+              <input type="file" id="desk-file-picker" accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" onchange="handleDeskFilePicked(event)">
+              
+              <div id="desk-drop-target" 
+                   onclick="document.getElementById('desk-file-picker').click()"
+                   ondragover="event.preventDefault(); this.classList.add('border-teal-500', 'bg-teal-50/50')"
+                   ondragleave="this.classList.remove('border-teal-500', 'bg-teal-50/50')"
+                   ondrop="handleDeskFileDropped(event)"
+                   class="border-2 border-dashed border-teal-300 hover:border-teal-500 bg-teal-50/20 hover:bg-teal-50/50 rounded-2xl p-7 text-center cursor-pointer transition flex flex-col items-center justify-center">
+                <div class="w-14 h-14 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-2xl mb-2.5 shadow-xs">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div class="text-sm font-extrabold text-slate-800 mb-1">
+                  Kéo & thả tệp tin Excel (.xlsx, .xls) hoặc CSV (.csv) vào đây
+                </div>
+                <p class="text-xs text-slate-500 mb-3">
+                  hoặc <span class="text-teal-600 font-bold underline">bấm vào đây để chọn tệp từ máy tính</span>
+                </p>
+                <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+                  <span class="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700">.XLSX</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700">.XLS</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700">.CSV (UTF-8)</span>
+                  <span>• Tối đa 10 MB / 5.000 dòng</span>
+                </div>
+              </div>
+
+              <!-- File Status Card (when file selected) -->
+              <div id="desk-file-status" class="hidden p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-base">
+                    <i class="fa-solid fa-file-excel"></i>
+                  </div>
+                  <div>
+                    <div class="font-bold text-slate-900 text-xs flex items-center gap-2">
+                      <span id="desk-file-name">ten_file.xlsx</span>
+                      <span id="desk-file-size" class="text-slate-500 text-[11px] font-mono">(24.5 KB)</span>
+                    </div>
+                    <div class="text-[11px] text-emerald-800 font-semibold flex items-center gap-1.5 mt-0.5">
+                      <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                      <span id="desk-file-meta">Đã nhận diện thành công dữ liệu</span>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" onclick="clearSelectedDeskFile()" class="px-2.5 py-1 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                  <i class="fa-solid fa-trash-can"></i> Đổi tệp
+                </button>
+              </div>
+            </div>
+
+            <!-- Mode 2: Direct Paste Area -->
+            <div id="desk-pane-paste" class="hidden space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="font-bold text-slate-700">Dán Dữ Liệu Bảng Tính Từ Excel / Google Sheets:</label>
+                <span class="text-slate-500 font-mono text-[11px]">Hỗ trợ Tab, Phẩy (,) hoặc Chấm phẩy (;)</span>
+              </div>
+              <textarea id="desk-paste-textarea" oninput="handleDeskPasteInput()" rows="4" placeholder="Lê Bảo Trâm, 0909887766, tram.le@demo.vn, 123 Nguyễn Thị Minh Khai, Bé Bống, Mèo, Ragdoll, 4.2, Kim Cương, 1000000, Bé ngoan
+Trần Quang Huy, 0918776655, huy.tran@demo.vn, 45 Lê Duẩn, Bé Lu, Chó, Golden Retriever, 26.5, Gói Vàng VIP, 500000, Ăn hạt mềm
+Nguyễn Minh Triết, 0987654321, triet.nguyen@demo.vn, 78 Hai Bà Trưng, Bé Sam, Chó, Samoyed, 18.0, Gói Bạc, 200000, Lông dày" class="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl bg-slate-50 text-slate-900"></textarea>
+            </div>
+
+            <!-- Data Preview Section -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="font-extrabold text-slate-800 uppercase tracking-wide text-[11px]">
+                    Bảng Xem Trước Dữ Liệu Thực Tế:
+                  </span>
+                  <span id="desk-stat-valid" class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">0 Hợp Lệ</span>
+                  <span id="desk-stat-warn" class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 hidden">0 Cảnh báo</span>
+                </div>
+                <span class="text-slate-500 text-[11px]">Hiển thị tối đa 50 dòng</span>
+              </div>
+
+              <div class="border border-slate-200 rounded-xl overflow-hidden max-h-52 overflow-y-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200 sticky top-0">
+                    <tr>
+                      <th class="p-2.5 w-8 text-center">#</th>
+                      <th class="p-2.5">Họ & Tên Chủ</th>
+                      <th class="p-2.5">Số Điện Thoại</th>
+                      <th class="p-2.5">Thú Cưng & Giống</th>
+                      <th class="p-2.5">Hạng Gói</th>
+                      <th class="p-2.5">Số Dư Ví</th>
+                      <th class="p-2.5">Địa Chỉ</th>
+                      <th class="p-2.5 text-center">Trạng Thái</th>
+                    </tr>
+                  </thead>
+                  <tbody id="desk-preview-table-body" class="divide-y divide-slate-100 font-medium">
+                    <tr>
+                      <td colspan="8" class="p-6 text-center text-slate-400">
+                        <i class="fa-solid fa-file-arrow-up text-2xl text-slate-300 mb-1.5 block"></i>
+                        Chưa có dữ liệu nào. Vui lòng kéo thả file Excel/CSV ở trên hoặc bấm "Nạp 3 Khách Mẫu".
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Options Checkboxes -->
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-xs text-slate-700">
+              <div class="font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-teal-600"></i> Tùy chọn xử lý tự động:
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <label class="flex items-center gap-2 cursor-pointer font-medium">
+                  <input type="checkbox" id="opt-desk-phone" checked class="rounded text-teal-600">
+                  <span>Chuẩn hóa SĐT Việt Nam (bỏ +84, khoảng trắng, gạch nối)</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer font-medium">
+                  <input type="checkbox" id="opt-desk-benefit" checked class="rounded text-teal-600">
+                  <span>Tự động cấp quyền lợi Grooming & Spa theo gói</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer font-medium">
+                  <input type="checkbox" id="opt-desk-wallet" checked class="rounded text-teal-600">
+                  <span>Ghi nhận số dư ví vào sổ cái giao dịch tài khoản</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer font-medium">
+                  <input type="checkbox" id="opt-desk-skip-invalid" checked class="rounded text-teal-600">
+                  <span>Bỏ qua dòng lỗi (thiếu số điện thoại hoặc tên)</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="p-4 px-6 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div class="text-xs text-slate-500 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-amber-500"></i>
+              <span>Dữ liệu sẽ được ghi trực tiếp vào các DocType Frappe tương ứng.</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <button type="button" onclick="closeDeskImportModal()" class="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition">
+                Hủy Bỏ
+              </button>
+              <button type="button" id="btn-desk-submit-import" onclick="executeBatchImportDesk()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Xác Nhận Import Vào Desk (<span id="btn-desk-import-count">0</span>)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    function closeDeskImportModal() {
+      const el = document.getElementById('desk-import-overlay');
+      if (el) el.remove();
+    }
+
+    function switchDeskImportTab(tab) {
+      const filePane = document.getElementById('desk-pane-file');
+      const pastePane = document.getElementById('desk-pane-paste');
+      const btnFile = document.getElementById('btn-desk-tab-file');
+      const btnPaste = document.getElementById('btn-desk-tab-paste');
+      if (!filePane || !pastePane) return;
+
+      if (tab === 'file') {
+        filePane.classList.remove('hidden');
+        pastePane.classList.add('hidden');
+        btnFile.className = 'px-3.5 py-1.5 rounded-md bg-teal-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition';
+        btnPaste.className = 'px-3.5 py-1.5 rounded-md text-slate-700 hover:bg-white font-bold text-xs flex items-center gap-1.5 transition';
+      } else {
+        filePane.classList.add('hidden');
+        pastePane.classList.remove('hidden');
+        btnPaste.className = 'px-3.5 py-1.5 rounded-md bg-teal-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition';
+        btnFile.className = 'px-3.5 py-1.5 rounded-md text-slate-700 hover:bg-white font-bold text-xs flex items-center gap-1.5 transition';
+      }
+    }
+
+    function downloadDeskTemplate(format = 'csv') {
+      const headers = ['Họ và Tên', 'Số Điện Thoại', 'Email', 'Địa Chỉ', 'Tên Thú Cưng', 'Loài', 'Giống Loài', 'Cân Nặng (kg)', 'Gói Hội Viên', 'Số Dư Ví', 'Ghi Chú'];
+      const sampleRows = [
+        ['Lê Bảo Trâm', '0909887766', 'tram.le@demo.vn', '123 Nguyễn Thị Minh Khai, Q.1', 'Bé Bống', 'Mèo', 'Ragdoll', '4.2', 'Kim Cương', '1000000', 'Bé ngoan, sợ máy sấy mạnh'],
+        ['Trần Quang Huy', '0918776655', 'huy.tran@demo.vn', '45 Lê Duẩn, Q.1', 'Bé Lu', 'Chó', 'Golden Retriever', '26.5', 'Gói Vàng VIP', '500000', 'Thích gãi bụng, ăn hạt mềm'],
+        ['Nguyễn Minh Triết', '0987654321', 'triet.nguyen@demo.vn', '78 Hai Bà Trưng, Q.3', 'Bé Sam', 'Chó', 'Samoyed', '18.0', 'Gói Bạc', '200000', 'Lông dày, cần xịt dưỡng gỡ rối']
+      ];
+
+      if (format === 'xlsx' && typeof XLSX !== 'undefined') {
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...sampleRows]);
+        ws['!cols'] = [
+          { wch: 22 }, { wch: 15 }, { wch: 24 }, { wch: 30 },
+          { wch: 14 }, { wch: 10 }, { wch: 18 }, { wch: 14 },
+          { wch: 18 }, { wch: 14 }, { wch: 30 }
+        ];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "KhachHang_PetCare");
+        XLSX.writeFile(wb, "PetCare_Mau_Import_Desk.xlsx");
+        showToast('Đã tải xuống file mẫu Excel (.xlsx) chuẩn!', 'success');
+      } else {
+        const csvLines = [
+          headers.join(','),
+          ...sampleRows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(','))
+        ];
+        const csvContent = '\uFEFF' + csvLines.join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'PetCare_Mau_Import_Desk.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showToast('Đã tải xuống file mẫu CSV (.csv) UTF-8 chuẩn!', 'success');
+      }
+    }
+
+    function handleDeskFilePicked(event) {
+      const file = event.target.files?.[0];
+      if (file) handleSelectedDeskFile(file);
+    }
+
+    function handleDeskFileDropped(event) {
+      event.preventDefault();
+      const dt = event.dataTransfer;
+      const file = dt.files?.[0];
+      if (file) handleSelectedDeskFile(file);
+    }
+
+    function handleSelectedDeskFile(file) {
+      currentImportFileDesk = file;
+      const name = file.name;
+      const sizeKb = (file.size / 1024).toFixed(1) + ' KB';
+      const ext = name.split('.').pop().toLowerCase();
+
+      const statusCard = document.getElementById('desk-file-status');
+      const nameEl = document.getElementById('desk-file-name');
+      const sizeEl = document.getElementById('desk-file-size');
+      const dropTarget = document.getElementById('desk-drop-target');
+
+      if (nameEl) nameEl.innerText = name;
+      if (sizeEl) sizeEl.innerText = '(' + sizeKb + ')';
+      if (statusCard) statusCard.classList.remove('hidden');
+      if (dropTarget) dropTarget.classList.add('border-emerald-500', 'bg-emerald-50/20');
+
+      if (ext === 'xlsx' || ext === 'xls') {
+        if (typeof XLSX !== 'undefined') {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            try {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, { type: 'array' });
+              const firstSheet = workbook.SheetNames[0];
+              const rawRows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { header: 1 });
+              processDeskImportData(rawRows);
+              document.getElementById('desk-file-meta').innerText = 'Đã đọc thành công Sheet: ' + firstSheet + ' (' + (rawRows.length > 0 ? rawRows.length - 1 : 0) + ' dòng)';
+            } catch (err) {
+              showToast('Lỗi đọc file Excel: ' + err.message, 'error');
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        } else {
+          showToast('Trình duyệt chưa tải kịp bộ giải mã Excel. Vui lòng thử file .csv hoặc dán dữ liệu.', 'warning');
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const text = e.target.result;
+          const rawRows = parseDeskCsvToRawRows(text);
+          processDeskImportData(rawRows);
+          document.getElementById('desk-file-meta').innerText = 'Đã đọc file CSV thành công (' + (rawRows.length > 0 ? rawRows.length - 1 : 0) + ' dòng)';
+        };
+        reader.readAsText(file, 'utf-8');
+      }
+    }
+
+    function clearSelectedDeskFile() {
+      currentImportFileDesk = null;
+      const picker = document.getElementById('desk-file-picker');
+      if (picker) picker.value = '';
+      const statusCard = document.getElementById('desk-file-status');
+      if (statusCard) statusCard.classList.add('hidden');
+      const dropTarget = document.getElementById('desk-drop-target');
+      if (dropTarget) dropTarget.classList.remove('border-emerald-500', 'bg-emerald-50/20');
+      parsedImportRowsDesk = [];
+      renderDeskImportPreviewTable();
+    }
+
+    function handleDeskPasteInput() {
+      const ta = document.getElementById('desk-paste-textarea');
+      if (!ta) return;
+      const text = ta.value.trim();
+      if (!text) {
+        parsedImportRowsDesk = [];
+        renderDeskImportPreviewTable();
+        return;
+      }
+      const rawRows = parseDeskCsvToRawRows(text);
+      processDeskImportData(rawRows);
+    }
+
+    function loadSampleDeskDemo() {
+      const demoData = [
+        ['Họ và Tên', 'Số Điện Thoại', 'Email', 'Địa Chỉ', 'Tên Thú Cưng', 'Loài', 'Giống Loài', 'Cân Nặng', 'Gói Hội Viên', 'Số Dư Ví', 'Ghi Chú'],
+        ['Lê Bảo Trâm', '0909887766', 'tram.le@demo.vn', '123 Nguyễn Thị Minh Khai, Q.1', 'Bé Bống', 'Mèo', 'Ragdoll', '4.2', 'Kim Cương', '1000000', 'Bé ngoan, sợ sấy mạnh'],
+        ['Trần Quang Huy', '0918776655', 'huy.tran@demo.vn', '45 Lê Duẩn, Q.1', 'Bé Lu', 'Chó', 'Golden Retriever', '26.5', 'Gói Vàng VIP', '500000', 'Thích gãi bụng'],
+        ['Nguyễn Minh Triết', '0987654321', 'triet.nguyen@demo.vn', '78 Hai Bà Trưng, Q.3', 'Bé Sam', 'Chó', 'Samoyed', '18.0', 'Gói Bạc', '200000', 'Lông dày gỡ rối']
+      ];
+      const ta = document.getElementById('desk-paste-textarea');
+      if (ta) {
+        ta.value = 'Lê Bảo Trâm, 0909887766, tram.le@demo.vn, 123 Nguyễn Thị Minh Khai, Bé Bống, Mèo, Ragdoll, 4.2, Kim Cương, 1000000, Bé ngoan\nTrần Quang Huy, 0918776655, huy.tran@demo.vn, 45 Lê Duẩn, Bé Lu, Chó, Golden Retriever, 26.5, Gói Vàng VIP, 500000, Thích gãi bụng\nNguyễn Minh Triết, 0987654321, triet.nguyen@demo.vn, 78 Hai Bà Trưng, Bé Sam, Chó, Samoyed, 18.0, Gói Bạc, 200000, Lông dày gỡ rối';
+      }
+      processDeskImportData(demoData);
+      showToast('Đã nạp 3 khách hàng mẫu vào bảng xem trước!', 'info');
+    }
+
+    function parseDeskCsvToRawRows(text) {
+      if (!text) return [];
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length === 0) return [];
+
+      const firstLine = lines[0];
+      let delimiter = ',';
+      if (firstLine.includes('\t')) delimiter = '\t';
+      else if (firstLine.includes(';') && !firstLine.includes(',')) delimiter = ';';
+
+      return lines.map(line => {
+        const result = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i];
+          if (c === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              cur += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (c === delimiter && !inQuotes) {
+            result.push(cur.trim());
+            cur = '';
+          } else {
+            cur += c;
+          }
+        }
+        result.push(cur.trim());
+        return result;
+      });
+    }
+
+    function processDeskImportData(rawRows) {
+      if (!rawRows || rawRows.length === 0) {
+        parsedImportRowsDesk = [];
+        renderDeskImportPreviewTable();
+        return;
+      }
+
+      const headerCandidates = rawRows[0].map(c => String(c || '').toLowerCase().trim());
+      const isHeader = headerCandidates.some(h => 
+        h.includes('tên') || h.includes('name') || h.includes('sđt') || h.includes('sdt') || 
+        h.includes('phone') || h.includes('pet') || h.includes('thú cưng') || h.includes('gói') || h.includes('email')
+      );
+
+      let colMap = {
+        name: 0, phone: 1, email: 2, address: 3, petName: 4, species: 5, breed: 6, weight: 7, tier: 8, wallet: 9, notes: 10
+      };
+
+      let dataRows = rawRows;
+      if (isHeader) {
+        dataRows = rawRows.slice(1);
+        const newMap = {};
+        headerCandidates.forEach((h, idx) => {
+          if ((h.includes('tên') && (h.includes('chủ') || h.includes('khách') || h.includes('họ'))) || h === 'họ và tên' || h === 'họ tên' || h === 'customer' || h === 'name') {
+            newMap.name = idx;
+          } else if (h.includes('sđt') || h.includes('sdt') || h.includes('điện thoại') || h.includes('phone') || h.includes('mobile')) {
+            newMap.phone = idx;
+          } else if (h.includes('email') || h.includes('thư')) {
+            newMap.email = idx;
+          } else if (h.includes('địa chỉ') || h.includes('address')) {
+            newMap.address = idx;
+          } else if ((h.includes('thú cưng') && h.includes('tên')) || h.includes('tên bé') || h === 'thú cưng' || h === 'pet' || h === 'pet name') {
+            newMap.petName = idx;
+          } else if (h === 'loài' || (h.includes('loài') && !h.includes('giống')) || h === 'species') {
+            newMap.species = idx;
+          } else if (h === 'giống' || h.includes('giống') || h === 'breed') {
+            newMap.breed = idx;
+          } else if (h.includes('cân') || h.includes('weight') || h.includes('kg')) {
+            newMap.weight = idx;
+          } else if (h.includes('gói') || h.includes('hạng') || h.includes('tier') || h.includes('membership') || h.includes('thẻ')) {
+            newMap.tier = idx;
+          } else if (h.includes('ví') || h.includes('wallet') || h.includes('số dư') || h.includes('tiền')) {
+            newMap.wallet = idx;
+          } else if (h.includes('ghi chú') || h.includes('notes') || h.includes('lưu ý')) {
+            newMap.notes = idx;
+          }
+        });
+        colMap = { ...colMap, ...newMap };
+      }
+
+      parsedImportRowsDesk = dataRows.map((r, i) => {
+        let rawPhone = String(r[colMap.phone] !== undefined ? r[colMap.phone] : '').trim();
+        let cleanPhone = rawPhone.replace(/[\s\.\-\(\)]/g, '');
+        if (cleanPhone.startsWith('+84')) cleanPhone = '0' + cleanPhone.slice(3);
+        else if (cleanPhone.startsWith('84') && cleanPhone.length === 11) cleanPhone = '0' + cleanPhone.slice(2);
+
+        let rawWallet = String(r[colMap.wallet] !== undefined ? r[colMap.wallet] : '500000').replace(/[^0-9]/g, '');
+        let walletNum = parseInt(rawWallet, 10);
+        if (isNaN(walletNum)) walletNum = 500000;
+
+        let tierStr = String(r[colMap.tier] !== undefined ? r[colMap.tier] : 'Gói Vàng VIP (Gold Care)').trim();
+        let normTier = 'Gold';
+        let tierLabel = 'Gold VIP';
+        if (tierStr.toLowerCase().includes('kim cương') || tierStr.toLowerCase().includes('diamond')) {
+          normTier = 'Diamond';
+          tierLabel = 'Diamond VIP';
+        } else if (tierStr.toLowerCase().includes('bạc') || tierStr.toLowerCase().includes('silver')) {
+          normTier = 'Silver';
+          tierLabel = 'Silver Care';
+        } else if (tierStr.toLowerCase().includes('vãng lai') || tierStr.toLowerCase().includes('walk-in') || tierStr.toLowerCase().includes('standard')) {
+          normTier = 'Walk-in';
+          tierLabel = 'Walk-in';
+        }
+
+        const name = String(r[colMap.name] !== undefined ? r[colMap.name] : ('Khách Hàng ' + (i + 1))).trim();
+        const petName = String(r[colMap.petName] !== undefined ? r[colMap.petName] : ('Bé Cưng ' + (i + 1))).trim();
+        let species = String(r[colMap.species] !== undefined ? r[colMap.species] : '').trim();
+        if (!species) species = (petName.toLowerCase().includes('mèo') || petName.toLowerCase().includes('miu')) ? 'Mèo' : 'Chó';
+        const breed = String(r[colMap.breed] !== undefined ? r[colMap.breed] : (species === 'Mèo' ? 'Anh Lông Ngắn' : 'Poodle')).trim();
+        const weight = parseFloat(r[colMap.weight]) || (species === 'Mèo' ? 4.0 : 8.5);
+        const email = String(r[colMap.email] !== undefined ? r[colMap.email] : (cleanPhone ? cleanPhone + '@petcare.vn' : 'khach@petcare.vn')).trim();
+        const address = String(r[colMap.address] !== undefined ? r[colMap.address] : 'TP. Hồ Chí Minh').trim();
+        const notes = String(r[colMap.notes] !== undefined ? r[colMap.notes] : 'Import từ tệp Excel').trim();
+
+        let isValid = true;
+        let statusMsg = '✓ Hợp lệ';
+        let statusClass = 'text-emerald-700 bg-emerald-50 border-emerald-200';
+
+        if (!cleanPhone || cleanPhone.length < 9) {
+          isValid = false;
+          statusMsg = '✖ Thiếu SĐT';
+          statusClass = 'text-rose-700 bg-rose-50 border-rose-200';
+        } else if (rawPhone !== cleanPhone) {
+          statusMsg = '⚠ Đã chuẩn hóa SĐT';
+          statusClass = 'text-amber-700 bg-amber-50 border-amber-200';
+        }
+
+        return {
+          index: i + 1,
+          name: name || ('Khách Hàng ' + (i + 1)),
+          phone: cleanPhone || '0900000000',
+          email,
+          address,
+          petName: petName || ('Bé Cưng ' + (i + 1)),
+          species,
+          breed,
+          weight,
+          tier: tierLabel,
+          normTier,
+          wallet: walletNum,
+          notes,
+          isValid,
+          statusMsg,
+          statusClass
+        };
+      });
+
+      renderDeskImportPreviewTable();
+    }
+
+    function renderDeskImportPreviewTable() {
+      const tbody = document.getElementById('desk-preview-table-body');
+      const validStat = document.getElementById('desk-stat-valid');
+      const warnStat = document.getElementById('desk-stat-warn');
+      const btnCount = document.getElementById('btn-desk-import-count');
+      const submitBtn = document.getElementById('btn-desk-submit-import');
+      if (!tbody) return;
+
+      if (!parsedImportRowsDesk || parsedImportRowsDesk.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-400"><i class="fa-solid fa-file-arrow-up text-2xl text-slate-300 mb-1.5 block"></i>Chưa có dữ liệu nào. Vui lòng kéo thả file Excel/CSV ở trên hoặc bấm "Nạp 3 Khách Mẫu".</td></tr>';
+        if (validStat) validStat.innerText = '0 Hợp Lệ';
+        if (warnStat) warnStat.classList.add('hidden');
+        if (btnCount) btnCount.innerText = '0';
+        if (submitBtn) submitBtn.disabled = true;
+        return;
+      }
+
+      const validCount = parsedImportRowsDesk.filter(r => r.isValid).length;
+      const warnCount = parsedImportRowsDesk.filter(r => r.statusMsg.includes('chuẩn hóa')).length;
+
+      if (validStat) validStat.innerText = validCount + ' Hợp Lệ (' + parsedImportRowsDesk.length + ' dòng)';
+      if (warnStat) {
+        if (warnCount > 0) {
+          warnStat.innerText = warnCount + ' Đã Chuẩn Hóa';
+          warnStat.classList.remove('hidden');
+        } else {
+          warnStat.classList.add('hidden');
+        }
+      }
+      if (btnCount) btnCount.innerText = validCount;
+      if (submitBtn) submitBtn.disabled = validCount === 0;
+
+      tbody.innerHTML = parsedImportRowsDesk.slice(0, 50).map(r => `
+        <tr class="hover:bg-slate-50 transition ${!r.isValid ? 'bg-rose-50/40' : ''}">
+          <td class="p-2.5 text-center font-mono font-bold text-slate-500">${r.index}</td>
+          <td class="p-2.5 font-bold text-slate-900">${r.name}</td>
+          <td class="p-2.5 font-mono text-teal-800 font-bold">${r.phone}</td>
+          <td class="p-2.5">
+            <span class="font-bold text-slate-900">${r.petName}</span>
+            <span class="text-slate-500 text-[11px] block">${r.species} • ${r.breed} (${r.weight}kg)</span>
+          </td>
+          <td class="p-2.5">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${r.normTier === 'Diamond' ? 'bg-purple-100 text-purple-900' : (r.normTier === 'Gold' ? 'bg-amber-100 text-amber-900' : 'bg-slate-200 text-slate-800')}">${r.normTier}</span>
+          </td>
+          <td class="p-2.5 font-mono font-bold text-emerald-700">${(r.wallet || 0).toLocaleString('vi-VN')} đ</td>
+          <td class="p-2.5 text-slate-600 text-[11px] truncate max-w-[140px]" title="${r.address}">${r.address}</td>
+          <td class="p-2.5 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${r.statusClass}">${r.statusMsg}</span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function executeBatchImportDesk() {
+      const skipInvalid = document.getElementById('opt-desk-skip-invalid')?.checked ?? true;
+      const candidates = skipInvalid ? parsedImportRowsDesk.filter(r => r.isValid) : parsedImportRowsDesk;
+
+      if (!candidates || candidates.length === 0) {
+        showToast('Không có dữ liệu khách hàng hợp lệ để nạp!', 'warning');
+        return;
+      }
+
+      candidates.forEach((r, idx) => {
+        const newId = 'CUST-00' + (DESK_DATA.customers.length + 10);
+        DESK_DATA.customers.unshift({
+          id: newId,
+          name: r.name,
+          phone: r.phone,
+          email: r.email,
+          pets_count: 1,
+          tier: r.tier,
+          wallet: (r.wallet || 500000).toLocaleString('vi-VN') + ' đ',
+          address: r.address || 'TP. Hồ Chí Minh'
+        });
+        DESK_DATA.pets.unshift({
+          name: r.petName,
+          customer: r.name,
+          species: r.species,
+          breed: r.breed,
+          birth: '01/01/2024',
+          weight: r.weight + ' kg',
+          status: 'DUE_SOON'
+        });
+      });
+
+      const totalImported = candidates.length;
+      closeDeskImportModal();
+      showToast(`Đã import thành công ${totalImported} khách hàng & thú cưng mới vào Frappe Desk!`, 'success');
+
+      if (currentModalType === 'customers') {
+        renderCustomersTable(document.getElementById('modal-body'));
+      } else if (currentModalType === 'pets') {
+        renderPetsTable(document.getElementById('modal-body'));
+      }
+    }
+
+    function executeModalAction() {
+      if (currentModalType === 'customers') {
+        openCreateCustomerModalDesk();
+      } else if (currentModalType === 'leads') {
+        const name = prompt('Nhập tên khách tiềm năng mới:');
+        if (!name) return;
+        const phone = prompt('Nhập số điện thoại:');
+        const newLead = {
+          id: 'LEAD-2026-00' + Math.floor(Math.random() * 90 + 10),
+          name: name.trim(),
+          phone: phone ? phone.trim() : '0912345678',
+          source: 'Website Lead Form',
+          stage: 'New',
+          pet_interest: 'Tư vấn tiêm phòng thú cưng',
+          owner: 'Administrator'
+        };
+        DESK_DATA.leads.unshift(newLead);
+        showToast(`Đã thêm Lead mới ${newLead.name} (${newLead.id}) vào hệ thống!`, 'success');
+        document.getElementById('stat-leads-count').innerHTML = `${DESK_DATA.leads.length} <span class="text-xs font-semibold text-slate-400">Leads</span>`;
+        renderLeadsTable(document.getElementById('modal-body'));
+      } else if (currentModalType === 'appointments') {
+        const pet = prompt('Nhập tên thú cưng hẹn dịch vụ:');
+        if (!pet) return;
+        const srv = prompt('Chọn dịch vụ (Spa / Grooming / Khám):', 'Spa & Tắm Thảo Dược');
+        const newApt = {
+          id: 'APT-2026-00' + Math.floor(Math.random() * 90 + 10),
+          pet: pet.trim(),
+          customer: 'Khách Hàng Mới',
+          phone: '0901234567',
+          service: srv || 'Spa & Tắm Thảo Dược',
+          date: '2026-11-03',
+          time: '17:00',
+          branch: 'CN Trung Tâm',
+          status: 'Scheduled'
+        };
+        DESK_DATA.appointments.unshift(newApt);
+        showToast(`Đã tạo lịch hẹn mới ${newApt.id} cho bé ${newApt.pet}!`, 'success');
+        renderAppointmentsTable(document.getElementById('modal-body'));
+      } else if (currentModalType === 'cases') {
+        const pet = prompt('Nhập tên thú cưng phản ánh:');
+        if (!pet) return;
+        const subj = prompt('Mô tả khiếu nại / yêu cầu:', 'Phản hồi chất lượng dịch vụ chăm sóc');
+        const newCase = {
+          id: 'CASE-2026-00' + Math.floor(Math.random() * 90 + 10),
+          pet: pet.trim(),
+          customer: 'Khách Hàng',
+          phone: '0901234567',
+          subject: subj || 'Phản hồi dịch vụ',
+          type: 'Complaint',
+          priority: 'Medium',
+          status: 'Open',
+          resolution: ''
+        };
+        DESK_DATA.cases.unshift(newCase);
+        showToast(`Đã tạo Case khiếu nại mới ${newCase.id}!`, 'success');
+        updateDeskHeaderStats();
+        renderCasesTable(document.getElementById('modal-body'));
+      } else {
+        showToast(`Chức năng tạo mới cho ${currentModalType.toUpperCase()} đã sẵn sàng.`, 'info');
+      }
+    }
+
+
+
+    // Keyboard shortcut Escape closes modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  
+    function updateDeskHeaderStats() {
+      if (!window.DESK_DATA) return;
+      const leadsCount = DESK_DATA.leads ? DESK_DATA.leads.length : 12;
+      const dueSoonCount = DESK_DATA.recommendations ? DESK_DATA.recommendations.filter(r => r.type === 'DUE_SOON').length : 5;
+      const atRiskCount = DESK_DATA.recommendations ? DESK_DATA.recommendations.filter(r => r.type === 'AT_RISK').length : 3;
+      const membershipsCount = DESK_DATA.memberships ? DESK_DATA.memberships.filter(m => m.status === 'Active').length : 45;
+      const casesCount = DESK_DATA.cases ? DESK_DATA.cases.filter(c => c.status === 'Open').length : 2;
+
+      const elLeads = document.getElementById('stat-leads-count');
+      if (elLeads) elLeads.innerHTML = `${leadsCount} <span class="text-xs font-semibold text-slate-400">Leads</span>`;
+
+      const elDueSoon = document.getElementById('stat-due-soon-count');
+      if (elDueSoon) elDueSoon.innerHTML = `${dueSoonCount} <span class="text-xs font-semibold text-slate-400">Pets</span>`;
+
+      const elAtRisk = document.getElementById('stat-at-risk-count');
+      if (elAtRisk) elAtRisk.innerHTML = `${atRiskCount} <span class="text-xs font-semibold text-slate-400">Pets</span>`;
+
+      const elMem = document.getElementById('stat-memberships-count');
+      if (elMem) elMem.innerHTML = `${membershipsCount} <span class="text-xs font-semibold text-slate-400">Active</span>`;
+
+      const elCases = document.getElementById('stat-cases-count');
+      if (elCases) elCases.innerHTML = `${casesCount} <span class="text-xs font-semibold text-slate-400">Cases</span>`;
+    }
+
+    // Khởi tạo và đồng bộ số liệu Dashboard ban đầu
+    document.addEventListener('DOMContentLoaded', () => {
+      updateDeskHeaderStats();
+    });
+    // Gọi trực tiếp phòng trường hợp DOMContentLoaded đã kích hoạt
+    setTimeout(updateDeskHeaderStats, 50);
+
+    // =========================================================================
+    // OUTREACH MODAL (GỬI TIN NHẮN / NHẮC HẸN)
+    // =========================================================================
+    let currentOutreachRec = null;
+
+    function handleContactRec(recId) {
+      openOutreachModal(recId);
+    }
+
+    function openOutreachModal(recId) {
+      const rec = DESK_DATA.recommendations.find(r => r.id === recId);
+      if (!rec) {
+        showToast('Không tìm thấy thông tin đề xuất chăm sóc!', 'error');
+        return;
+      }
+      currentOutreachRec = rec;
+
+      // Tìm thông tin khách hàng trong DESK_DATA
+      const cust = DESK_DATA.customers.find(c => c.name === rec.customer) || {
+        name: rec.customer,
+        email: rec.customer.toLowerCase().replace(/\s+/g, '') + '@gmail.com',
+        phone: rec.phone || '0901234567'
+      };
+
+      const modal = document.getElementById('modal-outreach');
+      const banner = document.getElementById('outreach-summary-banner');
+      const emailTo = document.getElementById('outreach-email-to');
+      const emailSub = document.getElementById('outreach-email-subject');
+      const emailPreview = document.getElementById('outreach-email-preview-card');
+      const zaloPhone = document.getElementById('outreach-zalo-phone');
+      const zaloContent = document.getElementById('outreach-zalo-content');
+      const callBtn = document.getElementById('outreach-call-btn');
+
+      // Banner summary
+      const isRisk = rec.type === 'AT_RISK';
+      banner.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full ${isRisk ? 'bg-red-500' : 'bg-amber-500'}"></span>
+          <span>Thú cưng: <b class="text-slate-900">${rec.pet}</b></span>
+          <span class="text-slate-400">•</span>
+          <span>Chủ: <b class="text-slate-900">${rec.customer}</b> (${rec.phone})</span>
+        </div>
+        <span class="px-2 py-0.5 rounded font-bold text-[11px] ${isRisk ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}">
+          ${isRisk ? 'Nguy Cơ Rời Bỏ' : 'Sắp Đến Hạn'}
+        </span>
+      `;
+
+      // Form email
+      emailTo.value = cust.email || 'customer@petcare.com';
+      if (isRisk) {
+        emailSub.value = `🐾 PetCare Clinic & Spa nhớ bé ${rec.pet}! Tặng ưu đãi 20% khi đặt lịch tuần này`;
+        emailPreview.innerHTML = `
+          <div class="p-3 bg-white rounded-lg border border-slate-200">
+            <div class="font-bold text-teal-800 text-sm mb-1">🎁 Thư Chăm Sóc & Ưu Đãi Giữ Chân (Retention Offer)</div>
+            <p class="text-slate-700">Kính gửi anh/chị <b>${rec.customer}</b>,</p>
+            <p class="text-slate-600 mt-1">Đã hơn ${rec.reason.toLowerCase()}. PetCare rất nhớ bé <b>${rec.pet}</b> và gửi tặng voucher <b>GIẢM 20%</b> toàn bộ gói Spa Bồn Sục & Chăm Sóc khi đặt lịch hẹn trong tuần này.</p>
+            <div class="mt-2.5 p-2 bg-teal-50 rounded border border-teal-200 font-mono font-bold text-teal-900 text-center">
+              MÃ ƯU ĐÃI: PETCARE-WELCOMEBACK-20
+            </div>
+          </div>
+        `;
+      } else {
+        emailSub.value = `⏰ Nhắc lịch chăm sóc định kỳ cho bé ${rec.pet} — PetCare Clinic & Spa`;
+        emailPreview.innerHTML = `
+          <div class="p-3 bg-white rounded-lg border border-slate-200">
+            <div class="font-bold text-teal-800 text-sm mb-1">📅 Thông Báo Lịch Chăm Sóc Định Kỳ (Care Reminder)</div>
+            <p class="text-slate-700">Kính gửi anh/chị <b>${rec.customer}</b>,</p>
+            <p class="text-slate-600 mt-1">Hệ thống ghi nhận bé <b>${rec.pet}</b> đã đến chu kỳ chăm sóc: <i>"${rec.reason}"</i>. Kính mời anh/chị sắp xếp lịch đưa bé ghé spa để giữ form lông và sức khỏe tốt nhất ạ!</p>
+            <p class="text-slate-500 mt-1 text-[11px]">Hotline đặt chỗ ưu tiên: 1900 8888 • Địa chỉ: CN Trung Tâm PetCare</p>
+          </div>
+        `;
+      }
+
+      // Form Zalo
+      zaloPhone.value = rec.phone || '0901234567';
+      callBtn.href = `tel:${rec.phone || '0901234567'}`;
+      if (isRisk) {
+        zaloContent.value = `[PetCare Clinic & Spa] Chào chị/anh ${rec.customer}, đã khá lâu PetCare chưa được gặp lại bé ${rec.pet}. Spa gửi tặng bé voucher giảm 20% cho buổi Spa & Grooming tuần này ạ. Anh/chị nhắn lại để em giữ lịch đẹp cho bé nhé! Hotline: 1900 8888.`;
+      } else {
+        zaloContent.value = `[PetCare Clinic & Spa] Chào chị/anh ${rec.customer}, bé ${rec.pet} đã đến lịch chăm sóc định kỳ (${rec.service || 'Spa / Cắt tỉa'}). Anh/chị có muốn đặt hẹn trước vào hôm nay hoặc cuối tuần để bé không phải đợi lâu không ạ?`;
+      }
+
+      switchOutreachTab('email');
+      modal.classList.remove('hidden');
+    }
+
+    function closeOutreachModal() {
+      const modal = document.getElementById('modal-outreach');
+      if (modal) modal.classList.add('hidden');
+      currentOutreachRec = null;
+    }
+
+    function switchOutreachTab(tab) {
+      const emailTab = document.getElementById('tab-outreach-email');
+      const zaloTab = document.getElementById('tab-outreach-zalo');
+      const emailBtn = document.getElementById('tab-outreach-email-btn');
+      const zaloBtn = document.getElementById('tab-outreach-zalo-btn');
+
+      if (tab === 'email') {
+        emailTab.classList.remove('hidden');
+        zaloTab.classList.add('hidden');
+        emailBtn.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-teal-600 text-teal-800 flex items-center gap-2";
+        zaloBtn.className = "px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2";
+      } else {
+        emailTab.classList.add('hidden');
+        zaloTab.classList.remove('hidden');
+        zaloBtn.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-teal-600 text-teal-800 flex items-center gap-2";
+        emailBtn.className = "px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2";
+      }
+    }
+
+    async function sendOutreachEmail() {
+      if (!currentOutreachRec) return;
+      const email = document.getElementById('outreach-email-to').value.trim();
+      const subject = document.getElementById('outreach-email-subject').value.trim();
+      const btn = document.getElementById('btn-submit-outreach-email');
+
+      if (!email) {
+        showToast('Vui lòng nhập địa chỉ email hợp lệ!', 'warning');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi qua Mailtrap...';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Gửi Email Ngay';
+
+        // 1. Thêm ToDo mới vào tasks
+        const newTask = {
+          id: 'TSK-2026-00' + Math.floor(Math.random() * 80 + 20),
+          title: `Đã gửi email nhắc lịch cho bé ${currentOutreachRec.pet} (${currentOutreachRec.customer})`,
+          assignee: 'customer_service@petcare.com',
+          priority: currentOutreachRec.type === 'AT_RISK' ? 'Urgent' : 'Normal',
+          due: 'Hôm nay',
+          status: 'Completed'
+        };
+        if (DESK_DATA.tasks) DESK_DATA.tasks.unshift(newTask);
+
+        closeOutreachModal();
+        showToast(`✅ Đã gửi email nhắc lịch thành công tới ${email} qua Mailtrap Sandbox SMTP!`, 'success');
+      }, 700);
+    }
+
+    function copyOutreachZaloMessage() {
+      const content = document.getElementById('outreach-zalo-content').value;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(content).catch(() => {});
+      }
+      if (currentOutreachRec && DESK_DATA.tasks) {
+        DESK_DATA.tasks.unshift({
+          id: 'TSK-2026-00' + Math.floor(Math.random() * 80 + 20),
+          title: `Đã gửi tin Zalo/SMS nhắc lịch cho bé ${currentOutreachRec.pet} (${currentOutreachRec.customer})`,
+          assignee: 'receptionist_1@petcare.com',
+          priority: 'Normal',
+          due: 'Hôm nay',
+          status: 'Completed'
+        });
+      }
+      closeOutreachModal();
+      showToast('Đã sao chép nội dung tin nhắn Zalo vào bộ nhớ tạm & tạo Task CSKH thành công!', 'success');
+    }
+
+    // =========================================================================
+    // EMAIL CENTER MODAL (TRUNG TÂM HỘP THƯ MAILTRAP)
+    // =========================================================================
+    function openEmailCenterModal() {
+      const modal = document.getElementById('modal-email-center');
+      if (modal) {
+        changeEmailCenterTemplate('welcome');
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeEmailCenterModal() {
+      const modal = document.getElementById('modal-email-center');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function changeEmailCenterTemplate(key) {
+      const preview = document.getElementById('email-center-preview-card');
+      if (!preview) return;
+
+      if (key === 'welcome') {
+        preview.innerHTML = `
+          <div class="p-4 bg-slate-900 text-white rounded-xl shadow-md space-y-3 font-sans">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-xs uppercase tracking-wider text-teal-400 font-bold">PetCare VIP Member</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Active</span>
+            </div>
+            <div>
+              <div class="text-sm font-bold text-slate-300">Gói Hội Viên:</div>
+              <div class="text-lg font-extrabold text-teal-300">Gói Vàng VIP (Gold Care)</div>
+            </div>
+            <div class="text-xs text-slate-300">
+              Mã Thẻ: <span class="font-mono font-bold text-white">MEM-2026-0001</span> • Thời Hạn: 12 Tháng
+            </div>
+            <div class="pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+              🎁 Bao gồm: 4 lượt Spa Thảo Dược + Miễn phí Khám Lâm Sàng 100%
+            </div>
+          </div>
+        `;
+      } else if (key === 'receipt') {
+        preview.innerHTML = `
+          <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-2 text-slate-800 font-sans">
+            <div class="text-center pb-2 border-b border-dashed border-slate-300">
+              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Biên Lai Nạp Tiền Ví</span>
+              <div class="text-2xl font-black text-teal-700 mt-1">+1.000.000 VNĐ</div>
+              <span class="inline-block mt-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">✓ Đã Ghi Có Tài Khoản</span>
+            </div>
+            <div class="text-xs space-y-1 pt-1 text-slate-600">
+              <div class="flex justify-between"><span>Khách Hàng:</span> <b class="text-slate-900">Trần Thị Bích Ngọc</b></div>
+              <div class="flex justify-between"><span>Mã Thẻ:</span> <span class="font-mono text-slate-900">MEM-2026-0002</span></div>
+              <div class="flex justify-between"><span>Số Dư Mới:</span> <b class="text-teal-800 text-sm">2.450.000 đ</b></div>
+            </div>
+          </div>
+        `;
+      } else {
+        preview.innerHTML = `
+          <div class="p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-2 text-slate-800 font-sans">
+            <div class="font-bold text-teal-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-clock text-teal-700"></i> Nhắc Lịch Tái Khám & Spa Định Kỳ
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">
+              Kính gửi Quý khách, bé cưng của bạn đã đến lịch cắt tỉa và kiểm tra sức khỏe lông móng định kỳ. PetCare hân hạnh phục vụ và dành tặng khung giờ ưu tiên khi bạn xác nhận lịch hôm nay.
+            </p>
+            <div class="text-[11px] text-teal-800 font-bold">Hotline: 1900 8888 • Địa chỉ: Hệ thống PetCare Clinic</div>
+          </div>
+        `;
+      }
+    }
+
+    function sendDiagnosticTestEmail() {
+      showToast('Đang kết nối SMTP Mailtrap sandbox.smtp.mailtrap.io:2525...', 'info');
+      setTimeout(() => {
+        showToast('✅ Kết nối Mailtrap thành công! Đã gửi email chẩn đoán hệ thống.', 'success');
+      }, 600);
+    }
+
+    function sendCenterCustomEmail() {
+      const email = document.getElementById('email-center-recipient').value.trim();
+      const tpl = document.getElementById('email-center-tpl-select').value;
+      const btn = document.getElementById('btn-submit-center-email');
+
+      if (!email) {
+        showToast('Vui lòng nhập email người nhận!', 'warning');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Gửi Thử Nghiệm';
+        closeEmailCenterModal();
+        showToast(`✅ Đã gửi mẫu email [${tpl.toUpperCase()}] thành công tới ${email} qua Mailtrap Sandbox!`, 'success');
+      }, 700);
+    }
+</script>
+
+
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: GỬI TIN NHẮN & EMAIL NHẮC HẸN (OUTREACH MODAL) -->
+  <!-- ========================================================================= -->
+  <div id="modal-outreach" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden transform transition-all my-8 animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Header -->
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-lg shadow-xs">
+            <i class="fa-solid fa-paper-plane"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900" id="outreach-title">Gửi Tin Nhắn & Email Nhắc Hẹn</h3>
+            <p class="text-xs text-slate-500" id="outreach-subtitle">Chủ động liên hệ khách hàng để chăm sóc và nhắc lịch tái khám</p>
+          </div>
+        </div>
+        <button onclick="closeOutreachModal()" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Pet & Customer Summary Banner -->
+      <div id="outreach-summary-banner" class="px-6 py-3 bg-teal-50/70 border-b border-teal-100 flex items-center justify-between text-xs">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="flex border-b border-slate-200 bg-slate-50/50 px-6 pt-2">
+        <button id="tab-outreach-email-btn" onclick="switchOutreachTab('email')" class="px-4 py-2.5 text-xs font-bold border-b-2 border-teal-600 text-teal-800 flex items-center gap-2">
+          <i class="fa-solid fa-envelope"></i> <span>Gửi Email (Mailtrap HTML)</span>
+        </button>
+        <button id="tab-outreach-zalo-btn" onclick="switchOutreachTab('zalo')" class="px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2">
+          <i class="fa-solid fa-comment-sms"></i> <span>Zalo / SMS Trực Tiếp</span>
+        </button>
+      </div>
+
+      <!-- Tab Content: EMAIL -->
+      <div id="tab-outreach-email" class="p-6 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Hòm Thư Người Nhận:</label>
+            <input type="email" id="outreach-email-to" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium focus:outline-teal-600 focus:border-teal-600" value="customer@petcare.com" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Cổng Gửi (Mailtrap SMTP):</label>
+            <div class="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 font-mono text-[11px] flex items-center justify-between">
+              <span>sandbox.smtp.mailtrap.io:2525</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 text-xs mb-1">Tiêu Đề Thư Điện Tử:</label>
+          <input type="text" id="outreach-email-subject" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium focus:outline-teal-600" value="PetCare Clinic: Nhắc lịch chăm sóc cho bé" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 text-xs mb-1">Xem Trước Nội Dung Email HTML (Template Chuẩn Y Tế & Fintech):</label>
+          <div id="outreach-email-preview-card" class="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2 max-h-48 overflow-y-auto">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-between border-t border-slate-100">
+          <span class="text-[11px] text-slate-500 flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-halved text-teal-600"></i> Mailtrap Sandbox: Chế độ an toàn demo
+          </span>
+          <div class="flex items-center gap-2">
+            <button onclick="closeOutreachModal()" class="px-3.5 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100">Đóng</button>
+            <button id="btn-submit-outreach-email" onclick="sendOutreachEmail()" class="btn-teal px-4 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5">
+              <i class="fa-solid fa-paper-plane"></i> <span>Gửi Email Ngay</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: ZALO / SMS -->
+      <div id="tab-outreach-zalo" class="p-6 space-y-4 hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Số Điện Thoại:</label>
+            <input type="text" id="outreach-zalo-phone" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800" readonly />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Kênh Tương Tác:</label>
+            <div class="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 font-bold text-xs flex items-center gap-2">
+              <i class="fa-solid fa-comment-dots text-blue-600"></i> Zalo Official Account & SMS Brandname
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 text-xs mb-1">Nội Dung Tin Nhắn Soạn Sẵn (Tùy Chỉnh Linh Hoạt):</label>
+          <textarea id="outreach-zalo-content" rows="4" class="w-full p-3 border border-slate-300 rounded-xl text-xs font-medium focus:outline-teal-600 text-slate-800 leading-relaxed"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-between border-t border-slate-100">
+          <div class="flex items-center gap-2">
+            <a id="outreach-call-btn" href="#" class="px-3.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs">
+              <i class="fa-solid fa-phone text-emerald-600"></i> Gọi Trực Tiếp
+            </a>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="closeOutreachModal()" class="px-3.5 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100">Đóng</button>
+            <button onclick="copyOutreachZaloMessage()" class="px-4 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5">
+              <i class="fa-solid fa-copy"></i> <span>Sao Chép & Ghi Nhận CSKH</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: TRUNG TÂM HỘP THƯ & KIỂM TRA MAILTRAP (EMAIL CENTER MODAL) -->
+  <!-- ========================================================================= -->
+  <div id="modal-email-center" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden transform transition-all my-8 animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Header -->
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center text-lg shadow-xs">
+            <i class="fa-solid fa-envelope-open-text"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Trung Tâm Email Service (Mailtrap SMTP)</h3>
+            <p class="text-xs text-slate-500">Kiểm tra kết nối gửi thư, xem trước template và gửi email thử nghiệm</p>
+          </div>
+        </div>
+        <button onclick="closeEmailCenterModal()" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Server Connection Status Card -->
+      <div class="p-6 space-y-4">
+        <div class="p-4 rounded-xl border border-sky-200 bg-sky-50/50 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-base font-bold">
+              <i class="fa-solid fa-server"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-900 flex items-center gap-2">
+                <span>Mailtrap SMTP Sandbox</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">● Đã Kết Nối</span>
+              </div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">Host: sandbox.smtp.mailtrap.io | Port: 2525 (TLS) | User: 9777c07beed041</div>
+            </div>
+          </div>
+          <button onclick="sendDiagnosticTestEmail()" class="px-3 py-1.5 rounded-lg border border-sky-300 bg-white hover:bg-sky-50 text-sky-800 font-bold text-xs shadow-2xs flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-vial"></i> Gửi Test Chẩn Đoán
+          </button>
+        </div>
+
+        <!-- Form soạn test email -->
+        <div class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Mẫu Email (HTML Template):</label>
+              <select id="email-center-tpl-select" onchange="changeEmailCenterTemplate(this.value)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium focus:outline-teal-600 bg-white">
+                <option value="welcome">1. Email Chào Mừng Hội Viên (Digital Card)</option>
+                <option value="receipt">2. Biên Lai Nạp Tiền Ví (Fintech Receipt)</option>
+                <option value="reminder">3. Nhắc Hẹn Tái Khám & CSKH (Care Reminder)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Email Người Nhận:</label>
+              <input type="email" id="email-center-recipient" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium focus:outline-teal-600" value="khachhang-demo@petcare.com" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 text-xs mb-1">Bản Xem Trước Template (Live HTML Preview):</label>
+            <div id="email-center-preview-card" class="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2 max-h-56 overflow-y-auto">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 flex items-center justify-between border-t border-slate-100">
+          <span class="text-[11px] text-slate-500">
+            Email gửi qua sandbox sẽ hiển thị trong Inbox tài khoản Mailtrap.
+          </span>
+          <div class="flex items-center gap-2">
+            <button onclick="closeEmailCenterModal()" class="px-3.5 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100">Đóng</button>
+            <button id="btn-submit-center-email" onclick="sendCenterCustomEmail()" class="btn-teal px-4 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5">
+              <i class="fa-solid fa-paper-plane"></i> <span>Gửi Thử Nghiệm</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

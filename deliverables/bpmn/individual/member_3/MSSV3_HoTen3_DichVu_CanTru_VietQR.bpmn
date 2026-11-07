@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Mem3_Service" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0">
+  <bpmn:collaboration id="Collab_Mem3">
+    <bpmn:participant id="Participant_Mem3" name="Quy trình Mở Phiếu Dịch Vụ, Cấn Trừ Quyền Lợi &amp; Quyết Toán VietQR (FLOW-05)" processRef="Process_Mem3_ServiceVisit"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Mem3_ServiceVisit" name="Quy trình Mở Phiếu Dịch Vụ, Cấn Trừ Quyền Lợi &amp; Quyết Toán VietQR" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_Mem3">
+      <bpmn:lane id="Lane_Mem3_LT" name="Lễ tân &amp; Thu ngân (PetCare Receptionist)">
+        <bpmn:flowNodeRef>Start_ThuCungToiCoSo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_LT_MoPhieu</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_LT_XacNhanHoanThanh</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_FinalPrice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_LT_TrinhMaQR</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem3_KT" name="Kỹ thuật viên Spa &amp; Bác sĩ (Specialist)">
+        <bpmn:flowNodeRef>Task_KT_KiemTraCanNang</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_KT_ThucHienDichVu</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem3_CRM" name="Động cơ Tính giá &amp; Khóa dòng (Pricing &amp; Lock Engine)">
+        <bpmn:flowNodeRef>Task_CRM_RowLockQuery</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_QuyenLoi</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_SetFree</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_SetDiscount</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_SetRetail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_DeductBenefitZero</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_VisitZero</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_GenerateVietQR</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_VerifyIPN</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CRM_UpdatePaid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_VisitSuccess</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem3_GW" name="Cổng Thanh toán VietQR &amp; Ngân hàng">
+        <bpmn:flowNodeRef>Task_GW_NhanThanhToan</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_ThuCungToiCoSo" name="Thú cưng tới cơ sở làm dịch vụ"/>
+    <bpmn:userTask id="Task_LT_MoPhieu" name="Mở phiếu Service Visit (Chọn Customer, Pet, Service)"/>
+    <bpmn:userTask id="Task_KT_KiemTraCanNang" name="Kiểm tra thể trạng &amp; cập nhật cân nặng Pet (kg)"/>
+    <bpmn:serviceTask id="Task_CRM_RowLockQuery" name="Truy vấn Thẻ Active &amp; Khóa hàng Pessimistic (FOR UPDATE)"/>
+    <bpmn:exclusiveGateway id="Gateway_QuyenLoi" name="Quyền lợi khả dụng?"/>
+    <bpmn:serviceTask id="Task_CRM_SetFree" name="Áp dụng FREE (Final Price = 0)"/>
+    <bpmn:serviceTask id="Task_CRM_SetDiscount" name="Áp dụng chiết khấu % theo gói"/>
+    <bpmn:serviceTask id="Task_CRM_SetRetail" name="Tính giá niêm yết bán lẻ gốc"/>
+    <bpmn:userTask id="Task_KT_ThucHienDichVu" name="Tiến hành dịch vụ Grooming / Khám / Điều trị"/>
+    <bpmn:userTask id="Task_LT_XacNhanHoanThanh" name="Xác nhận hoàn thành &amp; Kiểm tra số tiền quyết toán"/>
+    <bpmn:exclusiveGateway id="Gateway_FinalPrice" name="Final Price &gt; 0?"/>
+    <bpmn:serviceTask id="Task_CRM_DeductBenefitZero" name="Trừ 1 lượt quyền lợi, ghi Ledger &amp; Hoàn tất phiếu"/>
+    <bpmn:endEvent id="End_VisitZero" name="Dịch vụ miễn phí thẻ hội viên thành công"/>
+    <bpmn:serviceTask id="Task_CRM_GenerateVietQR" name="Sinh Dynamic VietQR kèm mã GD chuẩn EMVCo"/>
+    <bpmn:userTask id="Task_LT_TrinhMaQR" name="Trình mã QR trên màn hình cho khách quét"/>
+    <bpmn:serviceTask id="Task_GW_NhanThanhToan" name="Ngân hàng khớp lệnh &amp; Phát Webhook IPN sang CRM"/>
+    <bpmn:serviceTask id="Task_CRM_VerifyIPN" name="Xác thực HMAC-SHA256 &amp; Khóa Idempotency Key"/>
+    <bpmn:serviceTask id="Task_CRM_UpdatePaid" name="Cập nhật Status 'Paid', trừ lượt thẻ &amp; sinh hóa đơn"/>
+    <bpmn:endEvent id="End_VisitSuccess" name="Hoàn tất quyết toán &amp; Bàn giao thú cưng"/>
+    <bpmn:sequenceFlow id="Flow_S1" sourceRef="Start_ThuCungToiCoSo" targetRef="Task_LT_MoPhieu"/>
+    <bpmn:sequenceFlow id="Flow_S2" sourceRef="Task_LT_MoPhieu" targetRef="Task_KT_KiemTraCanNang"/>
+    <bpmn:sequenceFlow id="Flow_S3" sourceRef="Task_KT_KiemTraCanNang" targetRef="Task_CRM_RowLockQuery"/>
+    <bpmn:sequenceFlow id="Flow_S4" sourceRef="Task_CRM_RowLockQuery" targetRef="Gateway_QuyenLoi"/>
+    <bpmn:sequenceFlow id="Flow_S5" name="Miễn phí (FREE)" sourceRef="Gateway_QuyenLoi" targetRef="Task_CRM_SetFree"/>
+    <bpmn:sequenceFlow id="Flow_S6" name="Giảm giá %" sourceRef="Gateway_QuyenLoi" targetRef="Task_CRM_SetDiscount"/>
+    <bpmn:sequenceFlow id="Flow_S7" name="Giá gốc" sourceRef="Gateway_QuyenLoi" targetRef="Task_CRM_SetRetail"/>
+    <bpmn:sequenceFlow id="Flow_S8" sourceRef="Task_CRM_SetFree" targetRef="Task_KT_ThucHienDichVu"/>
+    <bpmn:sequenceFlow id="Flow_S9" sourceRef="Task_CRM_SetDiscount" targetRef="Task_KT_ThucHienDichVu"/>
+    <bpmn:sequenceFlow id="Flow_S10" sourceRef="Task_CRM_SetRetail" targetRef="Task_KT_ThucHienDichVu"/>
+    <bpmn:sequenceFlow id="Flow_S11" sourceRef="Task_KT_ThucHienDichVu" targetRef="Task_LT_XacNhanHoanThanh"/>
+    <bpmn:sequenceFlow id="Flow_S12" sourceRef="Task_LT_XacNhanHoanThanh" targetRef="Gateway_FinalPrice"/>
+    <bpmn:sequenceFlow id="Flow_S13" name="Bằng 0 VNĐ" sourceRef="Gateway_FinalPrice" targetRef="Task_CRM_DeductBenefitZero"/>
+    <bpmn:sequenceFlow id="Flow_S14" sourceRef="Task_CRM_DeductBenefitZero" targetRef="End_VisitZero"/>
+    <bpmn:sequenceFlow id="Flow_S15" name="Lớn hơn 0 VNĐ" sourceRef="Gateway_FinalPrice" targetRef="Task_CRM_GenerateVietQR"/>
+    <bpmn:sequenceFlow id="Flow_S16" sourceRef="Task_CRM_GenerateVietQR" targetRef="Task_LT_TrinhMaQR"/>
+    <bpmn:sequenceFlow id="Flow_S17" sourceRef="Task_LT_TrinhMaQR" targetRef="Task_GW_NhanThanhToan"/>
+    <bpmn:sequenceFlow id="Flow_S18" sourceRef="Task_GW_NhanThanhToan" targetRef="Task_CRM_VerifyIPN"/>
+    <bpmn:sequenceFlow id="Flow_S19" sourceRef="Task_CRM_VerifyIPN" targetRef="Task_CRM_UpdatePaid"/>
+    <bpmn:sequenceFlow id="Flow_S20" sourceRef="Task_CRM_UpdatePaid" targetRef="End_VisitSuccess"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Mem3">
+    <bpmndi:BPMNPlane id="BPMNPlane_Mem3" bpmnElement="Collab_Mem3">
+      <bpmndi:BPMNShape id="Shape_Participant_Mem3" bpmnElement="Participant_Mem3" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1760" height="640"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem3_LT" bpmnElement="Lane_Mem3_LT" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1730" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem3_KT" bpmnElement="Lane_Mem3_KT" isHorizontal="true">
+        <dc:Bounds x="190" y="240" width="1730" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem3_CRM" bpmnElement="Lane_Mem3_CRM" isHorizontal="true">
+        <dc:Bounds x="190" y="400" width="1730" height="170"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem3_GW" bpmnElement="Lane_Mem3_GW" isHorizontal="true">
+        <dc:Bounds x="190" y="570" width="1730" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_ThuCungToiCoSo" bpmnElement="Start_ThuCungToiCoSo">
+        <dc:Bounds x="222" y="142" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_LT_MoPhieu" bpmnElement="Task_LT_MoPhieu">
+        <dc:Bounds x="290" y="120" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_KT_KiemTraCanNang" bpmnElement="Task_KT_KiemTraCanNang">
+        <dc:Bounds x="290" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_RowLockQuery" bpmnElement="Task_CRM_RowLockQuery">
+        <dc:Bounds x="450" y="445" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_QuyenLoi" bpmnElement="Gateway_QuyenLoi" isMarkerVisible="true">
+        <dc:Bounds x="625" y="460" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_SetFree" bpmnElement="Task_CRM_SetFree">
+        <dc:Bounds x="715" y="410" width="120" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_SetDiscount" bpmnElement="Task_CRM_SetDiscount">
+        <dc:Bounds x="715" y="465" width="120" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_SetRetail" bpmnElement="Task_CRM_SetRetail">
+        <dc:Bounds x="715" y="520" width="120" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_KT_ThucHienDichVu" bpmnElement="Task_KT_ThucHienDichVu">
+        <dc:Bounds x="870" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_LT_XacNhanHoanThanh" bpmnElement="Task_LT_XacNhanHoanThanh">
+        <dc:Bounds x="870" y="120" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_FinalPrice" bpmnElement="Gateway_FinalPrice" isMarkerVisible="true">
+        <dc:Bounds x="1045" y="135" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_DeductBenefitZero" bpmnElement="Task_CRM_DeductBenefitZero">
+        <dc:Bounds x="1130" y="445" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_VisitZero" bpmnElement="End_VisitZero">
+        <dc:Bounds x="1302" y="467" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_GenerateVietQR" bpmnElement="Task_CRM_GenerateVietQR">
+        <dc:Bounds x="1005" y="445" width="110" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_LT_TrinhMaQR" bpmnElement="Task_LT_TrinhMaQR">
+        <dc:Bounds x="1180" y="120" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_GW_NhanThanhToan" bpmnElement="Task_GW_NhanThanhToan">
+        <dc:Bounds x="1340" y="605" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_VerifyIPN" bpmnElement="Task_CRM_VerifyIPN">
+        <dc:Bounds x="1510" y="445" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CRM_UpdatePaid" bpmnElement="Task_CRM_UpdatePaid">
+        <dc:Bounds x="1670" y="445" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_VisitSuccess" bpmnElement="End_VisitSuccess">
+        <dc:Bounds x="1842" y="467" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_S1" bpmnElement="Flow_S1">
+        <di:waypoint x="258" y="160"/>
+        <di:waypoint x="290" y="160"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S2" bpmnElement="Flow_S2">
+        <di:waypoint x="355" y="200"/>
+        <di:waypoint x="355" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S3" bpmnElement="Flow_S3">
+        <di:waypoint x="420" y="320"/>
+        <di:waypoint x="515" y="320"/>
+        <di:waypoint x="515" y="445"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S4" bpmnElement="Flow_S4">
+        <di:waypoint x="580" y="485"/>
+        <di:waypoint x="625" y="485"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S5" bpmnElement="Flow_S5">
+        <di:waypoint x="650" y="460"/>
+        <di:waypoint x="650" y="435"/>
+        <di:waypoint x="715" y="435"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S6" bpmnElement="Flow_S6">
+        <di:waypoint x="675" y="485"/>
+        <di:waypoint x="715" y="485"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S7" bpmnElement="Flow_S7">
+        <di:waypoint x="650" y="510"/>
+        <di:waypoint x="650" y="545"/>
+        <di:waypoint x="715" y="545"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S8" bpmnElement="Flow_S8">
+        <di:waypoint x="835" y="435"/>
+        <di:waypoint x="850" y="435"/>
+        <di:waypoint x="850" y="320"/>
+        <di:waypoint x="870" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S9" bpmnElement="Flow_S9">
+        <di:waypoint x="835" y="490"/>
+        <di:waypoint x="850" y="490"/>
+        <di:waypoint x="850" y="320"/>
+        <di:waypoint x="870" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S10" bpmnElement="Flow_S10">
+        <di:waypoint x="835" y="545"/>
+        <di:waypoint x="850" y="545"/>
+        <di:waypoint x="850" y="320"/>
+        <di:waypoint x="870" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S11" bpmnElement="Flow_S11">
+        <di:waypoint x="935" y="280"/>
+        <di:waypoint x="935" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S12" bpmnElement="Flow_S12">
+        <di:waypoint x="1000" y="160"/>
+        <di:waypoint x="1045" y="160"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S13" bpmnElement="Flow_S13">
+        <di:waypoint x="1070" y="185"/>
+        <di:waypoint x="1070" y="485"/>
+        <di:waypoint x="1130" y="485"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S14" bpmnElement="Flow_S14">
+        <di:waypoint x="1260" y="485"/>
+        <di:waypoint x="1302" y="485"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S15" bpmnElement="Flow_S15">
+        <di:waypoint x="1095" y="160"/>
+        <di:waypoint x="1115" y="160"/>
+        <di:waypoint x="1115" y="445"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S16" bpmnElement="Flow_S16">
+        <di:waypoint x="1115" y="485"/>
+        <di:waypoint x="1145" y="485"/>
+        <di:waypoint x="1145" y="160"/>
+        <di:waypoint x="1180" y="160"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S17" bpmnElement="Flow_S17">
+        <di:waypoint x="1300" y="160"/>
+        <di:waypoint x="1320" y="160"/>
+        <di:waypoint x="1320" y="645"/>
+        <di:waypoint x="1340" y="645"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S18" bpmnElement="Flow_S18">
+        <di:waypoint x="1470" y="645"/>
+        <di:waypoint x="1490" y="645"/>
+        <di:waypoint x="1490" y="485"/>
+        <di:waypoint x="1510" y="485"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S19" bpmnElement="Flow_S19">
+        <di:waypoint x="1640" y="485"/>
+        <di:waypoint x="1670" y="485"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S20" bpmnElement="Flow_S20">
+        <di:waypoint x="1800" y="485"/>
+        <di:waypoint x="1842" y="485"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

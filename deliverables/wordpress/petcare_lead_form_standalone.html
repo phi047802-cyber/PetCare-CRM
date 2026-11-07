@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetCare Lead Capture Form - Standalone Embed</title>
+    <!--
+    ================================================================================
+    PETCARE CRM — STANDALONE LEAD CAPTURE FORM (NHÚNG TỰ DO / CUSTOM HTML BLOCK)
+    Dành cho việc dán trực tiếp vào:
+    1. WordPress: Gutenberg "Custom HTML Block" hoặc Classic Editor Text mode.
+    2. Landing Page tĩnh (HTML5 / Bootstrap / Tailwind).
+    
+    CẤU HÌNH AN TOÀN:
+    - Mặc định form gọi qua WordPress Proxy: /wp-json/petcare/v1/lead (Khuyên dùng để bảo vệ Secret).
+    - Nếu nhúng trên Landing Page ngoài độc lập, trỏ về Frappe Guest API:
+      http://YOUR_FRAPPE_HOST:8000/api/method/petcare_crm.api.submit_website_lead
+    ================================================================================
+    -->
+    <style>
+        :root {
+            --pc-primary: #0284C7;
+            --pc-primary-hover: #0369A1;
+            --pc-primary-light: #E0F2FE;
+            --pc-dark: #0F172A;
+            --pc-text: #334155;
+            --pc-text-muted: #64748B;
+            --pc-bg: #FFFFFF;
+            --pc-border: #CBD5E1;
+            --pc-error: #DC2626;
+            --pc-error-bg: #FEF2F2;
+            --pc-success: #16A34A;
+            --pc-success-bg: #F0FDF4;
+        }
+
+        .petcare-standalone-wrap {
+            max-width: 640px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--pc-bg);
+            border: 1px solid var(--pc-border);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--pc-text);
+            box-sizing: border-box;
+        }
+        .petcare-standalone-wrap * { box-sizing: border-box; }
+
+        .petcare-s-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: var(--pc-primary-light);
+            color: var(--pc-primary-hover);
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.6rem;
+        }
+        .petcare-s-title {
+            margin: 0 0 0.4rem 0;
+            color: var(--pc-dark);
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+        .petcare-s-subtitle {
+            margin: 0 0 1.5rem 0;
+            color: var(--pc-text-muted);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .petcare-s-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 600px) {
+            .petcare-s-grid { grid-template-columns: 1fr; }
+            .petcare-standalone-wrap { padding: 1.4rem 1rem; }
+        }
+
+        .petcare-s-group { margin-bottom: 1rem; }
+        .petcare-s-label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--pc-dark);
+        }
+        .petcare-s-req { color: var(--pc-error); font-weight: 700; }
+
+        .petcare-s-input, .petcare-s-select, .petcare-s-textarea {
+            width: 100%;
+            padding: 0.75rem 0.9rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--pc-dark);
+            border: 1.5px solid var(--pc-border);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .petcare-s-input:focus, .petcare-s-select:focus, .petcare-s-textarea:focus {
+            outline: none;
+            border-color: var(--pc-primary);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18);
+        }
+        .petcare-s-error-text {
+            color: var(--pc-error);
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .petcare-s-btn {
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            background: linear-gradient(135deg, var(--pc-primary), var(--pc-primary-hover));
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+            transition: all 0.2s;
+        }
+        .petcare-s-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #0284C7, #025A8A);
+        }
+        .petcare-s-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        .petcare-s-alert {
+            padding: 0.9rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            margin-bottom: 1.2rem;
+            display: none;
+        }
+        .petcare-s-alert-success {
+            background-color: var(--pc-success-bg);
+            color: var(--pc-success);
+            border: 1px solid #BBF7D0;
+            display: block;
+        }
+        .petcare-s-alert-error {
+            background-color: var(--pc-error-bg);
+            color: var(--pc-error);
+            border: 1px solid #FECACA;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="petcare-standalone-wrap">
+    <div style="text-align: center;">
+        <span class="petcare-s-badge">🐾 PetCare Care Intelligence</span>
+        <h3 class="petcare-s-title">ĐẶT LỊCH HẸN & TƯ VẤN CHĂM SÓC THÚ CƯNG</h3>
+        <p class="petcare-s-subtitle">Điền thông tin bên dưới để chuyên viên PetCare liên hệ xác nhận lịch hẹn và chuẩn bị tốt nhất cho bé cưng của bạn.</p>
+    </div>
+
+    <!-- Alert Box -->
+    <div id="standalone-alert" class="petcare-s-alert" role="alert" aria-live="polite"></div>
+
+    <form id="standalone-form" novalidate>
+        <!-- HONEYPOT BOT TRAP (Hidden from humans) -->
+        <div style="display:none !important;" aria-hidden="true">
+            <input type="text" id="s_hp_website" name="s_hp_website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="petcare-s-grid">
+            <div class="petcare-s-group">
+                <label for="s_lead_name" class="petcare-s-label">Họ và Tên Chủ Nuôi <span class="petcare-s-req">*</span></label>
+                <input type="text" id="s_lead_name" class="petcare-s-input" placeholder="Nguyễn Văn An" required>
+                <div class="petcare-s-error-text" id="s_err_name">Vui lòng nhập họ và tên.</div>
+            </div>
+            <div class="petcare-s-group">
+                <label for="s_phone" class="petcare-s-label">Số Điện Thoại <span class="petcare-s-req">*</span></label>
+                <input type="tel" id="s_phone" class="petcare-s-input" placeholder="0912345678" required>
+                <div class="petcare-s-error-text" id="s_err_phone">Số điện thoại không hợp lệ (10 chữ số).</div>
+            </div>
+        </div>
+
+        <div class="petcare-s-grid">
+            <div class="petcare-s-group">
+                <label for="s_email" class="petcare-s-label">Email (Tùy chọn)</label>
+                <input type="email" id="s_email" class="petcare-s-input" placeholder="email@example.com">
+            </div>
+            <div class="petcare-s-group">
+                <label for="s_service" class="petcare-s-label">Dịch Vụ Quan Tâm</label>
+                <select id="s_service" class="petcare-s-select">
+                    <option value="Tắm Spa & Cắt Tỉa Lông Toàn Diện">Tắm Spa & Cắt Tỉa Lông Toàn Diện</option>
+                    <option value="Khám Sức Khỏe & Thú Y Lâm Sàng">Khám Sức Khỏe & Thú Y Lâm Sàng</option>
+                    <option value="Tiêm Phòng Vắc-xin & Tẩy Giun">Tiêm Phòng Vắc-xin & Tẩy Giun</option>
+                    <option value="Khách Sạn & Trông Giữ Thú Cưng">Khách Sạn & Trông Giữ Thú Cưng</option>
+                    <option value="Đăng Ký Gói Thẻ Hội Viên VIP">Đăng Ký Gói Thẻ Hội Viên VIP</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="petcare-s-group">
+            <label for="s_pet_notes" class="petcare-s-label">Thông Tin Bé Cưng & Yêu Cầu Riêng</label>
+            <textarea id="s_pet_notes" class="petcare-s-textarea" rows="3" placeholder="Ví dụ: Bé Mèo Anh lông ngắn 1.5 tuổi, cần tỉa lông gọn gàng và vệ sinh tai..."></textarea>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <button type="submit" id="s_submit_btn" class="petcare-s-btn">Gửi Thông Tin Đặt Lịch Ngay</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: var(--pc-text-muted);">
+            🔒 <em>Dữ liệu được mã hóa và bảo mật theo chuẩn CRM. Không spam.</em>
+        </div>
+    </form>
+</div>
+
+<script>
+(function() {
+    // =========================================================================
+    // CẤU HÌNH ĐƯỜNG DẪN ENDPOINT TẠI ĐÂY
+    // 1. Dùng qua WordPress REST API Proxy (Khuyên dùng):
+    const ENDPOINT_URL = '/wp-json/petcare/v1/lead';
+    // 2. Hoặc trỏ trực tiếp Frappe Public API:
+    // const ENDPOINT_URL = 'http://127.0.0.1:8000/api/method/petcare_crm.api.submit_website_lead';
+    // =========================================================================
+
+    const form = document.getElementById('standalone-form');
+    const alertBox = document.getElementById('standalone-alert');
+    const btn = document.getElementById('s_submit_btn');
+
+    const nameIn = document.getElementById('s_lead_name');
+    const phoneIn = document.getElementById('s_phone');
+    const emailIn = document.getElementById('s_email');
+    const serviceIn = document.getElementById('s_service');
+    const notesIn = document.getElementById('s_pet_notes');
+    const hpIn = document.getElementById('s_hp_website');
+
+    const errName = document.getElementById('s_err_name');
+    const errPhone = document.getElementById('s_err_phone');
+
+    function showAlert(type, msg) {
+        alertBox.className = 'petcare-s-alert petcare-s-alert-' + type;
+        alertBox.textContent = msg;
+        alertBox.focus();
+    }
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+        errName.style.display = 'none';
+        errPhone.style.display = 'none';
+
+        let valid = true;
+        const nameVal = nameIn.value.trim();
+        let phoneVal = phoneIn.value.trim().replace(/[\s\-\.]/g, '');
+        if (phoneVal.startsWith('+84')) phoneVal = '0' + phoneVal.substring(3);
+
+        if (!nameVal) {
+            errName.style.display = 'block';
+            valid = false;
+        }
+
+        const phoneRegex = /^0\d{8,10}$/;
+        if (!phoneVal || !phoneRegex.test(phoneVal)) {
+            errPhone.style.display = 'block';
+            valid = false;
+        }
+
+        if (!valid) return;
+
+        const origText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Đang gửi thông tin...';
+
+        const payload = {
+            lead_name: nameVal,
+            phone: phoneVal,
+            email: emailIn.value.trim() || null,
+            service_type: serviceIn.value,
+            pet_notes: notesIn.value.trim(),
+            pet_info: 'Dịch vụ: ' + serviceIn.value + (notesIn.value ? ' | ' + notesIn.value : ''),
+            petcare_hp_website: hpIn.value.trim(),
+            hp_field: hpIn.value.trim()
+        };
+
+        try {
+            const res = await fetch(ENDPOINT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            const isOk = res.ok && (data.success || (data.message && data.message.status === 'success'));
+
+            if (isOk) {
+                form.reset();
+                const leadId = data.lead_id || (data.message && data.message.lead_id) || 'Hồ sơ mới';
+                showAlert('success', '✓ Đăng ký thành công! Mã hồ sơ: [' + leadId + ']. PetCare sẽ liên hệ sớm nhất!');
+                btn.textContent = 'Đã Gửi Thành Công';
+                setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 4000);
+            } else {
+                const msg = data.message ? (typeof data.message === 'string' ? data.message : (data.message.message || 'Lỗi xử lý dữ liệu.')) : 'Có lỗi xảy ra.';
+                showAlert('error', '⚠️ ' + msg);
+                btn.disabled = false;
+                btn.textContent = origText;
+            }
+        } catch (err) {
+            showAlert('error', '⚠️ Không thể kết nối máy chủ. Vui lòng thử lại sau.');
+            btn.disabled = false;
+            btn.textContent = origText;
+        }
+    });
+})();
+</script>
+</body>
+</html>

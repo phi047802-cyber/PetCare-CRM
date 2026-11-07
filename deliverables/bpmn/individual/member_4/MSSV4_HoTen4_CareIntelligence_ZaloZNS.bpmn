@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Mem4_Care" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0">
+  <bpmn:collaboration id="Collab_Mem4">
+    <bpmn:participant id="Participant_Mem4" name="Quy trình Động cơ Trí tuệ Giữ chân Khách hàng &amp; Chăm sóc Zalo ZNS (FLOW-07 &amp; FLOW-08)" processRef="Process_Mem4_CareIntelligence"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Mem4_CareIntelligence" name="Quy trình Động cơ Trí tuệ Giữ chân Khách hàng &amp; Chăm sóc Zalo ZNS" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_Mem4">
+      <bpmn:lane id="Lane_Mem4_Cron" name="Tiến trình Quét ngầm Định kỳ (Scheduler Daemon)">
+        <bpmn:flowNodeRef>Start_Cron23h</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Cron_ScanActivePets</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_MarkInsufficient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_SkipPet</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Stable</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_DuplicateSkip</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem4_Engine" name="Động cơ Phân tích EWMA &amp; IQR (CarePattern Engine)">
+        <bpmn:flowNodeRef>Task_Engine_FetchVisits</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_CheckCount</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_ApplyIQR</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_ComputeEWMA</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_EvaluateStatus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_StatusResult</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_ClassifyAtRisk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_ClassifyDueSoon</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_MergeClassify</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_CheckAntiDuplicate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_CheckDuplicate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Engine_CreateRecommendation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem4_CSKH" name="Chuyên viên CSKH (PetCare Care Specialist)">
+        <bpmn:flowNodeRef>Task_CSKH_GoiDienCSKH</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_PhanHoiKH</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CSKH_Dismiss</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_RetentionDismissed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CSKH_BookService</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_RetentionWon</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Mem4_Zalo" name="Cổng Tin nhắn Tự động &amp; Khách hàng (Zalo ZNS / SMS)">
+        <bpmn:flowNodeRef>Task_Zalo_SendZNS</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_Cron23h" name="Frappe Scheduler kích hoạt 23:00 hàng ngày"/>
+    <bpmn:serviceTask id="Task_Cron_ScanActivePets" name="Quét danh sách Thú cưng hoạt động (petcare_crm.tasks)"/>
+    <bpmn:serviceTask id="Task_Engine_FetchVisits" name="Truy vấn lịch sử Service Visit &amp; Tính khoảng cách ngày"/>
+    <bpmn:exclusiveGateway id="Gateway_CheckCount" name="Số lượt khám &gt;= 2?"/>
+    <bpmn:serviceTask id="Task_Engine_MarkInsufficient" name="Gán trạng thái INSUFFICIENT_DATA"/>
+    <bpmn:endEvent id="End_SkipPet" name="Bỏ qua thú cưng chưa đủ chu kỳ"/>
+    <bpmn:serviceTask id="Task_Engine_ApplyIQR" name="Lọc dị thường thống kê bằng Tukey IQR Filter (n &gt;= 4)"/>
+    <bpmn:serviceTask id="Task_Engine_ComputeEWMA" name="Tính trung bình EWMA (alpha = 0.6) dự báo ngày tái khám"/>
+    <bpmn:serviceTask id="Task_Engine_EvaluateStatus" name="So sánh days_since_last_visit với chu kỳ chuẩn"/>
+    <bpmn:exclusiveGateway id="Gateway_StatusResult" name="Đánh giá chu kỳ?"/>
+    <bpmn:endEvent id="End_Stable" name="Chu kỳ ổn định (STABLE) - Không cảnh báo"/>
+    <bpmn:serviceTask id="Task_Engine_ClassifyAtRisk" name="Gán AT_RISK (days &gt;= 1.5x chu kỳ EWMA)"/>
+    <bpmn:serviceTask id="Task_Engine_ClassifyDueSoon" name="Gán DUE_SOON (+-3 ngày quanh chu kỳ)"/>
+    <bpmn:exclusiveGateway id="Gateway_MergeClassify" name="Hợp nhất cảnh báo"/>
+    <bpmn:serviceTask id="Task_Engine_CheckAntiDuplicate" name="Kiểm tra chống spam: Có Recommendation mở &lt;= 7 ngày?"/>
+    <bpmn:exclusiveGateway id="Gateway_CheckDuplicate" name="Đã tồn tại đề xuất?"/>
+    <bpmn:endEvent id="End_DuplicateSkip" name="Bỏ qua tránh gửi trùng thông báo"/>
+    <bpmn:serviceTask id="Task_Engine_CreateRecommendation" name="Tạo Care Recommendation mới &amp; Giao ToDo cho CSKH"/>
+    <bpmn:serviceTask id="Task_Zalo_SendZNS" name="Tự động phát thông báo Zalo ZNS / SMS kèm ưu đãi"/>
+    <bpmn:userTask id="Task_CSKH_GoiDienCSKH" name="Gọi điện thăm hỏi thể trạng &amp; Nhắc lịch chăm sóc"/>
+    <bpmn:exclusiveGateway id="Gateway_PhanHoiKH" name="Phản hồi khách hàng?"/>
+    <bpmn:userTask id="Task_CSKH_Dismiss" name="Bấm 'Dismiss' &amp; Bắt buộc chọn lý do từ chối"/>
+    <bpmn:endEvent id="End_RetentionDismissed" name="Đóng đề xuất (DISMISSED)"/>
+    <bpmn:userTask id="Task_CSKH_BookService" name="Bấm 'Book Service' &amp; Tự động mở Service Visit"/>
+    <bpmn:endEvent id="End_RetentionWon" name="Giữ chân thành công (BOOKED)"/>
+    <bpmn:sequenceFlow id="Flow_C1" sourceRef="Start_Cron23h" targetRef="Task_Cron_ScanActivePets"/>
+    <bpmn:sequenceFlow id="Flow_C2" sourceRef="Task_Cron_ScanActivePets" targetRef="Task_Engine_FetchVisits"/>
+    <bpmn:sequenceFlow id="Flow_C3" sourceRef="Task_Engine_FetchVisits" targetRef="Gateway_CheckCount"/>
+    <bpmn:sequenceFlow id="Flow_C4" name="&lt; 2 lần" sourceRef="Gateway_CheckCount" targetRef="Task_Engine_MarkInsufficient"/>
+    <bpmn:sequenceFlow id="Flow_C5" sourceRef="Task_Engine_MarkInsufficient" targetRef="End_SkipPet"/>
+    <bpmn:sequenceFlow id="Flow_C6" name="&gt;= 2 lần" sourceRef="Gateway_CheckCount" targetRef="Task_Engine_ApplyIQR"/>
+    <bpmn:sequenceFlow id="Flow_C7" sourceRef="Task_Engine_ApplyIQR" targetRef="Task_Engine_ComputeEWMA"/>
+    <bpmn:sequenceFlow id="Flow_C8" sourceRef="Task_Engine_ComputeEWMA" targetRef="Task_Engine_EvaluateStatus"/>
+    <bpmn:sequenceFlow id="Flow_C9" sourceRef="Task_Engine_EvaluateStatus" targetRef="Gateway_StatusResult"/>
+    <bpmn:sequenceFlow id="Flow_C10" name="Vừa làm / Ổn định" sourceRef="Gateway_StatusResult" targetRef="End_Stable"/>
+    <bpmn:sequenceFlow id="Flow_C11" name="Quá hạn &gt;= 1.5x" sourceRef="Gateway_StatusResult" targetRef="Task_Engine_ClassifyAtRisk"/>
+    <bpmn:sequenceFlow id="Flow_C12" name="Sắp tới hạn (+-3d)" sourceRef="Gateway_StatusResult" targetRef="Task_Engine_ClassifyDueSoon"/>
+    <bpmn:sequenceFlow id="Flow_C13" sourceRef="Task_Engine_ClassifyAtRisk" targetRef="Gateway_MergeClassify"/>
+    <bpmn:sequenceFlow id="Flow_C14" sourceRef="Task_Engine_ClassifyDueSoon" targetRef="Gateway_MergeClassify"/>
+    <bpmn:sequenceFlow id="Flow_C15" sourceRef="Gateway_MergeClassify" targetRef="Task_Engine_CheckAntiDuplicate"/>
+    <bpmn:sequenceFlow id="Flow_C16" sourceRef="Task_Engine_CheckAntiDuplicate" targetRef="Gateway_CheckDuplicate"/>
+    <bpmn:sequenceFlow id="Flow_C17" name="Đã có đề xuất" sourceRef="Gateway_CheckDuplicate" targetRef="End_DuplicateSkip"/>
+    <bpmn:sequenceFlow id="Flow_C18" name="Chưa có" sourceRef="Gateway_CheckDuplicate" targetRef="Task_Engine_CreateRecommendation"/>
+    <bpmn:sequenceFlow id="Flow_C19" sourceRef="Task_Engine_CreateRecommendation" targetRef="Task_Zalo_SendZNS"/>
+    <bpmn:sequenceFlow id="Flow_C20" sourceRef="Task_Engine_CreateRecommendation" targetRef="Task_CSKH_GoiDienCSKH"/>
+    <bpmn:sequenceFlow id="Flow_C21" sourceRef="Task_CSKH_GoiDienCSKH" targetRef="Gateway_PhanHoiKH"/>
+    <bpmn:sequenceFlow id="Flow_C22" name="Khách từ chối" sourceRef="Gateway_PhanHoiKH" targetRef="Task_CSKH_Dismiss"/>
+    <bpmn:sequenceFlow id="Flow_C23" sourceRef="Task_CSKH_Dismiss" targetRef="End_RetentionDismissed"/>
+    <bpmn:sequenceFlow id="Flow_C24" name="Khách đặt lịch" sourceRef="Gateway_PhanHoiKH" targetRef="Task_CSKH_BookService"/>
+    <bpmn:sequenceFlow id="Flow_C25" sourceRef="Task_CSKH_BookService" targetRef="End_RetentionWon"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Mem4">
+    <bpmndi:BPMNPlane id="BPMNPlane_Mem4" bpmnElement="Collab_Mem4">
+      <bpmndi:BPMNShape id="Shape_Participant_Mem4" bpmnElement="Participant_Mem4" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1860" height="640"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem4_Cron" bpmnElement="Lane_Mem4_Cron" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1830" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem4_Engine" bpmnElement="Lane_Mem4_Engine" isHorizontal="true">
+        <dc:Bounds x="190" y="230" width="1830" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem4_CSKH" bpmnElement="Lane_Mem4_CSKH" isHorizontal="true">
+        <dc:Bounds x="190" y="410" width="1830" height="170"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Mem4_Zalo" bpmnElement="Lane_Mem4_Zalo" isHorizontal="true">
+        <dc:Bounds x="190" y="580" width="1830" height="140"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_Cron23h" bpmnElement="Start_Cron23h">
+        <dc:Bounds x="222" y="137" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Cron_ScanActivePets" bpmnElement="Task_Cron_ScanActivePets">
+        <dc:Bounds x="290" y="115" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_FetchVisits" bpmnElement="Task_Engine_FetchVisits">
+        <dc:Bounds x="290" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_CheckCount" bpmnElement="Gateway_CheckCount" isMarkerVisible="true">
+        <dc:Bounds x="455" y="295" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_MarkInsufficient" bpmnElement="Task_Engine_MarkInsufficient">
+        <dc:Bounds x="420" y="120" width="120" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_SkipPet" bpmnElement="End_SkipPet">
+        <dc:Bounds x="572" y="137" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_ApplyIQR" bpmnElement="Task_Engine_ApplyIQR">
+        <dc:Bounds x="540" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_ComputeEWMA" bpmnElement="Task_Engine_ComputeEWMA">
+        <dc:Bounds x="700" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_EvaluateStatus" bpmnElement="Task_Engine_EvaluateStatus">
+        <dc:Bounds x="860" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_StatusResult" bpmnElement="Gateway_StatusResult" isMarkerVisible="true">
+        <dc:Bounds x="1025" y="295" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Stable" bpmnElement="End_Stable">
+        <dc:Bounds x="1032" y="137" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_ClassifyAtRisk" bpmnElement="Task_Engine_ClassifyAtRisk">
+        <dc:Bounds x="1110" y="250" width="120" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_ClassifyDueSoon" bpmnElement="Task_Engine_ClassifyDueSoon">
+        <dc:Bounds x="1110" y="330" width="120" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_MergeClassify" bpmnElement="Gateway_MergeClassify" isMarkerVisible="true">
+        <dc:Bounds x="1265" y="295" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_CheckAntiDuplicate" bpmnElement="Task_Engine_CheckAntiDuplicate">
+        <dc:Bounds x="1345" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_CheckDuplicate" bpmnElement="Gateway_CheckDuplicate" isMarkerVisible="true">
+        <dc:Bounds x="1505" y="295" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_DuplicateSkip" bpmnElement="End_DuplicateSkip">
+        <dc:Bounds x="1512" y="137" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Engine_CreateRecommendation" bpmnElement="Task_Engine_CreateRecommendation">
+        <dc:Bounds x="1585" y="280" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Zalo_SendZNS" bpmnElement="Task_Zalo_SendZNS">
+        <dc:Bounds x="1585" y="615" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CSKH_GoiDienCSKH" bpmnElement="Task_CSKH_GoiDienCSKH">
+        <dc:Bounds x="1585" y="455" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_PhanHoiKH" bpmnElement="Gateway_PhanHoiKH" isMarkerVisible="true">
+        <dc:Bounds x="1745" y="470" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CSKH_Dismiss" bpmnElement="Task_CSKH_Dismiss">
+        <dc:Bounds x="1820" y="425" width="120" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_RetentionDismissed" bpmnElement="End_RetentionDismissed">
+        <dc:Bounds x="1962" y="437" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CSKH_BookService" bpmnElement="Task_CSKH_BookService">
+        <dc:Bounds x="1820" y="505" width="120" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_RetentionWon" bpmnElement="End_RetentionWon">
+        <dc:Bounds x="1962" y="517" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_C1" bpmnElement="Flow_C1">
+        <di:waypoint x="258" y="155"/>
+        <di:waypoint x="290" y="155"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C2" bpmnElement="Flow_C2">
+        <di:waypoint x="355" y="195"/>
+        <di:waypoint x="355" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C3" bpmnElement="Flow_C3">
+        <di:waypoint x="420" y="320"/>
+        <di:waypoint x="455" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C4" bpmnElement="Flow_C4">
+        <di:waypoint x="480" y="295"/>
+        <di:waypoint x="480" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C5" bpmnElement="Flow_C5">
+        <di:waypoint x="540" y="155"/>
+        <di:waypoint x="572" y="155"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C6" bpmnElement="Flow_C6">
+        <di:waypoint x="505" y="320"/>
+        <di:waypoint x="540" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C7" bpmnElement="Flow_C7">
+        <di:waypoint x="670" y="320"/>
+        <di:waypoint x="700" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C8" bpmnElement="Flow_C8">
+        <di:waypoint x="830" y="320"/>
+        <di:waypoint x="860" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C9" bpmnElement="Flow_C9">
+        <di:waypoint x="990" y="320"/>
+        <di:waypoint x="1025" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C10" bpmnElement="Flow_C10">
+        <di:waypoint x="1050" y="295"/>
+        <di:waypoint x="1050" y="173"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C11" bpmnElement="Flow_C11">
+        <di:waypoint x="1050" y="295"/>
+        <di:waypoint x="1050" y="280"/>
+        <di:waypoint x="1110" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C12" bpmnElement="Flow_C12">
+        <di:waypoint x="1050" y="345"/>
+        <di:waypoint x="1050" y="360"/>
+        <di:waypoint x="1110" y="360"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C13" bpmnElement="Flow_C13">
+        <di:waypoint x="1230" y="280"/>
+        <di:waypoint x="1290" y="280"/>
+        <di:waypoint x="1290" y="295"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C14" bpmnElement="Flow_C14">
+        <di:waypoint x="1230" y="360"/>
+        <di:waypoint x="1290" y="360"/>
+        <di:waypoint x="1290" y="345"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C15" bpmnElement="Flow_C15">
+        <di:waypoint x="1315" y="320"/>
+        <di:waypoint x="1345" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C16" bpmnElement="Flow_C16">
+        <di:waypoint x="1475" y="320"/>
+        <di:waypoint x="1505" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C17" bpmnElement="Flow_C17">
+        <di:waypoint x="1530" y="295"/>
+        <di:waypoint x="1530" y="173"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C18" bpmnElement="Flow_C18">
+        <di:waypoint x="1555" y="320"/>
+        <di:waypoint x="1585" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C19" bpmnElement="Flow_C19">
+        <di:waypoint x="1650" y="360"/>
+        <di:waypoint x="1650" y="615"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C20" bpmnElement="Flow_C20">
+        <di:waypoint x="1650" y="360"/>
+        <di:waypoint x="1650" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C21" bpmnElement="Flow_C21">
+        <di:waypoint x="1715" y="495"/>
+        <di:waypoint x="1745" y="495"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C22" bpmnElement="Flow_C22">
+        <di:waypoint x="1770" y="470"/>
+        <di:waypoint x="1770" y="455"/>
+        <di:waypoint x="1820" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C23" bpmnElement="Flow_C23">
+        <di:waypoint x="1940" y="455"/>
+        <di:waypoint x="1962" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C24" bpmnElement="Flow_C24">
+        <di:waypoint x="1770" y="520"/>
+        <di:waypoint x="1770" y="535"/>
+        <di:waypoint x="1820" y="535"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_C25" bpmnElement="Flow_C25">
+        <di:waypoint x="1940" y="535"/>
+        <di:waypoint x="1962" y="535"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
