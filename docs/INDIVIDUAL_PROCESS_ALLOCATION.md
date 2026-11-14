@@ -12,7 +12,7 @@
 ## 1. NGUYÊN TẮC PHÂN BỔ & ĐỐI CHIẾU TIÊU CHÍ (RUBRIC A4.3.2)
 
 1. **Tính độc lập & Không trùng lặp**: Mỗi thành viên phụ trách một mảng quy trình độc lập, không chồng chéo về phạm vi API, DocType chịu trách nhiệm chính hoặc logic nghiệp vụ cốt lõi.
-2. **Xác thực dựa trên mã nguồn thực tế**: Mọi ID quy trình (`FLOW-01`, `FLOW-02`, `FLOW-05`, `FLOW-07/08`), DocType (`PetCare Lead`, `PetCare Opportunity`, `Service Visit`, `Customer Membership`, `Care Recommendation`) và Endpoint `@frappe.whitelist()` đều có thật 100% trong `apps/petcare_crm/` và đã vượt qua bộ test 68/68 test cases.
+2. **Xác thực dựa trên mã nguồn thực tế**: Mọi ID quy trình (`FLOW-01`, `FLOW-02`, `FLOW-05`, `FLOW-07/08`), DocType (`PetCare Lead`, `PetCare Opportunity`, `Service Visit`, `Customer Membership`, `Care Recommendation`) và Endpoint `@frappe.whitelist()` đều có thật trong `apps/petcare_crm/`; bộ kiểm thử độc lập hiện đạt 106/106 test cases.
 3. **Độ sâu nghiệp vụ cá nhân (Sub-process Deep Dive)**: Quy trình cá nhân không phải là bản sao chép cắt nhỏ từ BPMN nhóm, mà mở rộng chi tiết các nhánh xử lý ngoại lệ, validation trường dữ liệu, kiểm tra tính toàn vẹn (ACID, Pessimistic Row Lock, idempotency) và tích hợp bên ngoài (VietQR, Zalo ZNS).
 4. **Chuẩn định danh & Cấu trúc lưu trữ**: 
    - Thư mục: `deliverables/bpmn/individual/member_[1-4]/`

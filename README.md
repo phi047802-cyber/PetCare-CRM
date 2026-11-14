@@ -3,7 +3,7 @@
 > **Hệ Thống Quản Lý Quan Hệ Khách Hàng Chuyên Biệt Cho Ngành Chăm Sóc Thú Cưng**  
 > **Nền tảng**: Frappe Framework v15 (Desk Native Architecture)  
 > **Phiên bản hoàn thiện**: 2.0 (Prompt 10 Final Handover Release)  
-> **Kiểm thử tự động**: **99 / 99 Tests PASS (100.0%)**
+> **Kiểm thử tự động**: **106 / 106 Tests PASS (100.0%)**
 
 ---
 
@@ -30,7 +30,7 @@ Hệ thống được thiết kế theo mô hình Clean Architecture 8 tầng, �
 * **Tầng 3 (Domain Layer)**: Business logic OOP thuần túy (`CarePatternAnalyzer`, `VisitPredictionService`, `RiskDetectionService`, `PricingEngine`).
 * **Tầng 2 (DocType Layer)**: Controllers và Schema JSON định nghĩa các thực thể và quan hệ cơ sở dữ liệu.
 * **Tầng 1 (Infrastructure Layer)**: Frappe Framework v15, MariaDB 11.x, Redis Cache & Queues.
-* **Tầng 7 & 8 (Automation & Testing)**: Tác vụ nền định kỳ và bộ kiểm thử tự động 99 test cases.
+* **Tầng 7 & 8 (Automation & Testing)**: Tác vụ nền định kỳ và bộ kiểm thử tự động 106 test cases.
 
 ---
 
@@ -45,7 +45,7 @@ python start_preview.py
 ```
 * **Cổng Khách Hàng & Thu Ngân POS**: `http://127.0.0.1:8080/`
 * **Không Gian Làm Việc Frappe Desk**: `http://127.0.0.1:8080/desk` (hoặc `/app`)
-* **Chạy 99 Bài Test Tự Động (100% PASS)**:
+* **Chạy 106 Bài Test Tự Động (100% PASS)**:
   ```bash
   python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
   ```
@@ -63,6 +63,9 @@ docker exec -it petcare-backend-1 bench --site petcare.localhost migrate
 
 # 3. Nạp dữ liệu demo thuần Việt chuẩn Prompt 10
 docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare_crm.patches.v1_0.seed_demo_data.execute
+
+# 4. Xác minh số lượng, quan hệ và trạng thái của dataset (kết quả phải PASS)
+docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare_crm.patches.v1_0.validate_demo_data.execute
 ```
 
 ### Cách 2: Khởi Chạy Native Trên Frappe Bench
@@ -70,8 +73,11 @@ docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare
 bench --site [ten_site] install-app petcare_crm
 bench --site [ten_site] migrate
 bench --site [ten_site] execute petcare_crm.patches.v1_0.seed_demo_data.execute
+bench --site [ten_site] execute petcare_crm.patches.v1_0.validate_demo_data.execute
 bench start
 ```
+
+Tài liệu dataset, kịch bản demo và checklist ảnh minh chứng nằm tại [`deliverables/demo-data/DEMO_DATASET_EVIDENCE.md`](deliverables/demo-data/DEMO_DATASET_EVIDENCE.md).
 
 * **Địa chỉ truy cập**: `http://localhost:8080` (hoặc `http://petcare.localhost:8080`)
 * **Tài khoản mặc định**: `Administrator` / `admin123`
@@ -81,7 +87,7 @@ bench start
 
 ## 🧪 Kiểm Thử Tự Động (Automated Testing)
 
-Toàn bộ 99 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
+Toàn bộ 106 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
 
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
@@ -103,8 +109,9 @@ Executing Suite 8: Advanced Extensions & Resolved Limitations ... [PASS] (10 pas
 Executing Suite 9: WordPress Lead Capture Integration ... [PASS] (6 passed)
 Executing Suite 10: Audit Remediation & System Hardening ... [PASS] (14 passed)
 Executing Suite 11: WooCommerce Order Webhook Integration ... [PASS] (11 passed)
+Executing Suite 12: Reproducible Demo Dataset Contract ... [PASS] (7 passed)
 ================================================================================
-Tổng số kịch bản kiểm thử : 99 | Thành công: 99 (100.0%)
+Tổng số kịch bản kiểm thử : 106 | Thành công: 106 (100.0%)
 ================================================================================
 ```
 

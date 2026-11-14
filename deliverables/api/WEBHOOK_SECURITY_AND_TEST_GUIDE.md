@@ -73,7 +73,7 @@ TỔNG KẾT: 4/4 KỊCH BẢN WEBHOOK ĐẠT CHUẨN AN TOÀN NGÂN HÀNG (PASS
 ## 3. DANH SÁCH ENDPOINTS ĐÃ KIỂM TRA THỰC TẾ (AUDIT TRACEABILITY)
 
 ### 3.1. Các Endpoints Đã Chạy Test Thực Tế Trên Môi Trường Test (Runtime Tested)
-Toàn bộ các endpoints cốt lõi đã chạy và vượt qua 74 test cases trong `run_all_tests.py`:
+Toàn bộ các endpoints cốt lõi đã chạy cùng bộ kiểm thử và vượt qua 106 test cases trong `run_all_tests.py`:
 1. `create_lead` (`test_lead_sales.py`, `test_crm_core_mock.py`)
 2. `submit_website_lead` (`test_wordpress_lead_integration.py`)
 3. `update_lead_status` (`test_lead_sales.py`)

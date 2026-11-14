@@ -33,7 +33,7 @@
 * **REQ-R12 (A4.10)**: Thuyết minh Các đề xuất & hiện thực hóa khác biệt mang lại giá trị thực tế cho khách hàng.
 
 ### Nhóm III: Khuyến nghị nâng chất lượng (Best Practices đồ án xuất sắc)
-* **REQ-Q01**: Bộ kiểm thử tự động toàn diện (Automated Testing) với Master Test Runner đạt tỷ lệ Pass 100% (hiện đã đạt 68/68 tests).
+* **REQ-Q01**: Bộ kiểm thử tự động toàn diện (Automated Testing) với Master Test Runner đạt tỷ lệ Pass 100% (hiện đã đạt 106/106 tests).
 * **REQ-Q02**: Thanh toán mã QR động VietQR theo chuẩn Napas247 QuickLink và Webhook đối soát IPN tự động có khóa Idempotency.
 * **REQ-Q03**: Động cơ Trí tuệ chăm sóc (Care Intelligence) có giải thích thuật toán (Explainability) kết hợp hệ số mùa vụ và độ tuổi thú cưng.
 * **REQ-Q04**: Điều phối thông báo đa kênh (Omnichannel) hỗ trợ Zalo ZNS, SMS Brandname và Email ở chế độ Safe Mode Outbox Preview an toàn.
@@ -75,8 +75,8 @@ Một hạng mục chỉ được đánh dấu là **HOÀN THÀNH (DONE)** khi t
 | **A4.9.1** | Nhóm II | Rubric 2025, Trang 1 | Thuyết minh Module Chức năng PetCare | `Module PetCare CRM - Nhóm XX.docx` + `PetCare_CRM_Code.zip` | Đọc tài liệu: Thuyết minh kiến trúc Clean Architecture, 11 DocTypes, tính năng VietQR, Zalo ZNS, Membership Ledger. | **Gap** (Code đã có, cần đóng gói) | `[Thành viên 1]` |
 | **A4.9.2** | Nhóm II | Rubric 2025, Trang 1 | Thuyết minh Module Báo cáo KPI | `Module Reporting - Nhóm XX.docx` + `Reporting_Code.zip` | Đọc tài liệu: Thuyết minh `AnalyticsService`, 8 chỉ số KPI, phân tích so sánh đa chi nhánh. | **Gap** (Code đã có, cần đóng gói) | `[Thành viên 4]` |
 | **A4.10** | Nhóm II | Rubric 2025, Trang 1 | Thuyết minh Đề xuất Khác biệt | `A4-10 - Giai phap Care Intelligence va VietQR Tu dong - Nhóm XX.docx` | Kiểm tra tài liệu: Lập luận giá trị của Care Intelligence theo mùa vụ/độ tuổi, Dynamic VietQR IPN, và Owner Portal. | **Gap Blocker** (P0) | `[Thành viên 3]` |
-| **REQ-M01** | Nhóm I | Giảng viên 2026 | CRM hoàn chỉnh đa phân hệ | Codebase `apps/petcare_crm/` | Chạy 74 tests tự động: Bao quát trọn vẹn Lead, Deal, Visit, Membership, Care Scan, WordPress Integration. | **Verified** (74/74 tests PASS) | `[Cả nhóm]` |
-| **REQ-Q01** | Nhóm III | Best Practice | Kiểm thử tự động 100% Pass | `apps/petcare_crm/petcare_crm/tests/run_all_tests.py` | Chạy lệnh `python apps/petcare_crm/petcare_crm/tests/run_all_tests.py`: 74 tests đạt kết quả OK (100% Pass). | **Verified** (100% Pass) | `[Thành viên 1]` |
+| **REQ-M01** | Nhóm I | Giảng viên 2026 | CRM hoàn chỉnh đa phân hệ | Codebase `apps/petcare_crm/` | Chạy 106 tests tự động: Bao quát Lead, Deal, Visit, Membership, Care Scan, WordPress, WooCommerce và dataset contract. | **Verified** (106/106 tests PASS) | `[Cả nhóm]` |
+| **REQ-Q01** | Nhóm III | Best Practice | Kiểm thử tự động 100% Pass | `apps/petcare_crm/petcare_crm/tests/run_all_tests.py` | Chạy lệnh `python apps/petcare_crm/petcare_crm/tests/run_all_tests.py`: 106 tests đạt kết quả OK (100% Pass). | **Verified** (100% Pass) | `[Thành viên 1]` |
 
 ---
 

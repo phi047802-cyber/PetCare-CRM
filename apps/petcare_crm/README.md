@@ -28,6 +28,9 @@ docker exec -it petcare-backend-1 bench --site petcare.localhost migrate
 
 # 3. Nạp dữ liệu demo thuần Việt (Seed Data chuẩn Prompt 10)
 docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare_crm.patches.v1_0.seed_demo_data.execute
+
+# 4. Xác minh dataset (kết quả phải có status = PASS)
+docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare_crm.patches.v1_0.validate_demo_data.execute
 ```
 
 ---
@@ -41,7 +44,7 @@ docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare
 
 ## 🧪 Kiểm Thử Tự Động (Automated Testing)
 
-Chạy toàn bộ 58 kịch bản kiểm thử (100% Pass) trực tiếp qua Master Test Runner:
+Chạy toàn bộ 106 kịch bản kiểm thử (100% Pass) trực tiếp qua Master Test Runner:
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 ```
