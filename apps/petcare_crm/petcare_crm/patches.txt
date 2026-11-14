@@ -1,1 +1,2 @@
-petcare_crm.patches.v1_0.seed_demo_data
+# Demo data is intentionally loaded manually with bench execute.
+# It must never run automatically during production migrations.
