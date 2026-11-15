@@ -9,7 +9,7 @@ Dưới đây là danh sách đầy đủ **8 tài khoản khách hàng thực t
 - **Cổng Web Portal (Khách hàng & Lễ tân)**: [http://localhost:8080/portal](http://localhost:8080/portal) (Tra cứu nhanh bằng SĐT / Tên)
 - **Cổng Quản trị Frappe Desk**: [http://localhost:8080/app](http://localhost:8080/app) (Đăng nhập bằng Email & Mật khẩu)
 - **Mật khẩu mặc định cho tất cả khách hàng**: `Customer@123`
-- **Tài khoản Quản trị viên (Admin)**: `Administrator` / `admin123`
+- **Tài khoản Quản trị viên (Admin)**: `Administrator` / mật khẩu cấu hình riêng ngoài Git.
 
 ---
 

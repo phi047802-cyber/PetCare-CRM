@@ -37,14 +37,14 @@ docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare
 
 ## 🌐 Truy Cập Hệ Thống
 * **URL**: `http://localhost:8080` (hoặc `http://petcare.localhost:8080`)
-* **Tài khoản mặc định**: `Administrator` / `admin123`
+* **Tài khoản quản trị**: `Administrator` / mật khẩu riêng đã cấu hình khi tạo site (không lưu trong Git)
 * **Workspace chính**: `http://localhost:8080/app/petcare-crm`
 
 ---
 
 ## 🧪 Kiểm Thử Tự Động (Automated Testing)
 
-Chạy toàn bộ 106 kịch bản kiểm thử (100% Pass) trực tiếp qua Master Test Runner:
+Chạy toàn bộ 123 kịch bản kiểm thử (100% Pass) trực tiếp qua Master Test Runner:
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 ```

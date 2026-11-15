@@ -2,7 +2,7 @@
 > **Thời lượng demo chuẩn**: 7 – 10 phút  
 > **Cổng Giao Diện Web Lễ Tân & Bác Sĩ (Frontend)**: [http://localhost:8080/frontend](http://localhost:8080/frontend) (hoặc [http://localhost:8080/](http://localhost:8080/))  
 > **Cổng Quản Trị Hệ Thống Frappe Desk**: [http://localhost:8080/app](http://localhost:8080/app)  
-> **Tài khoản Administrator**: `Administrator` | Mật khẩu: `admin123`
+> **Tài khoản Administrator**: `Administrator` | Mật khẩu: dùng giá trị riêng đã cấu hình ngoài Git.
 
 ---
 

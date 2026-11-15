@@ -97,7 +97,7 @@ Ran 22 tests in 1.756s — OK (100% Passed)
    ```
 2. **Địa chỉ truy cập**:
    - Giao diện thao tác Lễ tân & Tra cứu: `http://localhost:8080/frontend` (hoặc `http://localhost:8080/`)
-   - Quản trị viên Frappe Desk: `http://localhost:8080/app` (Tài khoản: `Administrator` / `admin123`)
+   - Quản trị viên Frappe Desk: `http://localhost:8080/app` (Tài khoản: `Administrator`; mật khẩu cấu hình riêng ngoài Git)
 3. **Kịch bản diễn tập thuyết trình**:
    Xem chi tiết từng bước bấm trong file `apps/petcare_crm/docs/DEMO_CHEATSHEET.md`.
 

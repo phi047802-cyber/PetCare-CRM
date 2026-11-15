@@ -3,7 +3,7 @@
 > **Dự án**: PetCare CRM (Hệ Thống CRM Dịch Vụ Chăm Sóc Thú Cưng)  
 > **Nền tảng**: Frappe Framework v15 (Desk Native)  
 > **Thời lượng khuyến nghị**: 15 – 20 phút  
-> **Tài khoản demo**: `Administrator` / `admin123`  
+> **Tài khoản demo**: `Administrator` / mật khẩu riêng do người demo quản lý, không ghi vào Git.
 
 ---
 

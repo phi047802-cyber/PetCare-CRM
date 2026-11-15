@@ -77,7 +77,7 @@ bench start
 * **Địa chỉ truy cập**: `http://localhost:8080` (hoặc `http://petcare.localhost:8080`)
 * **Tài khoản quản trị viên (System Administrator)**:
   * **Tên đăng nhập**: `Administrator`
-  * **Mật khẩu**: `admin123`
+  * **Mật khẩu**: mật khẩu riêng đã cấu hình khi tạo site; không dùng hoặc lưu mật khẩu mặc định trong Git.
 * **Workspace chính**: Chọn **PetCare CRM** trên thanh Desk Navigation hoặc truy cập:
   `http://localhost:8080/app/petcare-crm`
 
