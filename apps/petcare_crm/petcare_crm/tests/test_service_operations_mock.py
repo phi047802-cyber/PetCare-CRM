@@ -143,13 +143,13 @@ class TestServiceOperationsMock(unittest.TestCase):
         # Mock PetCare Service
         mock_srv = MockDocument(
             service_code="SRV-BATH",
-            service_name="Tắm Spa",
+            service_name="Spa",
             standard_price=250000.0
         )
 
         # Mock Benefit & Membership
         mock_benefit = MockDocument(
-            benefit_type="Tắm Spa",
+            benefit_type="Spa",
             total_quantity=5,
             used_quantity=1,
             remaining_quantity=4,
@@ -158,6 +158,7 @@ class TestServiceOperationsMock(unittest.TestCase):
         )
         mock_membership = MockDocument(
             name="MEM-2026-0001",
+            customer="CT-001",
             status="Active",
             pet=None,  # Family plan
             benefits=[mock_benefit]
@@ -183,7 +184,7 @@ class TestServiceOperationsMock(unittest.TestCase):
         self.assertEqual(receipt["original_price"], 250000.0)
         self.assertEqual(receipt["discount_amount"], 250000.0)
         self.assertEqual(receipt["final_price"], 0.0)
-        self.assertEqual(receipt["benefit_used"], "Tắm Spa")
+        self.assertEqual(receipt["benefit_used"], "Spa")
         # Đã trừ 1 lượt: used = 2
         self.assertEqual(mock_benefit.used_quantity, 2)
 

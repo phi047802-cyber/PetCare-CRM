@@ -148,10 +148,10 @@ class TestServiceOperations(unittest.TestCase):
             "doctype": "Membership Plan",
             "plan_name": f"Gói Spa Thân Thiết_{self.ts[-4:]}",
             "price": 1000000.0,
-            "validity_days": 90,
+            "duration_months": 3,
             "benefits": [
                 {
-                    "benefit_type": "Tắm Spa",
+                    "benefit_type": "Spa",
                     "total_quantity": 5,
                     "discount_type": "FREE",
                     "discount_value": 0
@@ -169,7 +169,7 @@ class TestServiceOperations(unittest.TestCase):
             "status": "Active",
             "benefits": [
                 {
-                    "benefit_type": "Tắm Spa",
+                    "benefit_type": "Spa",
                     "total_quantity": 5,
                     "used_quantity": 0,
                     "remaining_quantity": 5,

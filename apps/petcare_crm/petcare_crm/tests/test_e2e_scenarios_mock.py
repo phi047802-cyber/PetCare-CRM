@@ -378,7 +378,7 @@ class TestE2EScenariosMock(unittest.TestCase):
             service_code="SRV-VACCINE",
             service_name="Tiêm Phòng 4 Bệnh",
             standard_price=250000.0,
-            category="Medical",
+            category="Healthcare & Clinic",
             target_species="Cat"
         )
 

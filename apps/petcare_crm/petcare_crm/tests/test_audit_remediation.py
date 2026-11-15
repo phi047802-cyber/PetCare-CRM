@@ -23,6 +23,9 @@ import sys
 import os
 import json
 import glob
+import hmac
+import hashlib
+import time
 from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
@@ -85,6 +88,7 @@ from petcare_crm.utils.payment_gateway import (
     PaymentWebhookService,
     VietQRConfig,
 )
+from petcare_crm.utils import payment_gateway
 from petcare_crm.utils.analytics_service import AnalyticsService
 from petcare_crm.petcare_crm.doctype.petcare_appointment.petcare_appointment import PetCareAppointment
 from petcare_crm.petcare_crm.doctype.service_visit.service_visit import ServiceVisit
@@ -95,6 +99,11 @@ class TestAuditRemediation(unittest.TestCase):
     def setUp(self):
         frappe.session.user = "Administrator"
         frappe.get_roles = MagicMock(return_value=["System Manager", "Administrator"])
+        frappe.db = MagicMock()
+        frappe.conf = {
+            "owner_portal_secret": "owner-portal-test-secret-with-at-least-32-characters",
+            "vietqr_webhook_secret": "vietqr-webhook-test-secret-with-at-least-32-characters",
+        }
 
     # ─────────────────────────────────────────────────────────────────
     # FINDING-01: Guest Protection on Critical Endpoints
@@ -120,10 +129,9 @@ class TestAuditRemediation(unittest.TestCase):
     def test_03_finding02_webhook_signature_mandatory(self):
         """FINDING-02: Webhook đối soát ngân hàng bắt buộc kiểm tra chữ ký số."""
         secret = VietQRConfig.get_webhook_secret_key()
-        self.assertTrue(len(secret) >= 16)
+        self.assertTrue(len(secret) >= 32)
 
         # 1. Generate valid signature
-        import hmac, hashlib
         payload = "VCB_SECURE_001|500000.0|PC-SVC-SV-2026-00001"
         valid_sig = hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
 
@@ -150,6 +158,80 @@ class TestAuditRemediation(unittest.TestCase):
         self.assertEqual(res_invalid.get("status"), "error")
         self.assertEqual(res_invalid.get("error_code"), "INVALID_SIGNATURE")
 
+    def test_03b_finding02_webhook_secret_must_be_configured(self):
+        """FINDING-02: Không dùng secret mặc định hoặc secret quá ngắn."""
+        frappe.conf = {}
+        with patch.dict(os.environ, {"PETCARE_WEBHOOK_SECRET": ""}):
+            with self.assertRaises(Exception):
+                VietQRConfig.get_webhook_secret_key()
+
+    def test_03c_finding02_webhook_rejects_non_positive_amount(self):
+        """FINDING-02: Webhook không được đối soát số tiền âm hoặc bằng 0."""
+        result = PaymentWebhookService.process_webhook_notification(
+            gateway_transaction_id="VCB-INVALID-AMOUNT",
+            amount=0,
+            content="PC-MEM-MEM-2026-00001",
+            verify_sig=False,
+        )
+        self.assertEqual(result["error_code"], "INVALID_AMOUNT")
+
+    def test_03d_finding02_membership_webhook_updates_wallet_atomically(self):
+        """FINDING-02: Top-up qua webhook phải tăng số dư và lưu trước/sau."""
+        membership = MockDocument(
+            name="MEM-2026-00001", customer="CUST-001", balance=100000
+        )
+        transaction = MockDocument(name="MT-2026-00001")
+        transaction_payload = {}
+
+        def fake_get_doc(*args, **kwargs):
+            if len(args) == 1 and isinstance(args[0], dict):
+                transaction_payload.update(args[0])
+                return transaction
+            return membership
+
+        frappe.db.exists = MagicMock(return_value=True)
+        frappe.db.sql = MagicMock(return_value=[{"balance": 100000}])
+        frappe.db.set_value = MagicMock()
+        frappe.db.commit = MagicMock()
+
+        with patch.object(payment_gateway, "_is_mock_frappe", return_value=False), patch.object(
+            frappe, "get_doc", side_effect=fake_get_doc
+        ):
+            result = PaymentWebhookService._reconcile_membership(
+                "VCB-TOPUP-001", "MEM-2026-00001", None, 250000, "VIETQR"
+            )
+
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(transaction_payload["balance_before"], 100000.0)
+        self.assertEqual(transaction_payload["balance_after"], 350000.0)
+        frappe.db.set_value.assert_called_once_with(
+            "Customer Membership", "MEM-2026-00001", "balance", 350000.0
+        )
+
+    def test_03e_finding02_payment_reference_is_persistent_and_unique(self):
+        """FINDING-02: Idempotency phải tồn tại trong DB, không chỉ ở RAM/cache."""
+        with open(
+            "apps/petcare_crm/petcare_crm/petcare_crm/doctype/service_visit/service_visit.json",
+            "r",
+            encoding="utf-8",
+        ) as handle:
+            visit_meta = json.load(handle)
+        visit_fields = {field["fieldname"]: field for field in visit_meta["fields"]}
+        self.assertEqual(visit_fields["gateway_transaction_id"].get("unique"), 1)
+        self.assertIn("payment_status", visit_fields)
+        self.assertIn("paid_amount", visit_fields)
+
+        with open(
+            "apps/petcare_crm/petcare_crm/petcare_crm/doctype/membership_transaction/membership_transaction.json",
+            "r",
+            encoding="utf-8",
+        ) as handle:
+            transaction_meta = json.load(handle)
+        transaction_fields = {
+            field["fieldname"]: field for field in transaction_meta["fields"]
+        }
+        self.assertEqual(transaction_fields["reference_no"].get("unique"), 1)
+
     # ─────────────────────────────────────────────────────────────────
     # FINDING-03: Owner Portal BOLA / IDOR Token Guard
     # ─────────────────────────────────────────────────────────────────
@@ -164,6 +246,23 @@ class TestAuditRemediation(unittest.TestCase):
         with self.assertRaises(Exception):
             with patch.object(frappe.db, "__class__", type("LiveDB", (), {})):
                 api._verify_owner_portal_access("CUST-999", portal_token="INVALID_TOKEN")
+
+    def test_04b_finding03_owner_portal_token_expires(self):
+        """FINDING-03: Token portal hết hạn phải bị từ chối."""
+        expires_at = int(time.time()) - 1
+        message = f"CUST-999|{expires_at}"
+        signature = hmac.new(
+            frappe.conf["owner_portal_secret"].encode("utf-8"),
+            message.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+        self.assertFalse(api._verify_portal_token("CUST-999", f"{expires_at}.{signature}"))
+
+    def test_04c_finding03_owner_portal_secret_must_be_configured(self):
+        """FINDING-03: Token portal không được ký bằng secret hardcode."""
+        frappe.conf = {}
+        with self.assertRaises(Exception):
+            api._generate_portal_token("CUST-999")
 
     # ─────────────────────────────────────────────────────────────────
     # FINDING-04: Pet Primary Key & Autoname Non-Collision
@@ -273,6 +372,56 @@ class TestAuditRemediation(unittest.TestCase):
         appt.cancel_appointment(reason="Khách bận đột xuất")
         self.assertEqual(appt.status, "Cancelled")
         self.assertEqual(appt.cancellation_reason, "Khách bận đột xuất")
+
+    def test_10b_finding11_check_in_uses_catalog_price(self):
+        """FINDING-11: Service Visit từ lịch hẹn phải có original_price bắt buộc."""
+        appt = PetCareAppointment(
+            name="APT-2026-0002",
+            customer="CUST-001",
+            pet="PET-001",
+            service_type="Grooming",
+            service="SRV-GROOM",
+            appointment_date="2026-11-20",
+            branch="CN-TRUNGTAM",
+            status="Scheduled",
+            notes="Test giá dịch vụ",
+        )
+        appt.save = MagicMock()
+        created_payload = {}
+
+        def fake_get_doc(payload):
+            created_payload.update(payload)
+            return MockDocument(name="SV-2026-0001")
+
+        with patch.object(frappe.db, "get_value", return_value=350000), patch.object(
+            frappe, "get_doc", side_effect=fake_get_doc
+        ):
+            visit_id = appt.check_in(technician="Staff A")
+
+        self.assertEqual(visit_id, "SV-2026-0001")
+        self.assertEqual(created_payload["original_price"], 350000.0)
+        self.assertEqual(created_payload["service"], "SRV-GROOM")
+        appt.save.assert_called_once_with(ignore_permissions=True)
+
+    def test_10c_finding11_check_in_does_not_hide_insert_failure(self):
+        """FINDING-11: Lỗi tạo Service Visit phải được trả về để transaction rollback."""
+        appt = PetCareAppointment(
+            name="APT-2026-0003",
+            customer="CUST-001",
+            pet="PET-001",
+            service_type="Grooming",
+            appointment_date="2026-11-20",
+            branch="CN-TRUNGTAM",
+            status="Scheduled",
+        )
+        appt.save = MagicMock()
+        broken_visit = MockDocument(name="SV-BROKEN")
+        broken_visit.insert = MagicMock(side_effect=RuntimeError("database insert failed"))
+
+        with patch.object(frappe, "get_doc", return_value=broken_visit):
+            with self.assertRaisesRegex(RuntimeError, "database insert failed"):
+                appt.check_in()
+        appt.save.assert_not_called()
 
     # ─────────────────────────────────────────────────────────────────
     # FINDING-12: Multi-Branch Analytics

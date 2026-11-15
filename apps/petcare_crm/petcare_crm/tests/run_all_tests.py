@@ -89,6 +89,12 @@ TEST_SUITES = [
         "name": "Suite 12: Reproducible Demo Dataset Contract",
         "layer": "Data Quality & Runtime Evidence",
         "description": "Manifest, schema Select values, document links, idempotent seed policy và dữ liệu KPI demo."
+    },
+    {
+        "file": "apps/petcare_crm/petcare_crm/tests/test_runtime_readiness_contract.py",
+        "name": "Suite 13: Frappe Runtime Readiness Contract",
+        "layer": "Schema, API Security & RBAC Consistency",
+        "description": "Đối chiếu truy vấn/payload với DocType, guest allowlist, backend authorization, secret và ma trận quyền."
     }
 ]
 

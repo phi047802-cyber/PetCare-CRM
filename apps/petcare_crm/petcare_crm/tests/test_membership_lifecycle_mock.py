@@ -42,6 +42,7 @@ mock_frappe_utils = MagicMock()
 mock_frappe_utils.now_datetime.return_value = "2026-10-26 14:00:00"
 mock_frappe_utils.nowdate.return_value = "2026-10-26"
 mock_frappe_utils.getdate = lambda d: d
+mock_frappe_utils.add_months = lambda d, months: f"{str(d)[:4]}-12-31"
 
 mock_frappe.utils = mock_frappe_utils
 mock_frappe_doc = MagicMock()
@@ -110,6 +111,7 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
         )
         mock_ms = MockDocument(
             name="MEM-001",
+            customer="CT-001",
             status="Active",
             pet=None,
             benefits=[mock_benefit]
@@ -139,6 +141,7 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
 
         mock_ms = MockDocument(
             name="MEM-002",
+            customer="CT-001",
             status="Expired",
             pet=None,
             benefits=[]
@@ -169,6 +172,7 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
         )
         mock_ms = MockDocument(
             name="MEM-003",
+            customer="CT-001",
             status="Active",
             pet=None,
             benefits=[mock_benefit]
@@ -184,6 +188,32 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
                 membership_id="MEM-003"
             )
 
+    def test_03b_cross_customer_membership_is_rejected(self):
+        """Thẻ của khách hàng khác không được dùng cho Service Visit hiện tại."""
+        mock_frappe.db.get_value.return_value = "CT-001"
+        mock_frappe.get_cached_doc.return_value = MockDocument(
+            service_code="SRV-SPA", service_name="Spa", standard_price=200000.0
+        )
+        foreign_membership = MockDocument(
+            name="MEM-FOREIGN",
+            customer="CT-999",
+            status="Active",
+            pet=None,
+            benefits=[],
+        )
+        mock_frappe.get_doc.side_effect = lambda *args, **kwargs: (
+            foreign_membership
+            if args and args[0] == "Customer Membership"
+            else MockDocument(*args, **kwargs)
+        )
+
+        with self.assertRaises(ValidationError):
+            ServiceVisitService.create_service_visit(
+                pet="Bé Bơ",
+                service_identifier="SRV-SPA",
+                membership_id="MEM-FOREIGN",
+            )
+
     def test_05_spa_percentage_discount_10_percent(self):
         """Kịch bản 5: Quyền lợi giảm giá 10% cho Spa -> final_price = 90% original."""
         mock_frappe.db.get_value.return_value = "CT-001"
@@ -191,7 +221,7 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
         mock_frappe.get_cached_doc.return_value = mock_srv
 
         mock_benefit = MockDocument(
-            benefit_type="Spa Thư Giãn",
+            benefit_type="Spa",
             total_quantity=10,
             used_quantity=0,
             remaining_quantity=10,
@@ -200,6 +230,7 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
         )
         mock_ms = MockDocument(
             name="MEM-004",
+            customer="CT-001",
             status="Active",
             pet=None,
             benefits=[mock_benefit]
@@ -233,6 +264,7 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
         )
         mock_ms = MockDocument(
             name="MEM-005",
+            customer="CT-001",
             status="Active",
             pet=None,
             benefits=[mock_benefit]
@@ -345,7 +377,7 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
         new_plan = MockDocument(
             name="PLAN-NEW-10",
             plan_name="Gói 10 Buổi",
-            validity_days=180,
+            duration_months=6,
             benefits=[new_plan_benefit]
         )
 

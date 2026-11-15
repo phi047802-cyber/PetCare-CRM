@@ -194,11 +194,11 @@ class TestSecurityAndReportingMock(unittest.TestCase):
     def test_08_kpi_lead_conversion_calculation(self):
         """KPI 1: Tỷ lệ chuyển đổi Lead và phân bổ nguồn."""
         mock_leads = [
-            {"name": "L1", "status": "Converted", "source": "Facebook", "converted_contact": "CT-1"},
-            {"name": "L2", "status": "Converted", "source": "Google", "converted_contact": "CT-2"},
-            {"name": "L3", "status": "Qualified", "source": "Facebook", "converted_contact": None},
-            {"name": "L4", "status": "New", "source": "Referral", "converted_contact": None},
-            {"name": "L5", "status": "Lost", "source": "Direct", "converted_contact": None},
+            {"name": "L1", "status": "Converted", "lead_source": "Facebook", "converted_contact": "CT-1"},
+            {"name": "L2", "status": "Converted", "lead_source": "Google", "converted_contact": "CT-2"},
+            {"name": "L3", "status": "Qualified", "lead_source": "Facebook", "converted_contact": None},
+            {"name": "L4", "status": "New", "lead_source": "Referral", "converted_contact": None},
+            {"name": "L5", "status": "Lost", "lead_source": "Direct", "converted_contact": None},
         ]
 
         metrics = AnalyticsService.get_lead_conversion_metrics(leads_store=mock_leads)
