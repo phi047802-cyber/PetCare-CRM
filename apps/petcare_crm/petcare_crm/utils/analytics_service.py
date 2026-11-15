@@ -64,7 +64,7 @@ class AnalyticsService:
             leads = frappe.db.get_list(
                 "PetCare Lead",
                 filters=filters,
-                fields=["name", "status", "lead_source", "source", "converted_contact"],
+                fields=["name", "status", "lead_source", "converted_contact"],
                 ignore_permissions=True,
             )
         else:
@@ -77,7 +77,7 @@ class AnalyticsService:
 
         for l in leads:
             st = str(_get_val(l, "status") or "New")
-            src = str(_get_val(l, "lead_source") or _get_val(l, "source") or "Direct")
+            src = str(_get_val(l, "lead_source") or "Direct")
             status_counts[st] = status_counts.get(st, 0) + 1
             source_counts[src] = source_counts.get(src, 0) + 1
             if st.lower() == "converted" or _get_val(l, "converted_contact"):

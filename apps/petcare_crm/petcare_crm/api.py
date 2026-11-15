@@ -14,6 +14,7 @@ import re
 import json
 import hmac
 import hashlib
+import time
 from typing import Optional, Dict, Any, List
 
 import frappe
@@ -36,6 +37,15 @@ from petcare_crm.utils.care_pattern_service import CarePatternService
 from petcare_crm.utils.config import STATUS_ACTIVE, STATUS_EXPIRED, SERVICE_TYPES
 
 from petcare_crm.utils.models import ServiceVisit
+from petcare_crm.utils.security import (
+    ROLE_ANALYST,
+    ROLE_CRM_MANAGER,
+    ROLE_FRONT_DESK,
+    ROLE_SALES,
+    ROLE_TECHNICIAN,
+    check_role_permission,
+    require_any_role,
+)
 
 try:
 
@@ -93,7 +103,8 @@ def _check_rate_limit(action: str, max_requests: int = 120, window_sec: int = 60
 
     except Exception as e:
 
-        if isinstance(e, getattr(frappe, "TooManyRequestsError", frappe.ValidationError)):
+        rate_limit_error = getattr(frappe, "TooManyRequestsError", None)
+        if isinstance(rate_limit_error, type) and isinstance(e, rate_limit_error):
 
             raise
 
@@ -153,7 +164,7 @@ def _sanitize_string(val, max_len=140, allow_none=False) -> Optional[str]:
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def get_active_membership(customer, pet=None, check_date=None):
 
@@ -165,7 +176,7 @@ def get_active_membership(customer, pet=None, check_date=None):
 
     """
 
-    frappe.flags.ignore_permissions = True
+    check_role_permission("Customer Membership", "read", raise_exception=True)
 
     customer = _sanitize_string(customer, max_len=140)
 
@@ -225,12 +236,13 @@ def get_active_membership(customer, pet=None, check_date=None):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def get_remaining_benefit(membership_name, service_type):
 
     """T18 & H1: Lấy thông tin quyền lợi còn lại theo service_type."""
 
+    check_role_permission("Customer Membership", "read", raise_exception=True)
     membership_name = _sanitize_string(membership_name, max_len=140)
 
     service_type = _sanitize_string(service_type, max_len=100)
@@ -271,7 +283,7 @@ def get_remaining_benefit(membership_name, service_type):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def record_benefit_usage(membership_name, service_type, count=1):
 
@@ -283,9 +295,8 @@ def record_benefit_usage(membership_name, service_type, count=1):
 
     """
 
+    check_role_permission("Customer Membership", "write", raise_exception=True)
     _check_rate_limit("benefit_deduct", max_requests=40, window_sec=60)
-
-    frappe.set_user("Administrator")
 
     
 
@@ -627,7 +638,7 @@ def _compute_care_status(pet_name, service_type, visits, current_date=None):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def get_care_status(pet_name, service_type, check_date=None):
 
@@ -643,7 +654,7 @@ def get_care_status(pet_name, service_type, check_date=None):
 
     """
 
-    frappe.flags.ignore_permissions = True
+    check_role_permission("Service Visit", "read", raise_exception=True)
 
     pet_name = _sanitize_string(pet_name, max_len=140)
 
@@ -677,12 +688,13 @@ def get_care_status(pet_name, service_type, check_date=None):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def predict_next_service(pet_name, service_type, enable_seasonal_adjustment=False, enable_age_adjustment=False):
 
     """T11 & H1: Dự đoán ngày dịch vụ tiếp theo dựa trên lịch sử (hỗ trợ hệ số mùa vụ & độ tuổi)."""
 
+    check_role_permission("Service Visit", "read", raise_exception=True)
     pet_name = _sanitize_string(pet_name, max_len=140)
 
     service_type = _sanitize_string(service_type, max_len=100)
@@ -767,7 +779,7 @@ def predict_next_service(pet_name, service_type, enable_seasonal_adjustment=Fals
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def check_membership_renewal(customer, pet=None):
 
@@ -779,6 +791,7 @@ def check_membership_renewal(customer, pet=None):
 
     """
 
+    check_role_permission("Customer Membership", "read", raise_exception=True)
     from datetime import timedelta
 
     customer = _sanitize_string(customer, max_len=140)
@@ -874,7 +887,7 @@ def check_membership_renewal(customer, pet=None):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def analyze_pet_care_pattern(pet_name, service_type):
 
@@ -892,7 +905,7 @@ def analyze_pet_care_pattern(pet_name, service_type):
 
     """
 
-    frappe.flags.ignore_permissions = True
+    check_role_permission("Service Visit", "read", raise_exception=True)
 
     pet_name = _sanitize_string(pet_name, max_len=140)
 
@@ -944,13 +957,13 @@ def analyze_pet_care_pattern(pet_name, service_type):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def get_pet_recommendations(pet=None, customer=None, status=None):
 
     """Truy xuất danh sách Care Recommendation theo Pet, Customer, hoặc Status."""
 
-    frappe.flags.ignore_permissions = True
+    check_role_permission("Care Recommendation", "read", raise_exception=True)
 
     filters = {}
 
@@ -1010,12 +1023,13 @@ def get_pet_recommendations(pet=None, customer=None, status=None):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def run_care_intelligence_scan(check_date=None):
 
     """Chạy quét toàn diện Care Intelligence và Retention."""
 
+    check_role_permission("Care Recommendation", "create", raise_exception=True)
     return run_care_scan(check_date)
 
 
@@ -1033,8 +1047,6 @@ def run_care_scan(check_date=None):
     """
 
     _check_rate_limit("care_scan", max_requests=10, window_sec=60)
-
-    frappe.set_user("Administrator")
 
     from petcare_crm.utils.frappe_recommendation_engine import generate_all_recommendations
 
@@ -1056,7 +1068,7 @@ def run_care_scan(check_date=None):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def run_daily_automation(check_date=None):
 
@@ -1066,9 +1078,8 @@ def run_daily_automation(check_date=None):
 
     """
 
+    require_any_role(ROLE_CRM_MANAGER)
     _check_rate_limit("daily_auto", max_requests=10, window_sec=60)
-
-    frappe.set_user("Administrator")
 
     from petcare_crm.tasks import daily_petcare_scan
 
@@ -1078,7 +1089,7 @@ def run_daily_automation(check_date=None):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def run_hourly_workflow(check_date=None):
 
@@ -1088,9 +1099,8 @@ def run_hourly_workflow(check_date=None):
 
     """
 
+    require_any_role(ROLE_CRM_MANAGER)
     _check_rate_limit("hourly_wf", max_requests=20, window_sec=60)
-
-    frappe.set_user("Administrator")
 
     from petcare_crm.tasks import hourly_workflow_check
 
@@ -1108,7 +1118,7 @@ def run_hourly_workflow(check_date=None):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def get_portal_overview():
 
@@ -1122,7 +1132,7 @@ def get_portal_overview():
 
     """
 
-    frappe.set_user("Administrator")
+    check_role_permission("Care Recommendation", "report", raise_exception=True)
 
     today = date.today()
 
@@ -1484,7 +1494,7 @@ def get_portal_overview():
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def get_customer_portal_details(query):
 
@@ -1496,9 +1506,8 @@ def get_customer_portal_details(query):
 
     """
 
+    check_role_permission("Pet", "read", raise_exception=True)
     _check_rate_limit("portal_search", max_requests=100, window_sec=60)
-
-    frappe.set_user("Administrator")
 
     if not query:
 
@@ -1804,7 +1813,7 @@ def get_customer_portal_details(query):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def quick_record_visit(customer, pet, service_type, original_price=300000):
 
@@ -1818,9 +1827,8 @@ def quick_record_visit(customer, pet, service_type, original_price=300000):
 
     """
 
+    check_role_permission("Service Visit", "create", raise_exception=True)
     _check_rate_limit("quick_visit", max_requests=40, window_sec=60)
-
-    frappe.set_user("Administrator")
 
     customer = _sanitize_string(customer, max_len=140)
 
@@ -2036,7 +2044,7 @@ def quick_record_visit(customer, pet, service_type, original_price=300000):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def update_recommendation_status(recommendation_name, status, notes=None):
 
@@ -2048,9 +2056,8 @@ def update_recommendation_status(recommendation_name, status, notes=None):
 
     """
 
+    check_role_permission("Care Recommendation", "write", raise_exception=True)
     _check_rate_limit("rec_status", max_requests=60, window_sec=60)
-
-    frappe.set_user("Administrator")
 
     recommendation_name = _sanitize_string(recommendation_name, max_len=140)
 
@@ -2103,8 +2110,8 @@ def top_up_membership(membership_name=None, customer=None, pet=None, amount=0, p
     Sử dụng Row Lock (FOR UPDATE) để đảm bảo atomic.
     BẢO MẬT: Bắt buộc đăng nhập với vai trò hợp lệ.
     """
-    if frappe.session.user == "Guest":
-        frappe.throw(_("Vui lòng đăng nhập để nạp tiền vào ví hội viên."), frappe.PermissionError)
+    require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK)
+    check_role_permission("Membership Transaction", "create", raise_exception=True)
 
     _check_rate_limit("top_up", max_requests=30, window_sec=60)
 
@@ -2382,8 +2389,6 @@ def get_available_plans():
 
     """Lấy danh sách gói hội viên khả dụng để đăng ký."""
 
-    frappe.set_user("Administrator")
-
     plans = frappe.db.get_list(
 
         "Membership Plan",
@@ -2440,7 +2445,7 @@ def get_available_plans():
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def register_membership(customer, pet, plan_name):
 
@@ -2454,9 +2459,8 @@ def register_membership(customer, pet, plan_name):
 
     """
 
+    check_role_permission("Customer Membership", "create", raise_exception=True)
     _check_rate_limit("register_membership", max_requests=20, window_sec=60)
-
-    frappe.set_user("Administrator")
 
 
 
@@ -2726,15 +2730,14 @@ def register_membership(customer, pet, plan_name):
 
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 
 def send_test_email(recipient_email=None):
 
     """Gửi email test demo qua Mailtrap để kiểm tra cấu hình."""
 
+    require_any_role(ROLE_CRM_MANAGER)
     _check_rate_limit("test_email", max_requests=5, window_sec=60)
-
-    frappe.set_user("Administrator")
 
 
 
@@ -2793,8 +2796,7 @@ def renew_membership(membership_name=None, customer=None, pet=None, new_plan_nam
     5. Tự động đóng các đề xuất gia hạn RENEWAL.
     BẢO MẬT: Bắt buộc đăng nhập tài khoản nhân viên hoặc chủ nuôi.
     """
-    if frappe.session.user == "Guest":
-        frappe.throw(_("Vui lòng đăng nhập để thực hiện gia hạn hội viên."), frappe.PermissionError)
+    check_role_permission("Customer Membership", "write", raise_exception=True)
 
     _check_rate_limit("renew_membership", max_requests=20, window_sec=60)
 
@@ -3164,6 +3166,8 @@ def create_lead(
 
     """API ghi nhận khách hàng tiềm năng mới với validation đầy đủ."""
 
+    check_role_permission("PetCare Lead", "create", raise_exception=True)
+
     from petcare_crm.utils.lead_service import LeadManagementService
 
     try:
@@ -3251,7 +3255,8 @@ def submit_website_lead(
             "message": "Đăng ký tư vấn dịch vụ thành công! Đội ngũ PetCare sẽ liên hệ với bạn trong thời gian sớm nhất.",
         }
     except Exception as e:
-        frappe.throw(str(e))
+        logger.exception("Public website lead submission failed")
+        frappe.throw(_("Không thể ghi nhận yêu cầu lúc này. Vui lòng thử lại sau."))
 
 
 
@@ -3270,6 +3275,8 @@ def update_lead_status(
 ):
 
     """API cập nhật trạng thái Lead tuân thủ quy tắc chuyển dịch trạng thái."""
+
+    check_role_permission("PetCare Lead", "write", raise_exception=True)
 
     from petcare_crm.utils.lead_service import LeadManagementService
 
@@ -3310,6 +3317,8 @@ def add_lead_interaction(
 ):
 
     """API ghi nhận lịch sử tương tác cuộc gọi/tin nhắn với Lead."""
+
+    check_role_permission("PetCare Lead", "write", raise_exception=True)
 
     from petcare_crm.utils.lead_service import LeadManagementService
 
@@ -3356,6 +3365,8 @@ def convert_lead_to_customer(
 ):
 
     """API chuyển đổi Lead sang Contact & Pet, bảo toàn 100% lịch sử tương tác."""
+
+    check_role_permission("PetCare Lead", "write", raise_exception=True)
 
     from petcare_crm.utils.lead_service import LeadConversionCoordinator
 
@@ -3413,6 +3424,8 @@ def create_opportunity(
 
     """API tạo Cơ hội bán hàng (Opportunity) mới."""
 
+    check_role_permission("PetCare Opportunity", "create", raise_exception=True)
+
     from petcare_crm.utils.sales_pipeline_service import SalesPipelineService
 
     try:
@@ -3465,6 +3478,8 @@ def update_opportunity_stage(
 
     """API cập nhật giai đoạn cơ hội bán hàng trên Sales Pipeline."""
 
+    check_role_permission("PetCare Opportunity", "write", raise_exception=True)
+
     from petcare_crm.utils.sales_pipeline_service import SalesPipelineService
 
     try:
@@ -3497,6 +3512,8 @@ def get_pipeline_summary():
 
     """API lấy tổng quan các số liệu phễu bán hàng theo giai đoạn."""
 
+    check_role_permission("PetCare Opportunity", "report", raise_exception=True)
+
     from petcare_crm.utils.sales_pipeline_service import SalesPipelineService
 
     try:
@@ -3516,6 +3533,8 @@ def get_pipeline_summary():
 def get_customer_360(contact_id: str):
 
     """API truy xuất hồ sơ 360 độ của khách hàng."""
+
+    require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK, ROLE_SALES, ROLE_ANALYST)
 
     from petcare_crm.utils.customer_service import CustomerService
 
@@ -3550,6 +3569,8 @@ def create_crm_todo(
 ):
 
     """API tạo công việc follow-up nhắc việc (ToDo) gắn với hồ sơ CRM."""
+
+    check_role_permission("ToDo", "create", raise_exception=True)
 
     from petcare_crm.utils.customer_service import CustomerService
 
@@ -3597,6 +3618,8 @@ def add_customer_interaction(
 
     """API ghi nhận lịch sử tương tác trực tiếp trên hồ sơ Khách hàng."""
 
+    require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK, ROLE_SALES)
+
     from petcare_crm.utils.customer_service import CustomerService
 
     try:
@@ -3639,6 +3662,8 @@ def get_service_catalog(species: Optional[str] = None):
 
     """API lấy danh mục dịch vụ đang hoạt động."""
 
+    check_role_permission("PetCare Service", "read", raise_exception=True)
+
     from petcare_crm.utils.service_operations import ServiceCatalogService
 
     try:
@@ -3676,6 +3701,8 @@ def create_service_catalog_item(
 ):
 
     """API đăng ký mới một dịch vụ vào danh mục chuẩn."""
+
+    check_role_permission("PetCare Service", "create", raise_exception=True)
 
     from petcare_crm.utils.service_operations import ServiceCatalogService
 
@@ -3735,6 +3762,10 @@ def record_pet_service_visit(
 
     """API tiếp nhận thú cưng làm dịch vụ, tính giá và cấn trừ ưu đãi thẻ."""
 
+    check_role_permission("Service Visit", "create", raise_exception=True)
+    if override_discount is not None:
+        require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK)
+
     from petcare_crm.utils.service_operations import ServiceVisitService
 
     try:
@@ -3791,6 +3822,8 @@ def create_service_case(
 
     """API ghi nhận phản hồi, khiếu nại hoặc sự cố sau dịch vụ."""
 
+    check_role_permission("PetCare Case", "create", raise_exception=True)
+
     from petcare_crm.utils.service_operations import CaseManagementService
 
     try:
@@ -3838,6 +3871,8 @@ def update_case_status(
 ):
 
     """API cập nhật trạng thái xử lý phản hồi/khiếu nại."""
+
+    check_role_permission("PetCare Case", "write", raise_exception=True)
 
     from petcare_crm.utils.service_operations import CaseManagementService
 
@@ -3917,6 +3952,8 @@ def verify_customer_pet_access(customer_id, pet_id=None, membership_id=None):
 
     """
 
+    check_role_permission("Pet", "read", raise_exception=True)
+
     from petcare_crm.utils.security import validate_cross_entity_relationship
 
     valid, err_msg = validate_cross_entity_relationship(customer_id, pet_id, membership_id)
@@ -3954,6 +3991,8 @@ def get_service_visit_payment_qr(visit_id):
     Cú pháp chuyển khoản: PC-SVC-{visit_id}
 
     """
+
+    check_role_permission("Service Visit", "read", raise_exception=True)
 
     from petcare_crm.utils.payment_gateway import VietQRGenerator
 
@@ -3999,6 +4038,8 @@ def get_membership_topup_qr(membership_id, amount):
 
     """
 
+    check_role_permission("Customer Membership", "read", raise_exception=True)
+
     from petcare_crm.utils.payment_gateway import VietQRGenerator
 
     membership_id = _sanitize_string(membership_id, max_len=140)
@@ -4038,6 +4079,8 @@ def payment_webhook(gateway="VIETQR", transaction_id=None, amount=0, content="",
     """
     from petcare_crm.utils.payment_gateway import PaymentWebhookService
 
+    _check_rate_limit("payment_webhook", max_requests=120, window_sec=60)
+
     # Extract signature from HTTP request header if not passed as param
     if not signature and frappe and hasattr(frappe, "get_request_header"):
         signature = frappe.get_request_header("X-Signature") or frappe.get_request_header("X-VietQR-Signature")
@@ -4074,6 +4117,8 @@ def send_omnichannel_notification(channel, recipient, template_id, template_data
     Mặc định ở Safe Mode: ghi nhận vào nhật ký gửi để xem trước nội dung tin nhắn.
 
     """
+
+    require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK, ROLE_SALES)
 
     from petcare_crm.utils.omnichannel_service import OmnichannelDispatcher
 
@@ -4115,6 +4160,8 @@ def get_omnichannel_outbox(channel=None, recipient=None):
 
     """
 
+    require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK, ROLE_SALES)
+
     from petcare_crm.utils.omnichannel_service import OmnichannelDispatcher
 
     return {
@@ -4133,10 +4180,91 @@ def get_omnichannel_outbox(channel=None, recipient=None):
 # PET OWNER SELF-SERVICE PORTAL & MOBILE APP APIS (Limitation 2.4 / Finding-03 Fix)
 # ─────────────────────────────────────────────────────────────────────
 
-def _generate_portal_token(customer_id: str) -> str:
-    """Tạo portal token HMAC-SHA256 dành cho chủ nuôi truy cập cổng thông tin."""
-    secret = (frappe.conf.get("owner_portal_secret") if frappe and hasattr(frappe, "conf") else None) or "petcare_portal_token_secret_key_2026"
-    return hmac.new(secret.encode("utf-8"), str(customer_id).strip().encode("utf-8"), hashlib.sha256).hexdigest()
+def _get_owner_portal_secret() -> str:
+    """Return the configured portal secret; never fall back to a code secret."""
+    conf = getattr(frappe, "conf", None)
+    secret = conf.get("owner_portal_secret") if conf and hasattr(conf, "get") else None
+    secret = str(secret or "").strip()
+    if len(secret) < 32:
+        frappe.throw(
+            _("owner_portal_secret chưa được cấu hình an toàn trong site_config.json."),
+            getattr(frappe, "ValidationError", ValueError),
+        )
+    return secret
+
+
+def _generate_portal_token(customer_id: str, expires_in_seconds: int = 86400) -> str:
+    """Create an expiring HMAC-SHA256 token for one owner Contact."""
+    clean_cust = str(customer_id or "").strip()
+    if not clean_cust:
+        frappe.throw(_("Thiếu mã định danh khách hàng."), frappe.ValidationError)
+    ttl = max(60, min(int(expires_in_seconds or 86400), 7 * 86400))
+    expires_at = int(time.time()) + ttl
+    message = f"{clean_cust}|{expires_at}"
+    signature = hmac.new(
+        _get_owner_portal_secret().encode("utf-8"),
+        message.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return f"{expires_at}.{signature}"
+
+
+def _verify_portal_token(customer_id: str, portal_token: str) -> bool:
+    """Verify token format, expiry and signature without leaking comparison timing."""
+    try:
+        expires_raw, supplied_signature = str(portal_token or "").strip().split(".", 1)
+        expires_at = int(expires_raw)
+    except (TypeError, ValueError):
+        return False
+    if expires_at < int(time.time()):
+        return False
+    message = f"{str(customer_id or '').strip()}|{expires_at}"
+    expected = hmac.new(
+        _get_owner_portal_secret().encode("utf-8"),
+        message.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return hmac.compare_digest(expected, supplied_signature)
+
+
+def _parse_portal_appointment_datetime(preferred_datetime: Any) -> datetime:
+    """Parse and validate an Owner Portal appointment timestamp."""
+    clean_value = str(preferred_datetime or "").strip()
+    if not clean_value:
+        frappe.throw(_("Vui lòng chọn ngày giờ hẹn."), frappe.ValidationError)
+
+    try:
+        appointment_datetime = frappe.utils.get_datetime(clean_value)
+    except (TypeError, ValueError):
+        frappe.throw(
+            _("Ngày giờ hẹn không hợp lệ. Vui lòng dùng định dạng YYYY-MM-DD HH:MM."),
+            frappe.ValidationError,
+        )
+
+    if appointment_datetime < frappe.utils.now_datetime():
+        frappe.throw(_("Ngày giờ hẹn phải ở tương lai."), frappe.ValidationError)
+    return appointment_datetime
+
+
+def _appointment_service_type(service_name: str, category: str) -> str:
+    """Map the service catalog to the Appointment Select field values."""
+    normalized_name = str(service_name or "").strip().lower()
+    normalized_category = str(category or "").strip().lower()
+    if "nail" in normalized_name or "móng" in normalized_name:
+        return "Nail Care"
+    if "vaccin" in normalized_name or "tiêm" in normalized_name:
+        return "Vaccination"
+    if "spa" in normalized_name or "tắm" in normalized_name:
+        return "Spa"
+    if "groom" in normalized_name or "cắt tỉa" in normalized_name:
+        return "Grooming"
+    if any(keyword in normalized_name for keyword in ("health", "clinic", "check", "khám")):
+        return "General Health Check"
+    if normalized_category == "grooming & spa":
+        return "Grooming"
+    if normalized_category == "healthcare & clinic":
+        return "General Health Check"
+    return "Other"
 
 def _verify_owner_portal_access(customer_id: str, portal_token: Optional[str] = None) -> bool:
     """
@@ -4147,6 +4275,7 @@ def _verify_owner_portal_access(customer_id: str, portal_token: Optional[str] = 
     2. Nếu là Guest:
        - Bắt buộc truyền portal_token hợp lệ (HMAC-SHA256 chữ ký của customer_id).
     """
+    _check_rate_limit("owner_portal_access", max_requests=120, window_sec=60)
     clean_cust = str(customer_id or "").strip()
     if not clean_cust:
         frappe.throw(_("Thiếu mã định danh khách hàng (customer_id)."), frappe.PermissionError)
@@ -4166,10 +4295,9 @@ def _verify_owner_portal_access(customer_id: str, portal_token: Optional[str] = 
             if clean_cust == user:
                 return True
 
-    # Guest access: verify signed portal_token
+    # Guest access: verify signed, expiring portal_token
     if portal_token:
-        expected = _generate_portal_token(clean_cust)
-        if hmac.compare_digest(expected.lower(), str(portal_token).strip().lower()):
+        if _verify_portal_token(clean_cust, portal_token):
             return True
         frappe.throw(
             _("Mã token cổng thông tin không hợp lệ."),
@@ -4195,8 +4323,9 @@ def _verify_owner_portal_access(customer_id: str, portal_token: Optional[str] = 
 @frappe.whitelist()
 def generate_portal_token(customer_id: str) -> Dict[str, Any]:
     """Tạo portal token xác thực cho khách hàng để nhúng vào SMS/ZNS."""
-    if frappe.session.user == "Guest":
-        frappe.throw(_("Chỉ nhân viên đã đăng nhập mới có quyền tạo mã portal token."), frappe.PermissionError)
+    require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK, ROLE_SALES)
+    if not frappe.db.exists("Contact", str(customer_id or "").strip()):
+        frappe.throw(_("Khách hàng không tồn tại."), frappe.ValidationError)
     token = _generate_portal_token(customer_id)
     return {"success": True, "customer_id": customer_id, "portal_token": token}
 
@@ -4330,50 +4459,56 @@ def owner_portal_book_appointment(customer_id, pet_id, service_id, preferred_dat
     if not valid:
         return {"success": False, "message": err}
 
-    # Parse appointment date and time
-    pref_str = str(preferred_datetime or "")
-    appt_date = pref_str[:10] if len(pref_str) >= 10 else frappe.utils.today()
-    appt_time = pref_str[11:19] if len(pref_str) >= 19 else "09:00:00"
+    clean_service_id = _sanitize_string(service_id, max_len=140)
+    service = frappe.db.get_value(
+        "PetCare Service",
+        clean_service_id,
+        ["name", "service_name", "category", "is_active"],
+        as_dict=True,
+    )
+    if not service or not service.get("is_active"):
+        frappe.throw(_("Dịch vụ không tồn tại hoặc đã ngừng cung cấp."), frappe.ValidationError)
 
-    appointment_name = None
-    if frappe.db.exists("DocType", "PetCare Appointment"):
-        try:
-            appt_doc = frappe.get_doc({
-                "doctype": "PetCare Appointment",
-                "customer": customer_id,
-                "pet": pet_id,
-                "service_type": service_id,
-                "appointment_date": appt_date,
-                "appointment_time": appt_time,
-                "branch": branch or "CN-TRUNGTAM",
-                "status": "Scheduled",
-                "notes": notes or "Đặt hẹn từ Owner Portal",
-            })
-            appt_doc.insert(ignore_permissions=True)
-            appointment_name = appt_doc.name
-        except Exception:
-            pass
+    appointment_datetime = _parse_portal_appointment_datetime(preferred_datetime)
+    appointment_service_type = _appointment_service_type(
+        service.get("service_name"), service.get("category")
+    )
+    clean_branch = _sanitize_string(branch, max_len=40) or "CN-TRUNGTAM"
+    clean_notes = _sanitize_string(notes, max_len=1000, allow_none=True)
+
+    appt_doc = frappe.get_doc({
+        "doctype": "PetCare Appointment",
+        "customer": customer_id,
+        "pet": pet_id,
+        "service_type": appointment_service_type,
+        "service": service.get("name") or clean_service_id,
+        "appointment_date": str(appointment_datetime.date()),
+        "appointment_time": appointment_datetime.time().replace(microsecond=0).isoformat(),
+        "branch": clean_branch,
+        "status": "Scheduled",
+        "notes": clean_notes or "Đặt hẹn từ Owner Portal",
+    })
+    appt_doc.insert(ignore_permissions=True)
+    appointment_name = appt_doc.name
 
     case_doc = frappe.get_doc({
         "doctype": "PetCare Case",
-        "subject": f"Đặt lịch trực tuyến: {service_id} cho thú cưng {pet_id}",
+        "subject": f"Đặt lịch trực tuyến: {service.get('service_name')} cho thú cưng {pet_id}",
         "customer": customer_id,
         "pet": pet_id,
-        "service": service_id,
+        "case_type": "Inquiry",
         "priority": "Medium",
-        "status": "Open",
-        "source": "Owner Mobile App",
-        "description": f"Khách hàng hẹn ngày {preferred_datetime}. Ghi chú: {notes or 'Không có'}. Lịch hẹn: {appointment_name or 'N/A'}",
+        "status": "New",
+        "description": f"Khách hàng hẹn ngày {preferred_datetime}. Ghi chú: {clean_notes or 'Không có'}. Lịch hẹn: {appointment_name}",
     })
     case_doc.insert(ignore_permissions=True)
-    frappe.db.commit()
 
     return {
         "success": True,
         "message": f"Đặt lịch thành công cho thú cưng {pet_id}. Nhân viên PetCare sẽ liên hệ xác nhận sớm nhất!",
         "case_id": case_doc.name,
-        "appointment_id": appointment_name or case_doc.name,
-        "status": "Open",
+        "appointment_id": appointment_name,
+        "status": "New",
     }
 
 
@@ -4396,8 +4531,7 @@ def create_appointment(
     """
     Tạo lịch hẹn dịch vụ mới (Front Desk / Call Center / Staff).
     """
-    if frappe.session.user == "Guest":
-        frappe.throw(_("Vui lòng đăng nhập để đặt lịch hẹn."), frappe.PermissionError)
+    check_role_permission("PetCare Appointment", "create", raise_exception=True)
 
     appt = frappe.get_doc({
         "doctype": "PetCare Appointment",
@@ -4413,7 +4547,6 @@ def create_appointment(
         "status": "Scheduled",
     })
     appt.insert(ignore_permissions=True)
-    frappe.db.commit()
     return {"success": True, "appointment_id": appt.name, "status": appt.status}
 
 
@@ -4426,6 +4559,7 @@ def get_appointments(
     status: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Truy xuất danh sách lịch hẹn theo bộ lọc."""
+    check_role_permission("PetCare Appointment", "read", raise_exception=True)
     filters = {}
     if customer:
         filters["customer"] = customer
@@ -4453,24 +4587,21 @@ def get_appointments(
 @frappe.whitelist()
 def check_in_appointment(appointment_name: str, technician: Optional[str] = None) -> Dict[str, Any]:
     """Lễ tân Check-in lịch hẹn tại quầy, tự động sinh Service Visit."""
-    if frappe.session.user == "Guest":
-        frappe.throw(_("Vui lòng đăng nhập để thực hiện check-in."), frappe.PermissionError)
+    check_role_permission("PetCare Appointment", "write", raise_exception=True)
+    check_role_permission("Service Visit", "create", raise_exception=True)
 
     appt = frappe.get_doc("PetCare Appointment", appointment_name)
     visit_id = appt.check_in(technician=technician)
-    frappe.db.commit()
     return {"success": True, "appointment_id": appt.name, "status": appt.status, "service_visit": visit_id}
 
 
 @frappe.whitelist()
 def cancel_appointment(appointment_name: str, reason: Optional[str] = None) -> Dict[str, Any]:
     """Hủy lịch hẹn."""
-    if frappe.session.user == "Guest":
-        frappe.throw(_("Vui lòng đăng nhập để hủy lịch hẹn."), frappe.PermissionError)
+    check_role_permission("PetCare Appointment", "write", raise_exception=True)
 
     appt = frappe.get_doc("PetCare Appointment", appointment_name)
     appt.cancel_appointment(reason=reason)
-    frappe.db.commit()
     return {"success": True, "appointment_id": appt.name, "status": "Cancelled"}
 
 
@@ -4535,9 +4666,9 @@ def woocommerce_order_webhook(
     secret = str(
         getattr(frappe, "conf", {}).get("woocommerce_webhook_secret", "") or ""
     )
-    if not secret:
+    if len(secret) < 32:
         frappe.throw(
-            _("WooCommerce webhook secret chưa được cấu hình trên Frappe site."),
+            _("WooCommerce webhook secret chưa được cấu hình an toàn (tối thiểu 32 ký tự)."),
             getattr(frappe, "AuthenticationError", frappe.PermissionError),
         )
 

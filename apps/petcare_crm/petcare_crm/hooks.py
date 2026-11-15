@@ -21,8 +21,7 @@ fixtures = [
                 "in",
                 [
                     "PetCare Front Desk",
-                    "PetCare Veterinarian",
-                    "PetCare Groomer",
+                    "PetCare Technician",
                     "PetCare Manager",
                     "PetCare Sales",
                     "PetCare Analyst",

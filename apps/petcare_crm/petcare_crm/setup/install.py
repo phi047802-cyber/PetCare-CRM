@@ -5,8 +5,7 @@ import frappe
 
 PETCARE_ROLES = [
     {"role_name": "PetCare Front Desk", "desk_access": 1},
-    {"role_name": "PetCare Veterinarian", "desk_access": 1},
-    {"role_name": "PetCare Groomer", "desk_access": 1},
+    {"role_name": "PetCare Technician", "desk_access": 1},
     {"role_name": "PetCare Manager", "desk_access": 1},
     {"role_name": "PetCare Sales", "desk_access": 1},
     {"role_name": "PetCare Analyst", "desk_access": 1},
@@ -34,10 +33,15 @@ def setup_petcare_crm():
                 })
                 role_doc.insert(ignore_permissions=True)
             except Exception:
-                pass
+                frappe.log_error(
+                    frappe.get_traceback(),
+                    f"PetCare role setup failed: {role_name}",
+                )
+                raise
 
     if hasattr(frappe.db, "commit"):
         try:
             frappe.db.commit()
         except Exception:
-            pass
+            frappe.log_error(frappe.get_traceback(), "PetCare setup commit failed")
+            raise

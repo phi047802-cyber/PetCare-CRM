@@ -17,6 +17,10 @@
   "original_price",
   "discount_amount",
   "final_price",
+  "payment_status",
+  "gateway_transaction_id",
+  "paid_amount",
+  "paid_at",
   "status",
   "column_break_1",
   "membership",
@@ -86,6 +90,36 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Final Price (VNĐ)"
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Payment Status",
+   "options": "Unpaid\nPaid\nPartially Paid\nRefunded",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "gateway_transaction_id",
+   "fieldtype": "Data",
+   "label": "Gateway Transaction ID",
+   "read_only": 1,
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "paid_at",
+   "fieldtype": "Datetime",
+   "label": "Paid At",
+   "read_only": 1
   },
   {
    "default": "Completed",
@@ -175,6 +209,19 @@
    "print": 1,
    "email": 1,
    "share": 1
+  },
+  {
+   "role": "PetCare Front Desk",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "cancel": 0,
+   "report": 1,
+   "export": 0,
+   "print": 1,
+   "email": 1,
+   "share": 0
   },
   {
    "role": "PetCare Sales",

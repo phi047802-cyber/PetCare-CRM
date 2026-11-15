@@ -90,7 +90,8 @@
    "fieldname": "reference_no",
    "fieldtype": "Data",
    "label": "Reference No",
-   "search_index": 1
+   "search_index": 1,
+   "unique": 1
   },
   {
    "fieldname": "processed_by",
@@ -148,6 +149,18 @@
    "print": 1,
    "email": 1,
    "share": 1
+  },
+  {
+   "role": "PetCare Front Desk",
+   "read": 1,
+   "write": 0,
+   "create": 1,
+   "delete": 0,
+   "report": 0,
+   "export": 0,
+   "print": 1,
+   "email": 1,
+   "share": 0
   },
   {
    "role": "PetCare Sales",

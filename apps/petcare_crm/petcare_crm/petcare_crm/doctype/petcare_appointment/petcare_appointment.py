@@ -51,24 +51,30 @@ class PetCareAppointment(Document):
         # Tu dong tao phieu Service Visit neu chua co
         visit_name = getattr(self, "linked_service_visit", None)
         if not visit_name and hasattr(frappe, "get_doc"):
-            try:
-                visit_doc = frappe.get_doc({
-                    "doctype": "Service Visit",
-                    "customer": self.customer,
-                    "pet": self.pet,
-                    "service_type": self.service_type or "General",
-                    "service": self.service,
-                    "visit_date": self.appointment_date,
-                    "branch": self.branch or "CN-TRUNGTAM",
-                    "technician": self.assigned_staff or technician,
-                    "status": "In Progress",
-                    "notes": f"Khởi tạo từ lịch hẹn {self.name}. {self.notes or ''}",
-                })
-                visit_doc.insert(ignore_permissions=True)
-                self.linked_service_visit = visit_doc.name
-                visit_name = visit_doc.name
-            except Exception:
-                pass
+            service_id = getattr(self, "service", None)
+            original_price = 0.0
+            if service_id:
+                service_price = frappe.db.get_value(
+                    "PetCare Service", service_id, "standard_price"
+                )
+                original_price = float(service_price or 0.0)
+
+            visit_doc = frappe.get_doc({
+                "doctype": "Service Visit",
+                "customer": self.customer,
+                "pet": self.pet,
+                "service_type": getattr(self, "service_type", None) or "Other",
+                "service": service_id,
+                "visit_date": self.appointment_date,
+                "branch": getattr(self, "branch", None) or "CN-TRUNGTAM",
+                "original_price": original_price,
+                "technician": getattr(self, "assigned_staff", None) or technician,
+                "status": "In Progress",
+                "notes": f"Khởi tạo từ lịch hẹn {self.name}. {getattr(self, 'notes', '') or ''}",
+            })
+            visit_doc.insert(ignore_permissions=True)
+            self.linked_service_visit = visit_doc.name
+            visit_name = visit_doc.name
 
         self.save(ignore_permissions=True)
         return visit_name

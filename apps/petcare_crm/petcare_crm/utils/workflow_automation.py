@@ -214,7 +214,7 @@ class LeadFollowupAutomation:
         leads = frappe.db.get_list(
             "PetCare Lead",
             filters={"status": "New"},
-            fields=["name", "lead_name", "phone", "email", "lead_owner", "creation", "lead_source", "source"],
+            fields=["name", "lead_name", "phone", "email", "lead_owner", "creation", "lead_source"],
             ignore_permissions=True,
         )
 
@@ -247,7 +247,7 @@ class LeadFollowupAutomation:
                     phone_display = lead.get("phone") or "Chưa có SĐT"
 
                     desc = (
-                        f"Follow-up Lead mới: '{lead_display}' (SĐT: {phone_display}, Nguồn: {lead.get('lead_source') or lead.get('source') or 'Trực tiếp'}). "
+                        f"Follow-up Lead mới: '{lead_display}' (SĐT: {phone_display}, Nguồn: {lead.get('lead_source') or 'Trực tiếp'}). "
                         f"Đã mở {int(hours_elapsed)}h chưa liên hệ. Hạn xử lý: Trong ngày."
                     )
 
@@ -472,7 +472,7 @@ class CareEngineAutomation:
 
         from petcare_crm.utils.frappe_recommendation_engine import generate_and_save_recommendation
 
-        all_pets = frappe.db.get_list("Pet", fields=["name", "customer", "owner"], ignore_permissions=True)
+        all_pets = frappe.db.get_list("Pet", fields=["name", "customer"], ignore_permissions=True)
         due_soon_created = 0
         at_risk_created = 0
         recs_updated = 0
@@ -495,7 +495,7 @@ class CareEngineAutomation:
             active_recs_cache = {}
 
         for pet in all_pets:
-            cust = pet.get("customer") or pet.get("owner")
+            cust = pet.get("customer")
             if not cust:
                 continue
 

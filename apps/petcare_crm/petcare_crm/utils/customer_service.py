@@ -128,7 +128,17 @@ class CustomerService:
             recommendations = frappe.get_all(
                 "Care Recommendation",
                 filters={"customer": contact_id},
-                fields=["name", "pet", "service_type", "pattern_status", "average_interval_days", "status", "due_date"],
+                fields=[
+                    "name",
+                    "pet",
+                    "service_type",
+                    "recommendation_type",
+                    "recommendation_date",
+                    "priority",
+                    "status",
+                    "reason",
+                    "suggested_action",
+                ],
                 order_by="creation desc"
             )
 

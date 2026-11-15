@@ -21,16 +21,20 @@ from petcare_crm.utils.exceptions import ValidationError
 # System Role Definitions
 ROLE_SYSTEM_MANAGER = "System Manager"
 ROLE_CRM_MANAGER = "PetCare Manager"
+ROLE_FRONT_DESK = "PetCare Front Desk"
 ROLE_SALES = "PetCare Sales"
 ROLE_TECHNICIAN = "PetCare Technician"
 ROLE_ANALYST = "PetCare Analyst"
+ROLE_CUSTOMER_PORTAL = "PetCare Customer Portal"
 
 ALL_PETCARE_ROLES = {
     ROLE_SYSTEM_MANAGER,
     ROLE_CRM_MANAGER,
+    ROLE_FRONT_DESK,
     ROLE_SALES,
     ROLE_TECHNICIAN,
     ROLE_ANALYST,
+    ROLE_CUSTOMER_PORTAL,
 }
 
 # Role Hierarchy / Capability Matrix
@@ -47,6 +51,8 @@ ROLE_PERMISSIONS: Dict[str, Dict[str, Set[str]]] = {
         "Benefit Redemption Ledger": {"read", "create", "write", "delete", "cancel", "report", "export"},
         "Membership Transaction": {"read", "create", "write", "delete", "report", "export"},
         "Care Recommendation": {"read", "create", "write", "delete", "report", "export"},
+        "PetCare Appointment": {"read", "create", "write", "delete", "report", "export"},
+        "WooCommerce Order Sync": {"read", "create", "write", "delete", "report", "export"},
         "ToDo": {"read", "create", "write", "delete", "report", "export"},
     },
     ROLE_CRM_MANAGER: {
@@ -58,37 +64,57 @@ ROLE_PERMISSIONS: Dict[str, Dict[str, Set[str]]] = {
         "PetCare Case": {"read", "create", "write", "report", "export"},
         "Membership Plan": {"read", "create", "write", "report", "export"},
         "Customer Membership": {"read", "create", "write", "cancel", "report", "export"},
-        "Benefit Redemption Ledger": {"read", "report", "export"},
-        "Membership Transaction": {"read", "create", "report", "export"},
+        "Benefit Redemption Ledger": {"read", "cancel", "report", "export"},
+        "Membership Transaction": {"read", "create", "write", "report", "export"},
         "Care Recommendation": {"read", "create", "write", "delete", "report", "export"},
+        "PetCare Appointment": {"read", "create", "write", "report", "export"},
+        "WooCommerce Order Sync": {"read", "report", "export"},
         "ToDo": {"read", "create", "write", "delete", "report", "export"},
+    },
+    ROLE_FRONT_DESK: {
+        "PetCare Lead": {"read", "create", "write"},
+        "PetCare Opportunity": {"read", "create", "write"},
+        "Pet": {"read", "create", "write"},
+        "PetCare Service": {"read", "report"},
+        "Service Visit": {"read", "create", "write", "report"},
+        "PetCare Case": {"read", "create", "write", "report"},
+        "Membership Plan": {"read", "report"},
+        "Customer Membership": {"read", "create", "write"},
+        "Benefit Redemption Ledger": {"read"},
+        "Membership Transaction": {"read", "create"},
+        "Care Recommendation": {"read", "write"},
+        "PetCare Appointment": {"read", "create", "write", "report"},
+        "ToDo": {"read", "create", "write"},
     },
     ROLE_SALES: {
         "PetCare Lead": {"read", "create", "write", "report"},
         "PetCare Opportunity": {"read", "create", "write", "report"},
         "Pet": {"read", "create", "write", "report"},
-        "PetCare Service": {"read"},
+        "PetCare Service": {"read", "report"},
         "Service Visit": {"read", "create", "report"},
-        "PetCare Case": {"read", "create", "write"},
-        "Membership Plan": {"read"},
+        "PetCare Case": {"read", "create", "write", "report"},
+        "Membership Plan": {"read", "report"},
         "Customer Membership": {"read", "create", "report"},
-        "Benefit Redemption Ledger": {"read"},
-        "Membership Transaction": {"read"},
-        "Care Recommendation": {"read", "write"},
+        "Benefit Redemption Ledger": {"read", "report"},
+        "Membership Transaction": {"read", "create", "report"},
+        "Care Recommendation": {"read", "write", "report"},
+        "PetCare Appointment": {"read", "create", "write", "report"},
+        "WooCommerce Order Sync": {"read", "report"},
         "ToDo": {"read", "create", "write"},
     },
     ROLE_TECHNICIAN: {
         "PetCare Lead": set(),
         "PetCare Opportunity": set(),
-        "Pet": {"read", "write"},
+        "Pet": {"read", "write", "report"},
         "PetCare Service": {"read"},
-        "Service Visit": {"read", "create", "write"},
+        "Service Visit": {"read", "create", "write", "report"},
         "PetCare Case": {"read", "write"},
         "Membership Plan": {"read"},
         "Customer Membership": {"read"},
         "Benefit Redemption Ledger": {"read"},
         "Membership Transaction": set(),
         "Care Recommendation": {"read"},
+        "PetCare Appointment": set(),
         "ToDo": {"read", "write"},
     },
     ROLE_ANALYST: {
@@ -103,7 +129,17 @@ ROLE_PERMISSIONS: Dict[str, Dict[str, Set[str]]] = {
         "Benefit Redemption Ledger": {"read", "report", "export"},
         "Membership Transaction": {"read", "report", "export"},
         "Care Recommendation": {"read", "report", "export"},
+        "PetCare Appointment": {"read", "report", "export"},
+        "WooCommerce Order Sync": {"read", "report", "export"},
         "ToDo": {"read", "report"},
+    },
+    ROLE_CUSTOMER_PORTAL: {
+        "Pet": {"read"},
+        "PetCare Service": {"read"},
+        "PetCare Appointment": {"read", "create"},
+        "Service Visit": {"read"},
+        "Customer Membership": {"read"},
+        "Care Recommendation": {"read"},
     },
 }
 
@@ -158,6 +194,27 @@ def check_role_permission(
     return False
 
 
+def require_any_role(*allowed_roles: str) -> bool:
+    """Require an authenticated user with at least one explicitly allowed role."""
+    user = get_current_user()
+    if not user or user == "Guest":
+        msg = _("Bạn cần đăng nhập để thực hiện thao tác này.")
+        if frappe and hasattr(frappe, "throw"):
+            frappe.throw(msg, getattr(frappe, "PermissionError", ValidationError))
+        raise ValidationError(msg)
+
+    roles = set(get_current_user_roles(user))
+    if user == "Administrator" or ROLE_SYSTEM_MANAGER in roles:
+        return True
+    if roles.intersection(set(allowed_roles)):
+        return True
+
+    msg = _("Bạn không có vai trò phù hợp để thực hiện thao tác này.")
+    if frappe and hasattr(frappe, "throw"):
+        frappe.throw(msg, getattr(frappe, "PermissionError", ValidationError))
+    raise ValidationError(msg)
+
+
 def validate_cross_entity_relationship(
     customer_id: str,
     pet_id: Optional[str] = None,
@@ -174,10 +231,10 @@ def validate_cross_entity_relationship(
 
     # 1. Validate Pet ownership
     if pet_id:
-        pet_owner = frappe.db.get_value("Pet", pet_id, ["customer", "owner"], as_dict=True)
+        pet_owner = frappe.db.get_value("Pet", pet_id, ["customer"], as_dict=True)
         if not pet_owner:
             return False, f"Không tìm thấy thú cưng '{pet_id}' trong hệ thống."
-        actual_cust = pet_owner.get("customer") or pet_owner.get("owner")
+        actual_cust = pet_owner.get("customer")
         if actual_cust and actual_cust != customer_id:
             return False, f"Thú cưng '{pet_id}' không thuộc sở hữu của khách hàng '{customer_id}'."
 

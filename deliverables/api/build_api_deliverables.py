@@ -1180,7 +1180,7 @@ def generate_postman_artifacts():
             {"key": "base_url", "value": "http://127.0.0.1:8000", "type": "default", "enabled": True},
             {"key": "api_key", "value": "YOUR_API_KEY_HERE", "type": "secret", "enabled": True},
             {"key": "api_secret", "value": "YOUR_API_SECRET_HERE", "type": "secret", "enabled": True},
-            {"key": "webhook_secret", "value": "SANDBOX_SECRET_KEY_PETCARE_2026", "type": "secret", "enabled": True}
+            {"key": "webhook_secret", "value": "YOUR_WEBHOOK_SECRET_HERE", "type": "secret", "enabled": True}
         ],
         "_postman_variable_scope": "environment"
     }

@@ -35,20 +35,28 @@ class VietQRConfig:
     DEFAULT_ACCOUNT_NO: str = "0388889999"
     DEFAULT_ACCOUNT_NAME: str = "PHONG KHAM PETCARE CRM"
     DEFAULT_TEMPLATE: str = "compact2"           # compact, compact2, qr_only, print
-    WEBHOOK_SECRET_KEY: str = "petcare_webhook_secret_key_2026"
+    MIN_WEBHOOK_SECRET_LENGTH: int = 32
 
     @classmethod
     def get_webhook_secret_key(cls) -> str:
         """Lay webhook secret tu frappe.conf hoac bien moi truong, tranh hardcode."""
+        secret = None
         if frappe and hasattr(frappe, "conf") and frappe.conf:
             conf_secret = frappe.conf.get("vietqr_webhook_secret")
             if conf_secret:
-                return str(conf_secret)
+                secret = str(conf_secret)
         import os
-        env_secret = os.getenv("PETCARE_WEBHOOK_SECRET")
-        if env_secret:
-            return str(env_secret)
-        return cls.WEBHOOK_SECRET_KEY
+        if not secret:
+            env_secret = os.getenv("PETCARE_WEBHOOK_SECRET")
+            if env_secret:
+                secret = str(env_secret)
+        secret = str(secret or "").strip()
+        if len(secret) < cls.MIN_WEBHOOK_SECRET_LENGTH:
+            raise ValidationError(
+                "vietqr_webhook_secret/PETCARE_WEBHOOK_SECRET phải được cấu hình "
+                f"với ít nhất {cls.MIN_WEBHOOK_SECRET_LENGTH} ký tự."
+            )
+        return secret
 
 
 class VietQRGenerator:
@@ -216,6 +224,18 @@ class PaymentWebhookService:
                 "message": "Thiếu mã giao dịch ngân hàng (gateway_transaction_id).",
             }
 
+        try:
+            clean_amount = float(amount)
+        except (TypeError, ValueError):
+            clean_amount = 0.0
+        if clean_amount <= 0:
+            return {
+                "status": "error",
+                "error_code": "INVALID_AMOUNT",
+                "message": "Số tiền thanh toán phải lớn hơn 0.",
+                "transaction_id": clean_tx_id,
+            }
+
         # 2. Idempotency Check (RAM + Persistent Cache + DB)
         if clean_tx_id in cls._processed_transaction_ids:
             return {
@@ -237,6 +257,14 @@ class PaymentWebhookService:
                 pass
 
         if not _is_mock_frappe():
+            if frappe.db.exists(
+                "Service Visit", {"gateway_transaction_id": clean_tx_id}
+            ):
+                return {
+                    "status": "idempotent_skip",
+                    "message": f"Giao dịch {clean_tx_id} đã được ghi nhận trên Service Visit.",
+                    "transaction_id": clean_tx_id,
+                }
             if frappe.db.exists("DocType", "Membership Transaction"):
                 already_recorded = frappe.db.exists(
                     "Membership Transaction",
@@ -263,9 +291,9 @@ class PaymentWebhookService:
 
         # 4. Route Reconciliation by Type
         if parsed_type == "SERVICE_VISIT":
-            result = cls._reconcile_service_visit(clean_tx_id, parsed_ref, amount, gateway)
+            result = cls._reconcile_service_visit(clean_tx_id, parsed_ref, clean_amount, gateway)
         elif parsed_type == "MEMBERSHIP":
-            result = cls._reconcile_membership(clean_tx_id, parsed_ref, extra, amount, gateway)
+            result = cls._reconcile_membership(clean_tx_id, parsed_ref, extra, clean_amount, gateway)
         else:
             result = {
                 "status": "unknown_type",
@@ -337,6 +365,14 @@ class PaymentWebhookService:
             v_doc = frappe.get_doc("Service Visit", visit_name)
             final_price = float(v_doc.final_price or 0.0)
 
+            if getattr(v_doc, "payment_status", None) == "Paid":
+                return {
+                    "status": "error",
+                    "error_code": "ALREADY_PAID",
+                    "message": f"Phiếu {visit_name} đã được thanh toán trước đó.",
+                    "visit_id": visit_name,
+                }
+
             # Check amount with 1,000 VND tolerance
             if amount < (final_price - 1000):
                 return {
@@ -350,6 +386,10 @@ class PaymentWebhookService:
             # Update Service Visit with payment confirmation
             note_entry = f"[VietQR Paid] {datetime.now().strftime('%Y-%m-%d %H:%M')}: {amount:,.0f} VNĐ via {gateway} (Ref: {tx_id})"
             v_doc.notes = f"{v_doc.notes or ''}\n{note_entry}".strip()
+            v_doc.payment_status = "Paid"
+            v_doc.gateway_transaction_id = tx_id
+            v_doc.paid_amount = amount
+            v_doc.paid_at = frappe.utils.now_datetime()
             v_doc.save(ignore_permissions=True)
             frappe.db.commit()
 
@@ -399,6 +439,24 @@ class PaymentWebhookService:
 
             mem_doc = frappe.get_doc("Customer Membership", mem_name)
             customer = mem_doc.customer
+            locked_rows = frappe.db.sql(
+                """
+                SELECT balance
+                FROM `tabCustomer Membership`
+                WHERE name = %(name)s
+                FOR UPDATE
+                """,
+                {"name": mem_name},
+                as_dict=True,
+            )
+            if not locked_rows:
+                return {
+                    "status": "error",
+                    "error_code": "MEMBERSHIP_NOT_FOUND",
+                    "message": f"Không tìm thấy thẻ hội viên '{mem_ref}'.",
+                }
+            balance_before = float(locked_rows[0].get("balance") or 0.0)
+            balance_after = balance_before + amount
 
             # Create or update Membership Transaction
             tx_doc = frappe.get_doc({
@@ -407,11 +465,16 @@ class PaymentWebhookService:
                 "customer": customer,
                 "transaction_type": "Top Up",
                 "amount": amount,
+                "balance_before": balance_before,
+                "balance_after": balance_after,
                 "payment_method": "Bank Transfer",
                 "reference_no": tx_id,
                 "notes": f"Tự động nạp tiền qua VietQR IPN ({gateway}). Nội dung: PC-MEM-{mem_ref}",
             })
             tx_doc.insert(ignore_permissions=True)
+            frappe.db.set_value(
+                "Customer Membership", mem_name, "balance", balance_after
+            )
             frappe.db.commit()
 
             return {
@@ -420,6 +483,8 @@ class PaymentWebhookService:
                 "membership_id": mem_name,
                 "customer": customer,
                 "amount": amount,
+                "balance_before": balance_before,
+                "balance_after": balance_after,
                 "gateway": gateway,
                 "transaction_id": tx_id,
                 "message": f"Nạp tiền tự động thành công {amount:,.0f} VNĐ vào thẻ hội viên {mem_name}.",

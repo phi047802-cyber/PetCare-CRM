@@ -69,13 +69,28 @@ class ServiceCatalogService:
     ) -> str:
         """Đăng ký mới một dịch vụ trong danh mục chuẩn."""
         code = str(service_code).strip().upper()
+        clean_name = str(service_name or "").strip()
+        allowed_categories = {
+            "Grooming & Spa", "Healthcare & Clinic", "Hotel & Boarding", "Training"
+        }
+        allowed_species = {"All", "Dog", "Cat", "Rabbit", "Other"}
+        if not code or not clean_name:
+            raise ValidationError("Mã và tên dịch vụ là bắt buộc.")
+        if category not in allowed_categories:
+            raise ValidationError(f"Nhóm dịch vụ '{category}' không hợp lệ.")
+        if target_species not in allowed_species:
+            raise ValidationError(f"Loài áp dụng '{target_species}' không hợp lệ.")
+        if float(standard_price) < 0:
+            raise ValidationError("Giá dịch vụ không được âm.")
+        if int(default_cycle_days or 0) <= 0 or int(estimated_duration_minutes or 0) <= 0:
+            raise ValidationError("Chu kỳ và thời lượng dịch vụ phải lớn hơn 0.")
         if frappe.db.exists("PetCare Service", code):
             raise ValidationError(f"Mã dịch vụ '{code}' đã tồn tại trong danh mục.")
 
         doc = frappe.get_doc({
             "doctype": "PetCare Service",
             "service_code": code,
-            "service_name": service_name.strip(),
+            "service_name": clean_name,
             "category": category,
             "standard_price": float(standard_price),
             "default_cycle_days": int(default_cycle_days or 30),
@@ -182,14 +197,33 @@ class ServiceVisitService:
 
             if target_mem_id and frappe.db.exists("Customer Membership", target_mem_id):
                 # Khóa dòng trong MariaDB để ngăn 2 request đồng thời trừ cùng 1 lượt
-                try:
-                    membership_doc = frappe.get_doc("Customer Membership", target_mem_id, for_update=True)
-                except Exception:
-                    membership_doc = frappe.get_doc("Customer Membership", target_mem_id)
+                frappe.db.sql(
+                    "SELECT name FROM `tabCustomer Membership` WHERE name = %s FOR UPDATE",
+                    target_mem_id,
+                )
+                membership_doc = frappe.get_doc("Customer Membership", target_mem_id)
+
+                if membership_doc.customer != customer:
+                    raise ValidationError(
+                        f"Thẻ hội viên '{target_mem_id}' không thuộc khách hàng '{customer}'."
+                    )
+                if membership_doc.pet and membership_doc.pet != pet:
+                    raise ValidationError(
+                        f"Thẻ hội viên '{target_mem_id}' chỉ áp dụng cho thú cưng '{membership_doc.pet}'."
+                    )
 
                 if membership_doc.status != "Active":
                     if membership_id:  # Khách cố ý chỉ định thẻ đã hết hạn
                         raise MembershipExpiredException(f"Thẻ hội viên '{target_mem_id}' có trạng thái là '{membership_doc.status}', không thể sử dụng.")
+                    membership_doc = None
+                elif (
+                    (getattr(membership_doc, "start_date", None) and getdate(membership_doc.start_date) > v_date)
+                    or (getattr(membership_doc, "end_date", None) and getdate(membership_doc.end_date) < v_date)
+                ):
+                    if membership_id:
+                        raise MembershipExpiredException(
+                            f"Thẻ hội viên '{target_mem_id}' không có hiệu lực tại ngày {v_date}."
+                        )
                     membership_doc = None
 
             # 3. Phân tích quyền lợi và Thứ tự ưu tiên (FREE > PERCENTAGE > FIXED)
@@ -300,7 +334,7 @@ class ServiceVisitService:
 
         except Exception as e:
             frappe.db.rollback()
-            raise e
+            raise
 
 
 class CaseManagementService:
@@ -406,9 +440,11 @@ class MembershipLifecycleService:
                     remaining_old[b.benefit_type.lower()] = rem
 
         # Tạo danh sách benefits cho thẻ mới
-        from datetime import timedelta
         new_start_date = date.today()
-        new_end_date = new_start_date + timedelta(days=int(new_plan.validity_days or 365))
+        duration_months = max(1, int(new_plan.duration_months or 12))
+        new_end_date = getdate(
+            frappe.utils.add_months(str(new_start_date), duration_months)
+        )
 
         new_benefits = []
         rollover_summary = []
