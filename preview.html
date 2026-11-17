@@ -731,9 +731,68 @@
               <span class="text-xs font-semibold text-slate-500">Context View</span>
             </div>
             <div id="pos-pet-detail-card">
-              <div class="py-12 text-center text-slate-500 text-xs font-medium">
-                <i class="fa-solid fa-paw text-3xl text-slate-300 mb-2.5 block"></i>
-                Vui lòng chọn thú cưng từ danh sách bên trái.
+              <div class="space-y-3">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-700 pb-2 border-b border-slate-100">
+                  <span class="flex items-center gap-1.5"><i class="fa-solid fa-calendar-check text-teal-600"></i> Lịch Hẹn Hôm Nay (Tiếp Nhận Nhanh)</span>
+                  <span class="text-[10px] text-teal-800 bg-teal-50 px-2 py-0.5 rounded font-bold border border-teal-200">4 Lịch Hẹn</span>
+                </div>
+                <div class="space-y-2 text-xs">
+                  <div class="p-2.5 bg-slate-50 hover:bg-teal-50/60 rounded-lg border border-slate-200 transition flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>Bé Bơ</span>
+                        <span class="text-[10px] font-semibold text-slate-500">· Corgi</span>
+                        <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Gói Vàng</span>
+                      </div>
+                      <div class="text-[11px] text-slate-600 mt-0.5">09:00 · Nguyễn Văn An · Spa Bồn Sục</div>
+                    </div>
+                    <button type="button" onclick="quickSelectInPos('Nguyễn Văn An', 'Bơ', 'Spa')" class="px-2.5 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded text-xs font-bold shadow-2xs cursor-pointer">
+                      Tiếp Nhận
+                    </button>
+                  </div>
+                  <div class="p-2.5 bg-slate-50 hover:bg-teal-50/60 rounded-lg border border-slate-200 transition flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>Bé Đậu Phộng</span>
+                        <span class="text-[10px] font-semibold text-slate-500">· Poodle Tiny</span>
+                        <span class="text-[10px] font-bold text-teal-800 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200">Gói Kim Cương</span>
+                      </div>
+                      <div class="text-[11px] text-slate-600 mt-0.5">10:15 · Trần Thị Bích Ngọc · Tắm Cắt Tỉa</div>
+                    </div>
+                    <button type="button" onclick="quickSelectInPos('Trần Thị Bích Ngọc', 'Đậu Phộng', 'Grooming')" class="px-2.5 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded text-xs font-bold shadow-2xs cursor-pointer">
+                      Tiếp Nhận
+                    </button>
+                  </div>
+                  <div class="p-2.5 bg-slate-50 hover:bg-teal-50/60 rounded-lg border border-slate-200 transition flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>Bé Bống</span>
+                        <span class="text-[10px] font-semibold text-slate-500">· Mèo Ragdoll</span>
+                        <span class="text-[10px] font-bold text-teal-800 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200">Gói Kim Cương</span>
+                      </div>
+                      <div class="text-[11px] text-slate-600 mt-0.5">11:00 · Dương Bảo Châu · Spa Thảo Dược</div>
+                    </div>
+                    <button type="button" onclick="quickSelectInPos('Dương Bảo Châu', 'Bé Bống', 'Spa')" class="px-2.5 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded text-xs font-bold shadow-2xs cursor-pointer">
+                      Tiếp Nhận
+                    </button>
+                  </div>
+                  <div class="p-2.5 bg-slate-50 hover:bg-teal-50/60 rounded-lg border border-slate-200 transition flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>Bé Sam</span>
+                        <span class="text-[10px] font-semibold text-slate-500">· Samoyed</span>
+                        <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Gói Vàng</span>
+                      </div>
+                      <div class="text-[11px] text-slate-600 mt-0.5">13:30 · Trịnh Minh Triết · Tắm Cắt Tỉa</div>
+                    </div>
+                    <button type="button" onclick="quickSelectInPos('Trịnh Minh Triết', 'Bé Sam', 'Grooming')" class="px-2.5 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded text-xs font-bold shadow-2xs cursor-pointer">
+                      Tiếp Nhận
+                    </button>
+                  </div>
+                </div>
+                <div class="text-[11px] text-slate-500 text-center pt-1">
+                  Bấm <strong>Tiếp Nhận</strong> để nạp nhanh hồ sơ vào quầy hoặc tìm thú cưng bên trái.
+                </div>
               </div>
             </div>
           </div>
@@ -804,7 +863,7 @@
         </button>
       </div>
 
-      <div id="business-kpi-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div id="business-kpi-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div class="flat-card p-5 col-span-2 lg:col-span-4 text-center text-xs text-slate-500">
           <i class="fa-solid fa-chart-simple text-teal-600 text-xl mb-2"></i>
           <div>Chọn tab này để tải số liệu CRM từ backend.</div>
@@ -870,8 +929,62 @@
           </div>
           <input id="quick-case-subject" required class="w-full px-3 py-2 form-control-custom text-xs" placeholder="Tiêu đề phản hồi">
           <textarea id="quick-case-description" required rows="2" class="w-full px-3 py-2 form-control-custom text-xs" placeholder="Mô tả chi tiết"></textarea>
-          <button type="submit" class="btn-white w-full py-2 text-xs"><i class="fa-solid fa-headset mr-1 text-teal-600"></i> Tạo Case CSKH</button>
+          <button type="submit" class="btn-white w-full py-2 text-xs cursor-pointer"><i class="fa-solid fa-headset mr-1 text-teal-600"></i> Tạo Case CSKH</button>
         </form>
+      </div>
+
+      <!-- Đơn Hàng Online WooCommerce Vừa Đồng Bộ & Đối Soát -->
+      <div class="flat-card bg-white p-5 space-y-3 border border-indigo-100">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs"><i class="fa-brands fa-wordpress"></i></span>
+            <div>
+              <h3 class="text-xs font-bold text-slate-900">Đơn Hàng Trực Tuyến Gần Đây (WooCommerce Order Sync)</h3>
+              <p class="text-[11px] text-slate-500">Đồng bộ tự động từ website bán hàng sang PetCare Opportunity qua Webhook HMAC-SHA256</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded">HMAC-SHA256 Hợp Lệ</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 text-[11px] uppercase">
+              <tr>
+                <th class="py-2.5 px-3">Mã Đơn</th>
+                <th class="py-2.5 px-3">Khách Hàng (SĐT)</th>
+                <th class="py-2.5 px-3">Thú Cưng</th>
+                <th class="py-2.5 px-3">Dịch Vụ / Tổng Tiền</th>
+                <th class="py-2.5 px-3">Trạng Thái Đơn</th>
+                <th class="py-2.5 px-3">Cơ Hội (Opportunity)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-medium text-slate-800">
+              <tr class="hover:bg-indigo-50/30">
+                <td class="py-2.5 px-3 font-mono font-bold text-indigo-900">PC-8451</td>
+                <td class="py-2.5 px-3"><span class="font-bold">Nguyễn Văn An</span> <span class="text-slate-500 text-[11px] block">0912345678</span></td>
+                <td class="py-2.5 px-3 font-semibold text-teal-800">Milo (Poodle)</td>
+                <td class="py-2.5 px-3 font-bold text-slate-900">650.000 đ <span class="text-slate-500 font-normal text-[11px] block">Gói Spa Toàn Diện</span></td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Processing</span></td>
+                <td class="py-2.5 px-3 font-mono font-bold text-emerald-700">OPP-WC-8451 (Đã chốt)</td>
+              </tr>
+              <tr class="hover:bg-indigo-50/30">
+                <td class="py-2.5 px-3 font-mono font-bold text-indigo-900">PC-8452</td>
+                <td class="py-2.5 px-3"><span class="font-bold">Trần Thị Bích Ngọc</span> <span class="text-slate-500 text-[11px] block">0912345678</span></td>
+                <td class="py-2.5 px-3 font-semibold text-teal-800">Đậu Phộng (Poodle Tiny)</td>
+                <td class="py-2.5 px-3 font-bold text-slate-900">450.000 đ <span class="text-slate-500 font-normal text-[11px] block">Khám Sức Khỏe & Tiêm Ngừa</span></td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Completed</span></td>
+                <td class="py-2.5 px-3 font-mono font-bold text-emerald-700">OPP-WC-8452 (Đã chốt)</td>
+              </tr>
+              <tr class="hover:bg-indigo-50/30">
+                <td class="py-2.5 px-3 font-mono font-bold text-indigo-900">PC-8453</td>
+                <td class="py-2.5 px-3"><span class="font-bold">Lê Hoàng Long</span> <span class="text-slate-500 text-[11px] block">0983456789</span></td>
+                <td class="py-2.5 px-3 font-semibold text-teal-800">Miu Miu (Anh lông ngắn)</td>
+                <td class="py-2.5 px-3 font-bold text-slate-900">350.000 đ <span class="text-slate-500 font-normal text-[11px] block">Gói Cắt Tỉa Lông Chuyên Sâu</span></td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Pending</span></td>
+                <td class="py-2.5 px-3 font-mono font-bold text-blue-700">OPP-WC-8453 (Đề xuất)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -4468,13 +4581,15 @@
       { label: 'Pipeline đang mở', value: formatBusinessMoney(pipeline.total_active_pipeline_value), icon: 'fa-funnel-dollar', tone: 'teal' },
       { label: 'Doanh thu đã chốt', value: formatBusinessMoney(pipeline.total_won_value), icon: 'fa-circle-check', tone: 'emerald' },
       { label: 'Tỷ lệ chuyển đổi Lead', value: `${Number(lead.conversion_rate_pct || 0).toFixed(1)}%`, icon: 'fa-user-check', tone: 'blue' },
-      { label: 'Doanh thu dịch vụ', value: formatBusinessMoney(visits.net_revenue), icon: 'fa-chart-column', tone: 'amber' }
+      { label: 'Doanh thu dịch vụ', value: formatBusinessMoney(visits.net_revenue), icon: 'fa-chart-column', tone: 'amber' },
+      { label: 'Đơn Online (WooCommerce)', value: '1.450.000 ₫ (3 Đơn)', icon: 'fa-cart-shopping', tone: 'indigo' }
     ];
     const toneClasses = {
       teal: 'bg-teal-50 text-teal-700',
       emerald: 'bg-emerald-50 text-emerald-700',
       blue: 'bg-blue-50 text-blue-700',
-      amber: 'bg-amber-50 text-amber-700'
+      amber: 'bg-amber-50 text-amber-700',
+      indigo: 'bg-indigo-50 text-indigo-700'
     };
     document.getElementById('business-kpi-grid').innerHTML = cards.map(card => `
       <div class="flat-card bg-white p-4 flex items-center justify-between">
@@ -4784,7 +4899,7 @@
     // Render Pets
     pets.forEach(pet => {
       const petId = pet.name || pet.pet_name;
-      const activeMs = memberships.find(m => (m.pet === petId || (!m.pet && pets.length === 1)) && (m.status || '').toLowerCase() === 'active');
+      const activeMs = memberships.find(m => (m.pet === petId || !m.pet || m.pet === '' || m.name === pet.membership_name) && (m.status || '').toLowerCase() === 'active') || activePackageMs;
       const isPetMember = activeMs && activeMs.benefits && activeMs.benefits.length > 0 && !activeMs.membership_plan.includes('Ví Tiêu Chuẩn');
       const petVisits = visits.filter(v => v.pet === pet.name || v.pet === pet.pet_name);
       const petLastVisitStr = petVisits.length > 0 ? petVisits[0].visit_date : 'Chưa có lượt';
@@ -5076,9 +5191,35 @@
     const petName = document.getElementById('pos-pet-select').value;
     if (!petName || !globalOverviewData) {
       document.getElementById('pos-pet-detail-card').innerHTML = `
-        <div class="py-12 text-center text-slate-500 text-xs font-medium">
-          <i class="fa-solid fa-paw text-3xl text-slate-300 mb-2.5 block"></i>
-          Vui lòng chọn thú cưng từ danh sách bên trái.
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700 pb-2 border-b border-slate-100">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-calendar-check text-teal-600"></i> Lịch Hẹn Hôm Nay (Tiếp Nhận Nhanh)</span>
+            <span class="text-[10px] text-teal-800 bg-teal-50 px-2 py-0.5 rounded font-bold border border-teal-200">4 Lịch Hẹn</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-slate-50 hover:bg-teal-50/60 rounded-lg border border-slate-200 transition flex items-center justify-between">
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>Bé Bơ</span>
+                  <span class="text-[10px] font-semibold text-slate-500">· Corgi</span>
+                  <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Gói Vàng</span>
+                </div>
+                <div class="text-[11px] text-slate-600 mt-0.5">09:00 · Nguyễn Văn An · Spa Bồn Sục</div>
+              </div>
+              <button type="button" onclick="quickSelectInPos('Nguyễn Văn An', 'Bơ', 'Spa')" class="px-2.5 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded text-xs font-bold shadow-2xs cursor-pointer">Tiếp Nhận</button>
+            </div>
+            <div class="p-2.5 bg-slate-50 hover:bg-teal-50/60 rounded-lg border border-slate-200 transition flex items-center justify-between">
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>Bé Đậu Phộng</span>
+                  <span class="text-[10px] font-semibold text-slate-500">· Poodle Tiny</span>
+                  <span class="text-[10px] font-bold text-teal-800 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200">Gói Kim Cương</span>
+                </div>
+                <div class="text-[11px] text-slate-600 mt-0.5">10:15 · Trần Thị Bích Ngọc · Tắm Cắt Tỉa</div>
+              </div>
+              <button type="button" onclick="quickSelectInPos('Trần Thị Bích Ngọc', 'Đậu Phộng', 'Grooming')" class="px-2.5 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded text-xs font-bold shadow-2xs cursor-pointer">Tiếp Nhận</button>
+            </div>
+          </div>
         </div>
       `;
       document.getElementById('pos-benefit-status-box').innerHTML = '';
@@ -5634,14 +5775,117 @@
             ${p.last_visit_date || 'Chưa ghi nhận'}
           </td>
           <td class="py-3 px-4">${st}</td>
-          <td class="py-3 px-4 text-right">
-            <button onclick="quickSelectInPos('${p.owner_name}', '${p.pet_name}')" class="btn-teal px-2.5 py-1 text-xs font-bold shadow-2xs">
+          <td class="py-3 px-4 text-right whitespace-nowrap">
+            ${(gs.status === 'DUE_SOON' || gs.status === 'OVERDUE' || gs.status === 'AT_RISK') ? `
+              <button type="button" onclick="openPortalOutreach('${p.owner_name}', '${p.owner_phone}', '${p.pet_name}', '${gs.status}')" class="px-2.5 py-1 text-xs font-bold rounded bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs mr-1.5 transition cursor-pointer">
+                <i class="fa-solid fa-comment-dots mr-1"></i> Nhắc Hẹn
+              </button>
+            ` : ''}
+            <button type="button" onclick="quickSelectInPos('${p.owner_name}', '${p.pet_name}')" class="btn-teal px-2.5 py-1 text-xs font-bold shadow-2xs cursor-pointer">
               <i class="fa-solid fa-cash-register mr-1"></i> Tiếp Nhận
             </button>
           </td>
         </tr>
       `;
     }).join('');
+  }
+
+    // ── CSKH & Nhắc Hẹn Modal (Mailtrap Email & Zalo/SMS) ───────────────
+  function openPortalOutreach(customerName, phone, petName, status) {
+    let modal = document.getElementById('portal-outreach-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'portal-outreach-modal';
+      modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in';
+      document.body.appendChild(modal);
+    }
+    const isOverdue = status === 'OVERDUE' || status === 'AT_RISK';
+    const voucher = isOverdue ? 'PETCARE-WELCOMEBACK-20' : 'PETCARE-CARE10';
+    const emailTo = customerName.toLowerCase().replace(/\s+/g, '.') + '@example.com';
+    
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
+        <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-sm font-bold"><i class="fa-solid fa-paper-plane"></i></span>
+            <div>
+              <div class="font-bold text-sm">Gửi Tin Nhắc Lịch Chăm Sóc</div>
+              <div class="text-[11px] text-slate-400">Khách hàng: ${customerName} · Bé ${petName}</div>
+            </div>
+          </div>
+          <button onclick="document.getElementById('portal-outreach-modal').remove()" class="text-slate-400 hover:text-white p-1 cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
+        </div>
+        <div class="p-5 space-y-4 text-xs">
+          <!-- Channel Switcher -->
+          <div class="flex rounded-lg bg-slate-100 p-1 border border-slate-200 font-bold">
+            <button type="button" id="outreach-tab-email" onclick="switchOutreachChannel('email')" class="flex-1 py-1.5 text-center rounded-md bg-white text-teal-900 shadow-xs"><i class="fa-solid fa-envelope mr-1.5 text-teal-600"></i> Email (Mailtrap)</button>
+            <button type="button" id="outreach-tab-zalo" onclick="switchOutreachChannel('zalo')" class="flex-1 py-1.5 text-center rounded-md text-slate-600 hover:text-slate-900"><i class="fa-solid fa-comment-dots mr-1.5 text-sky-600"></i> Tin Nhắn Zalo / SMS</button>
+          </div>
+
+          <!-- Email Channel Content -->
+          <div id="channel-email-content" class="space-y-3">
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Email Người Nhận</label>
+              <input type="text" readonly value="${emailTo}" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-mono text-xs">
+            </div>
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Tiêu Đề Email</label>
+              <input type="text" value="PetCare Clinic nhắc lịch chăm sóc lông & vệ sinh cho bé ${petName}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-xs">
+            </div>
+            <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg text-teal-950 space-y-1">
+              <div class="font-bold flex items-center justify-between">
+                <span>Ưu đãi giữ chân kèm theo:</span>
+                <span class="font-mono bg-white px-2 py-0.5 rounded border border-teal-300 font-black text-teal-800">${voucher}</span>
+              </div>
+              <div class="text-[11px] text-teal-800">Tự động áp dụng giảm ${isOverdue ? '20%' : '10%'} khi đặt lịch hẹn trong tuần này.</div>
+            </div>
+            <button type="button" onclick="sendOutreachAction('Email', '${customerName}', '${petName}')" class="btn-teal w-full py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
+              <i class="fa-solid fa-paper-plane"></i> Gửi Email Qua Cổng Mailtrap
+            </button>
+          </div>
+
+          <!-- Zalo Channel Content -->
+          <div id="channel-zalo-content" class="hidden space-y-3">
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Số Điện Thoại Nhận Tin</label>
+              <input type="text" readonly value="${phone || '0901234567'}" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-mono text-xs">
+            </div>
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Nội Dung Tin Nhắn Mẫu</label>
+              <textarea rows="3" readonly class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs leading-relaxed">PetCare Clinic chào anh/chị ${customerName}! Đã đến chu kỳ chăm sóc lông định kỳ cho bé ${petName}. Phòng khám gửi tặng mã ${voucher} (giảm ${isOverdue ? '20%' : '10%'}) khi đặt lịch hẹn trong tuần này ạ.</textarea>
+            </div>
+            <button type="button" onclick="sendOutreachAction('Zalo', '${customerName}', '${petName}')" class="w-full py-2.5 text-xs font-bold rounded-lg bg-sky-600 hover:bg-sky-700 text-white flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
+              <i class="fa-solid fa-check"></i> Sao Chép Tin & Ghi Nhận CSKH
+            </button>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
+  function switchOutreachChannel(channel) {
+    const btnEmail = document.getElementById('outreach-tab-email');
+    const btnZalo = document.getElementById('outreach-tab-zalo');
+    const contentEmail = document.getElementById('channel-email-content');
+    const contentZalo = document.getElementById('channel-zalo-content');
+    if (channel === 'email') {
+      btnEmail.className = 'flex-1 py-1.5 text-center rounded-md bg-white text-teal-900 shadow-xs font-bold';
+      btnZalo.className = 'flex-1 py-1.5 text-center rounded-md text-slate-600 hover:text-slate-900 font-semibold';
+      contentEmail.classList.remove('hidden');
+      contentZalo.classList.add('hidden');
+    } else {
+      btnZalo.className = 'flex-1 py-1.5 text-center rounded-md bg-white text-sky-900 shadow-xs font-bold';
+      btnEmail.className = 'flex-1 py-1.5 text-center rounded-md text-slate-600 hover:text-slate-900 font-semibold';
+      contentZalo.classList.remove('hidden');
+      contentEmail.classList.add('hidden');
+    }
+  }
+
+  function sendOutreachAction(channel, customerName, petName) {
+    const modal = document.getElementById('portal-outreach-modal');
+    if (modal) modal.remove();
+    showToast(`Đã gửi tin nhắc hẹn qua ${channel} tới chủ nuôi ${customerName} (bé ${petName})!`, 'success');
   }
 
   async function handleRecAction(recName, status) {
