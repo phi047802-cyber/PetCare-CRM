@@ -3,7 +3,7 @@
  * Plugin Name: PetCare CRM Lead Capture
  * Plugin URI:  https://github.com/petcare-crm
  * Description: Tích hợp Form Đặt Lịch & Tư Vấn Chăm Sóc Thú Cưng cho WordPress kết nối bảo mật qua Server-Side Proxy với Frappe PetCare CRM.
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      PetCare CRM Development Team
  * License:     GPL-2.0+
  * Text Domain: petcare-lead-capture
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit; // Chặn truy cập trực tiếp
 }
 
-define('PETCARE_LEAD_VERSION', '1.0.0');
+define('PETCARE_LEAD_VERSION', '1.1.0');
 define('PETCARE_LEAD_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('PETCARE_LEAD_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -43,6 +43,10 @@ class PetCare_Lead_Capture {
             add_action('admin_menu', [$this, 'add_admin_menu']);
             add_action('admin_init', [$this, 'register_settings']);
         }
+
+        // WooCommerce order synchronization (inactive when WooCommerce is absent).
+        require_once PETCARE_LEAD_PLUGIN_DIR . 'includes/class-petcare-woocommerce-sync.php';
+        new PetCare_WooCommerce_Sync();
     }
 
     /**
@@ -366,6 +370,8 @@ class PetCare_Lead_Capture {
         register_setting('petcare_crm_options', 'petcare_api_key', 'sanitize_text_field');
         register_setting('petcare_crm_options', 'petcare_api_secret', 'sanitize_text_field');
         register_setting('petcare_crm_options', 'petcare_lead_source', 'sanitize_text_field');
+        register_setting('petcare_crm_options', 'petcare_wc_sync_enabled', 'absint');
+        register_setting('petcare_crm_options', 'petcare_wc_webhook_secret', 'sanitize_text_field');
     }
 
     public function render_admin_settings_page() {
@@ -418,6 +424,26 @@ class PetCare_Lead_Capture {
                                    value="<?php echo esc_attr(get_option('petcare_lead_source', 'WordPress Form')); ?>" 
                                    class="regular-text">
                             <p class="description">Mặc định: <code>WordPress Form</code> hoặc <code>Website Landing Page</code>.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Đồng Bộ Đơn WooCommerce</th>
+                        <td>
+                            <label>
+                                <input name="petcare_wc_sync_enabled" type="hidden" value="0">
+                                <input name="petcare_wc_sync_enabled" type="checkbox" value="1"
+                                       <?php checked(1, (int)get_option('petcare_wc_sync_enabled', 0)); ?>>
+                                Tự động gửi đơn mới và thay đổi trạng thái sang PetCare CRM
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="petcare_wc_webhook_secret">WooCommerce Webhook Secret</label></th>
+                        <td>
+                            <input name="petcare_wc_webhook_secret" type="password" id="petcare_wc_webhook_secret"
+                                   value="<?php echo esc_attr(defined('PETCARE_WC_WEBHOOK_SECRET') ? '••••••••••••••••' : get_option('petcare_wc_webhook_secret', '')); ?>"
+                                   class="regular-text" <?php echo defined('PETCARE_WC_WEBHOOK_SECRET') ? 'readonly' : ''; ?>>
+                            <p class="description">Phải trùng với <code>woocommerce_webhook_secret</code> trong <code>site_config.json</code> của Frappe. Khuyến nghị khai báo hằng <code>PETCARE_WC_WEBHOOK_SECRET</code> trong <code>wp-config.php</code>.</p>
                         </td>
                     </tr>
                 </table>

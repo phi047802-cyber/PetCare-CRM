@@ -1,0 +1,59 @@
+{
+  "dataset_name": "PetCare CRM Vietnamese Demonstration Dataset",
+  "dataset_version": "2026.11",
+  "classification": "synthetic-demo-data",
+  "contains_real_personal_data": false,
+  "date_strategy": "relative-to-seed-date",
+  "expected_counts": {
+    "Contact": 8,
+    "Address": 8,
+    "Pet": 9,
+    "PetCare Service": 4,
+    "Membership Plan": 3,
+    "Customer Membership": 4,
+    "Service Visit": 12,
+    "PetCare Appointment": 7,
+    "PetCare Lead": 4,
+    "PetCare Opportunity": 4,
+    "Care Recommendation": 4,
+    "PetCare Case": 2,
+    "ToDo": 2
+  },
+  "required_scenarios": {
+    "multi_pet_customer": "Nguyễn Văn An owns Bơ and Đậu Đậu",
+    "lead_statuses": [
+      "New",
+      "Contacted",
+      "Converted",
+      "Unqualified"
+    ],
+    "opportunity_stages": [
+      "Prospecting",
+      "Proposal",
+      "Closed Won",
+      "Closed Lost"
+    ],
+    "membership_statuses": {
+      "Active": 3,
+      "Expired": 1
+    },
+    "care_recommendation_types": {
+      "DUE_SOON": 2,
+      "AT_RISK": 1,
+      "RENEWAL": 1
+    },
+    "care_recommendation_statuses": {
+      "NEW": 2,
+      "CONTACTED": 1,
+      "CONVERTED": 1
+    }
+  },
+  "woocommerce_policy": {
+    "preseed_order_sync": false,
+    "reason": "The order sync record must be created live through the signed webhook during the A4.8 demonstration."
+  },
+  "commands": {
+    "seed": "bench --site petcare.localhost execute petcare_crm.patches.v1_0.seed_demo_data.execute",
+    "validate": "bench --site petcare.localhost execute petcare_crm.patches.v1_0.validate_demo_data.execute"
+  }
+}

@@ -16,7 +16,7 @@
    * **Authenticated Endpoints (21 APIs)**: Bắt buộc phiên đăng nhập Session Cookie hoặc Token Header `Authorization: token {{api_key}}:{{api_secret}}`. Được bảo vệ bằng ma trận Frappe RBAC 4 nhóm quyền.
    * **Public Guest Endpoints (27 APIs)**: Được phép truy cập không cần đăng nhập nhưng bắt buộc kiểm soát qua các cơ chế phòng vệ hạ tầng: **Rate Limiting** (Frappe Cache), **Honeypot Bot Trap**, và **Xác thực chữ ký HMAC-SHA256** (đối với Webhook thanh toán).
 3. **Phân loại Trạng thái Kiểm chứng**:
-   * `[VERIFIED RUNTIME]`: Đã được chạy trực tiếp qua bộ kiểm thử tự động 9 Suites (74/74 tests PASS).
+   * `[VERIFIED RUNTIME]`: Đã được chạy trực tiếp qua bộ kiểm thử tự động 12 Suites (106/106 tests PASS).
    * `[VERIFIED CODE-AUDIT]`: Đã được đọc, phân tích cú pháp AST và xác minh logic qua mã nguồn thực tế tại `petcare_crm/api.py`.
 
 ---

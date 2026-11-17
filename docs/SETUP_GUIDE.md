@@ -38,6 +38,9 @@ docker exec -it petcare-backend-1 bench --site petcare.localhost migrate
 
 # Bước 5: Nạp dữ liệu demo thuần Việt (Seed Data chuẩn Prompt 10)
 docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare_crm.patches.v1_0.seed_demo_data.execute
+
+# Bước 6: Xác minh dataset (kết quả phải có status = PASS)
+docker exec -it petcare-backend-1 bench --site petcare.localhost execute petcare_crm.patches.v1_0.validate_demo_data.execute
 ```
 
 ---
@@ -60,7 +63,10 @@ bench --site [ten_site] migrate
 # Bước 5: Khởi tạo dữ liệu demo mẫu
 bench --site [ten_site] execute petcare_crm.patches.v1_0.seed_demo_data.execute
 
-# Bước 6: Khởi chạy môi trường Desk
+# Bước 6: Xác minh dataset (kết quả phải có status = PASS)
+bench --site [ten_site] execute petcare_crm.patches.v1_0.validate_demo_data.execute
+
+# Bước 7: Khởi chạy môi trường Desk
 bench start
 ```
 
@@ -82,7 +88,7 @@ bench start
 Hệ thống cung cấp Master Test Runner độc lập, có thể chạy trực tiếp bằng Python mà không bắt buộc khởi động container daemon:
 
 ```powershell
-# Chạy toàn bộ 58 kịch bản kiểm thử (7 Test Suites)
+# Chạy toàn bộ 106 kịch bản kiểm thử (12 Test Suites)
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 ```
 
@@ -91,8 +97,8 @@ Kết quả mong đợi:
 ================================================================================
 TỔNG HỢP KẾT QUẢ KIỂM THỬ (AUDIT SUMMARY)
 ================================================================================
-Tổng số kịch bản kiểm thử (Total Tests) : 58
-Thành công (PASS)                      : 58
+Tổng số kịch bản kiểm thử (Total Tests) : 106
+Thành công (PASS)                      : 106
 Thất bại (FAIL)                        : 0
 Lỗi cú pháp / runtime (ERRORS)         : 0
 Bỏ qua (SKIPPED)                       : 0

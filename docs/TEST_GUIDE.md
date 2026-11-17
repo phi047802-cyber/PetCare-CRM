@@ -2,14 +2,14 @@
 
 > **Dự án**: PetCare CRM  
 > **Nền tảng**: Frappe Framework v15  
-> **Tổng số kịch bản kiểm thử**: **58 tests** (Tỷ lệ Pass hiện tại: **100%**)  
+> **Tổng số kịch bản kiểm thử**: **106 tests / 12 suites** (Tỷ lệ Pass hiện tại: **100%**)
 
 ---
 
 ## 1. Triết Lý & Chiến Lược Kiểm Thử (Testing Strategy)
 
 Hệ thống PetCare CRM áp dụng chiến lược kiểm thử đa tầng (Test Pyramid) nghiêm ngặt:
-1. **Kiểm thử độc lập không phụ thuộc Daemon (Pure Python Mock Architecture)**: Toàn bộ 58 kịch bản kiểm thử có thể chạy trực tiếp trên bất kỳ máy trạm có cài Python 3.10+ mà không bắt buộc khởi động container Docker hay MariaDB server.
+1. **Kiểm thử độc lập không phụ thuộc Daemon (Pure Python Mock Architecture)**: Toàn bộ 106 kịch bản kiểm thử có thể chạy trực tiếp trên bất kỳ máy trạm có cài Python 3.10+ mà không bắt buộc khởi động container Docker hay MariaDB server.
 2. **Nguyên tắc "Chạy Thật — Không Làm Yếu Assertion"**:
    * Không đánh dấu Pass nếu test chưa thực sự chạy và in kết quả.
    * Khi gặp lỗi, truy tìm nguyên nhân gốc rễ (Root Cause) để sửa code logic, tuyệt đối không xóa bỏ assert hoặc hạ thấp tiêu chuẩn kiểm thử.
@@ -34,6 +34,11 @@ Thư mục kiểm thử: [`apps/petcare_crm/petcare_crm/tests/`](file:///c:/User
 | [`test_workflow_automation_mock.py`](file:///c:/Users/pc/Documents/Doan_CRM/apps/petcare_crm/petcare_crm/tests/test_workflow_automation_mock.py) | 9 | Automation & Scheduler | Tác vụ nền định kỳ: nhắc Lead quá 24h, tự động hết hạn thẻ, cảnh báo gia hạn 7 ngày, giám sát SLA khiếu nại, Safe Mode. |
 | [`test_security_and_reporting_mock.py`](file:///c:/Users/pc/Documents/Doan_CRM/apps/petcare_crm/petcare_crm/tests/test_security_and_reporting_mock.py) | 11 | Security & Analytics | Phân quyền vai trò RBAC (Sales, Tech, Analyst, Manager), xác thực sở hữu chéo, khử khuẩn đầu vào, 8 chỉ số KPI chuẩn. |
 | [`test_e2e_scenarios_mock.py`](file:///c:/Users/pc/Documents/Doan_CRM/apps/petcare_crm/petcare_crm/tests/test_e2e_scenarios_mock.py) | 11 | End-to-End Scenarios | 6 kịch bản E2E toàn diện (A: Lead->Khách hàng, B: Dịch vụ->360, C: Hội viên->Redemption, D: Care Intelligence, E: RBAC, F: Idempotent Scheduler). |
+| `test_extended_capabilities_mock.py` | 10 | Extensions | VietQR, payment webhook, omnichannel, owner portal và các khả năng mở rộng. |
+| `test_wordpress_lead_integration.py` | 6 | External Integration | WordPress Lead Form, validation, honeypot và proxy server. |
+| `test_audit_remediation.py` | 14 | Hardening | Kiểm tra các phát hiện audit về bảo mật và toàn vẹn dữ liệu. |
+| `test_woocommerce_integration.py` | 11 | Commerce Integration | HMAC, mapping đơn hàng, idempotency và retry WooCommerce. |
+| `test_demo_dataset_contract.py` | 7 | Data Quality | Manifest, Select values, document links và chính sách seed dataset. |
 
 ---
 
@@ -43,7 +48,7 @@ Thư mục kiểm thử: [`apps/petcare_crm/petcare_crm/tests/`](file:///c:/User
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 ```
-*Thời gian chạy*: ~1.5 giây cho toàn bộ 58 tests.
+*Thời gian chạy tham khảo*: khoảng 2–5 giây cho toàn bộ 106 tests, tùy máy.
 
 ### 3.2. Chạy Riêng Lẻ Từng Suite Cụ Thể
 ```powershell

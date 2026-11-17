@@ -77,6 +77,18 @@ TEST_SUITES = [
         "name": "Suite 10: Audit Remediation & System Hardening (All 20 Findings)",
         "layer": "Security, Data Integrity & Analytics Hardening",
         "description": "Kiểm tra toàn diện 14 kịch bản xác minh vá lỗi cho các phát hiện P0-P4 từ hội đồng kiểm toán."
+    },
+    {
+        "file": "apps/petcare_crm/petcare_crm/tests/test_woocommerce_integration.py",
+        "name": "Suite 11: WooCommerce Order Webhook Integration (A4.8)",
+        "layer": "Commerce Integration & Security",
+        "description": "HMAC-SHA256, ánh xạ đơn hàng, chống webhook trùng, cập nhật Opportunity và retry WordPress."
+    },
+    {
+        "file": "apps/petcare_crm/petcare_crm/tests/test_demo_dataset_contract.py",
+        "name": "Suite 12: Reproducible Demo Dataset Contract",
+        "layer": "Data Quality & Runtime Evidence",
+        "description": "Manifest, schema Select values, document links, idempotent seed policy và dữ liệu KPI demo."
     }
 ]
 
