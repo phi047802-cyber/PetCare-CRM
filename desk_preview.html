@@ -8,16 +8,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome 6.5.1 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- Google Fonts: Plus Jakarta Sans -->
+  <!-- Google Fonts: Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     body, html {
-      font-family: 'Plus Jakarta Sans', sans-serif !important;
-      background-color: #F8FAFC !important;
-      color: #0F172A;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+      background-color: #FAF8F5 !important;
+      color: #1C1917;
     }
+    .mono { font-family: 'JetBrains Mono', monospace; }
     .hover-card {
       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -147,18 +148,12 @@
           <span>Không Gian Làm Việc: PetCare CRM</span>
         </h1>
       </div>
-      <div class="flex items-center flex-wrap gap-2">
-        <button type="button" onclick="openCreateCustomerModalDesk()" class="px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition">
-          <i class="fa-solid fa-user-plus"></i> + Thêm Khách Hàng
-        </button>
-        <button type="button" onclick="openImportModalDesk()" class="px-3.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs transition">
-          <i class="fa-solid fa-file-excel text-emerald-700"></i> Import Data (Excel/CSV)
-        </button>
-        <span class="inline-flex items-center gap-1.5 bg-teal-50 text-teal-800 text-xs px-3 py-1.5 rounded-lg border border-teal-200 font-semibold shadow-2xs">
-          <span class="w-2 h-2 rounded-full bg-teal-500"></span> Phiên Làm Việc: Sẵn Sàng
+      <div class="flex items-center flex-wrap gap-2.5">
+        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 text-xs px-3 py-1.5 rounded-lg border border-emerald-200 font-medium shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Trạng thái: Hoạt động
         </span>
-        <button onclick="openModal('kpis')" class="px-3.5 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-300 font-bold text-xs flex items-center gap-1.5 transition shadow-2xs">
-          <i class="fa-solid fa-chart-line text-teal-600"></i> Xem KPI Dashboard
+        <button onclick="openModal('kpis')" class="px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-semibold text-xs flex items-center gap-1.5 transition shadow-2xs">
+          <i class="fa-solid fa-chart-line text-teal-600"></i> Báo Cáo KPI
         </button>
       </div>
     </div>
@@ -166,14 +161,14 @@
     <!-- SHORTCUT METRIC CARDS (INTERACTIVE) -->
     <div class="space-y-2">
       <div class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-        <span>Chỉ Số Vận Hành Nhanh (Shortcuts — Bấm để mở danh sách chi tiết)</span>
-        <span class="text-slate-400 font-normal">Tổng hợp từ dữ liệu hệ thống</span>
+        <span>Chỉ Số Vận Hành</span>
+        <span class="text-slate-400 font-normal">Dữ liệu thời gian thực</span>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <!-- New Leads -->
         <div onclick="openModal('leads')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-blue-500 hover-card transition cursor-pointer group">
           <div class="text-xs text-slate-500 font-bold group-hover:text-blue-600 flex items-center justify-between">
-            <span>Khách Tiềm Năng (Leads)</span>
+            <span>Khách Tiềm Năng</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
           </div>
           <div id="stat-leads-count" class="text-2xl font-black text-blue-600 mt-1">12 <span class="text-xs font-semibold text-slate-400">Leads</span></div>
@@ -185,36 +180,36 @@
         <!-- Due Soon Pets -->
         <div onclick="openModal('recommendations', 'DUE_SOON')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-amber-500 hover-card transition cursor-pointer group">
           <div class="text-xs text-slate-500 font-bold group-hover:text-amber-600 flex items-center justify-between">
-            <span>Bé Sắp Đến Hạn</span>
+            <span>Sắp Đến Hạn</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
           </div>
           <div id="stat-due-soon-count" class="text-2xl font-black text-amber-600 mt-1">5 <span class="text-xs font-semibold text-slate-400">Pets</span></div>
           <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
-            <i class="fa-solid fa-clock text-amber-500"></i> Sắp đến hạn chăm sóc
+            <i class="fa-solid fa-clock text-amber-500"></i> Cần đặt lịch
           </div>
         </div>
 
         <!-- At Risk Pets -->
         <div onclick="openModal('recommendations', 'AT_RISK')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-red-500 hover-card transition cursor-pointer group">
           <div class="text-xs text-slate-500 font-bold group-hover:text-red-600 flex items-center justify-between">
-            <span>Nguy Cơ Rời Bỏ</span>
+            <span>Cần Tái Khám</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
           </div>
           <div id="stat-at-risk-count" class="text-2xl font-black text-red-600 mt-1">3 <span class="text-xs font-semibold text-slate-400">Pets</span></div>
           <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
-            <i class="fa-solid fa-triangle-exclamation text-red-500"></i> Nguy cơ rời bỏ
+            <i class="fa-solid fa-triangle-exclamation text-red-500"></i> Quá chu kỳ
           </div>
         </div>
 
         <!-- Active Memberships -->
         <div onclick="openModal('memberships')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-emerald-500 hover-card transition cursor-pointer group">
           <div class="text-xs text-slate-500 font-bold group-hover:text-emerald-600 flex items-center justify-between">
-            <span>Thẻ Hội Viên Hiệu Lực</span>
+            <span>Hội Viên Active</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
           </div>
           <div id="stat-memberships-count" class="text-2xl font-black text-emerald-600 mt-1">45 <span class="text-xs font-semibold text-slate-400">Active</span></div>
           <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
-            <i class="fa-solid fa-id-card text-emerald-500"></i> Thẻ hội viên hiệu lực
+            <i class="fa-solid fa-id-card text-emerald-500"></i> Gói trả trước
           </div>
         </div>
 
@@ -226,19 +221,19 @@
           </div>
           <div id="stat-cases-count" class="text-2xl font-black text-purple-600 mt-1">2 <span class="text-xs font-semibold text-slate-400">Cases</span></div>
           <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
-            <i class="fa-solid fa-comments text-purple-500"></i> Khiếu nại đang xử lý
+            <i class="fa-solid fa-comments text-purple-500"></i> Chờ phản hồi
           </div>
         </div>
 
         <!-- WooCommerce Orders -->
         <div onclick="openModal('woocommerce')" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs hover:border-indigo-500 hover-card transition cursor-pointer group">
           <div class="text-xs text-slate-500 font-bold group-hover:text-indigo-600 flex items-center justify-between">
-            <span>Đơn WooCommerce</span>
+            <span>Đơn Hàng Online</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
           </div>
           <div id="stat-wc-count" class="text-2xl font-black text-indigo-600 mt-1">3 <span class="text-xs font-semibold text-slate-400">Orders</span></div>
           <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
-            <i class="fa-brands fa-wordpress text-indigo-500"></i> Đồng bộ WordPress
+            <i class="fa-brands fa-wordpress text-indigo-500"></i> WooCommerce
           </div>
         </div>
       </div>
@@ -247,7 +242,7 @@
     <!-- DOCTYPE MODULES GRID (FULL INTERACTIVITY) -->
     <div class="space-y-2">
       <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-        Danh Mục Quản Trị Nghiệp Vụ (Frappe DocTypes — Bấm vào mục bất kỳ để thao tác)
+        Danh Mục Quản Trị Nghiệp Vụ
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         
@@ -337,12 +332,12 @@
           </div>
           <ul class="space-y-1 text-xs">
             <li onclick="openModal('recommendations')" class="flex items-center justify-between p-2 hover:bg-purple-50 hover:text-purple-950 rounded-lg cursor-pointer transition font-semibold">
-              <span class="flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-slate-400 w-4"></i> Care Recommendations (AI)</span>
-              <span class="text-purple-700 bg-purple-50 border border-purple-200 text-[11px] px-2 py-0.5 rounded font-bold">EWMA / Tukey</span>
+              <span class="flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-slate-400 w-4"></i> Đề Xuất Chăm Sóc Định Kỳ</span>
+              <span class="text-purple-700 bg-purple-50 border border-purple-200 text-[11px] px-2 py-0.5 rounded font-bold">Đến Hạn</span>
             </li>
             <li onclick="openModal('tasks')" class="flex items-center justify-between p-2 hover:bg-purple-50 hover:text-purple-950 rounded-lg cursor-pointer transition font-semibold">
-              <span class="flex items-center gap-2"><i class="fa-solid fa-list-check text-slate-400 w-4"></i> Staff Tasks / ToDos</span>
-              <span class="text-slate-500 text-[11px]">Tự động giao việc</span>
+              <span class="flex items-center gap-2"><i class="fa-solid fa-list-check text-slate-400 w-4"></i> Nhiệm Vụ & Lịch CSKH</span>
+              <span class="text-slate-500 text-[11px]">Đang Xử Lý</span>
             </li>
           </ul>
         </div>
@@ -356,7 +351,7 @@
           <ul class="space-y-1 text-xs">
             <li onclick="openModal('kpis')" class="flex items-center justify-between p-2.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg cursor-pointer transition font-bold text-emerald-950 border border-emerald-200">
               <span class="flex items-center gap-2"><i class="fa-solid fa-chart-column text-emerald-600 w-4"></i> PetCare KPI Overview</span>
-              <span class="text-emerald-800 bg-white border border-emerald-300 text-[11px] px-2 py-0.5 rounded font-extrabold">8 KPIs Chuẩn</span>
+              <span class="text-emerald-800 bg-white border border-emerald-300 text-[11px] px-2 py-0.5 rounded font-extrabold">Thời Gian Thực</span>
             </li>
           </ul>
         </div>
@@ -377,7 +372,7 @@
             </li>
             <li onclick="openModal('woocommerce_audit')" class="flex items-center justify-between p-2 hover:bg-indigo-50 rounded-lg cursor-pointer transition font-semibold text-slate-700">
               <span class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-600 w-4"></i> Webhook HMAC-SHA256</span>
-              <span class="text-emerald-700 bg-emerald-50 border border-emerald-200 text-[10px] px-2 py-0.5 rounded font-mono font-bold">100% Validated</span>
+              <span class="text-emerald-700 bg-emerald-50 border border-emerald-200 text-[10px] px-2 py-0.5 rounded font-mono font-bold">Đã Kích Hoạt</span>
             </li>
           </ul>
         </div>
@@ -394,7 +389,7 @@
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
             </li>
             <li onclick="window.open('/?tab=cycle', '_blank')" class="flex items-center justify-between p-2 hover:bg-teal-50 rounded-lg cursor-pointer transition text-xs font-semibold text-slate-700">
-              <span class="flex items-center gap-2"><i class="fa-solid fa-notes-medical text-teal-600 w-4"></i> Theo Dõi Chu Kỳ & Đề Xuất</span>
+              <span class="flex items-center gap-2"><i class="fa-solid fa-notes-medical text-teal-600 w-4"></i> Theo Dõi Chu Kỳ & CSKH</span>
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
             </li>
           </ul>
@@ -452,7 +447,7 @@
           </div>
           <div>
             <h2 id="modal-title" class="text-base font-extrabold text-slate-900 tracking-tight">Chi Tiết Bảng Dữ Liệu</h2>
-            <p id="modal-subtitle" class="text-xs text-slate-500 mt-0.5">Dữ liệu thực tế từ DocType trong hệ thống PetCare CRM</p>
+            <p id="modal-subtitle" class="text-xs text-slate-500 mt-0.5">Dữ liệu thực tế từ hệ thống PetCare CRM</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -472,7 +467,7 @@
 
       <!-- Modal Footer -->
       <div class="p-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
-        <span id="modal-footer-info">Hiển thị dữ liệu trực tiếp • Có thể tương tác và cập nhật trạng thái</span>
+        <span id="modal-footer-info">Dữ liệu trực tiếp từ hệ thống</span>
         <button onclick="closeModal()" class="px-3.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold transition">
           Đóng
         </button>
@@ -2158,96 +2153,96 @@
 
       if (type === 'woocommerce') {
         title.innerText = 'Đồng Bộ Đơn Hàng WooCommerce (WooCommerce Order Sync)';
-        subtitle.innerText = 'Hứng đơn hàng đa kênh từ WordPress, xác thực HMAC-SHA256, tự động gán Contact, Pet & Opportunity';
+        subtitle.innerText = 'Danh sách đơn hàng trực tuyến & trạng thái xử lý';
         icon.innerHTML = '<i class="fa-brands fa-wordpress text-indigo-600"></i>';
         renderWooCommerceTable(body);
       } else if (type === 'woocommerce_audit') {
         title.innerText = 'Bảo Mật Webhook & Kiểm Toán WooCommerce (A4.8 Audit)';
-        subtitle.innerText = 'Xác thực chữ ký X-WC-Webhook-Signature, bảo vệ Idempotency 2 tầng và nhật ký Delivery';
+        subtitle.innerText = 'Xác thực chữ ký HMAC-SHA256 & kiểm soát Idempotency';
         icon.innerHTML = '<i class="fa-solid fa-shield-halved text-emerald-600"></i>';
         renderWooCommerceAudit(body);
       } else if (type === 'leads') {
         title.innerText = 'Danh Sách Khách Hàng Tiềm Năng (PetCare Leads)';
-        subtitle.innerText = 'Tiếp nhận Lead đa kênh, phân loại trình độ và chuyển đổi sang Khách hàng & Thú cưng';
+        subtitle.innerText = 'Danh sách khách hàng tiềm năng đa kênh';
         icon.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
         renderLeadsTable(body);
       } else if (type === 'appointments') {
         title.innerText = 'Quản Lý Lịch Hẹn Chăm Sóc & Khám (PetCare Appointments)';
-        subtitle.innerText = 'Theo dõi lịch hẹn khách đặt trước, hỗ trợ 1-click Check-in chuyển khách vào quầy POS';
+        subtitle.innerText = 'Danh sách lịch hẹn đặt trước & hỗ trợ check-in';
         icon.innerHTML = '<i class="fa-solid fa-calendar-check"></i>';
         renderAppointmentsTable(body);
       } else if (type === 'memberships') {
         title.innerText = 'Quản Lý Thẻ Hội Viên & Số Dư Ví (Customer Memberships)';
-        subtitle.innerText = 'Quản trị thẻ thành viên, nạp tiền ví, gia hạn và theo dõi số lượt dịch vụ còn dư';
+        subtitle.innerText = 'Quản trị thẻ thành viên & số dư ví khả dụng';
         icon.innerHTML = '<i class="fa-solid fa-credit-card"></i>';
         renderMembershipsTable(body);
       } else if (type === 'visits') {
         title.innerText = 'Sổ Nhật Ký Dịch Vụ Khám & Chăm Sóc (Service Visits)';
-        subtitle.innerText = 'Nhật ký từng lần thú cưng ghé phòng khám, cấn trừ quyền lợi thẻ hoặc thanh toán';
+        subtitle.innerText = 'Lịch sử thú cưng sử dụng dịch vụ tại phòng khám';
         icon.innerHTML = '<i class="fa-solid fa-notes-medical"></i>';
         renderVisitsTable(body);
       } else if (type === 'recommendations') {
         title.innerText = 'Đề Xuất Chăm Sóc & Dự Báo Tái Khám (Care Forecast)';
-        subtitle.innerText = 'Phân tích chu kỳ chăm sóc định kỳ và cảnh báo thú cưng cần tái khám hoặc giữ chân';
+        subtitle.innerText = 'Danh sách thú cưng đến chu kỳ chăm sóc định kỳ';
         icon.innerHTML = '<i class="fa-solid fa-brain"></i>';
         renderRecommendationsTable(body, filter);
       } else if (type === 'kpis') {
         title.innerText = 'Báo Cáo Tổng Hợp Chỉ Số CRM & Analytics (8 Chuẩn)';
-        subtitle.innerText = 'Doanh thu gộp/ròng, tỷ lệ chuyển đổi, tỷ lệ giữ chân và hiệu quả đa chi nhánh';
+        subtitle.innerText = 'Doanh thu, tỷ lệ chuyển đổi và chỉ số tăng trưởng';
         icon.innerHTML = '<i class="fa-solid fa-chart-line"></i>';
         actionBtn.classList.add('hidden');
         renderKpisDashboard(body);
       } else if (type === 'plans') {
         title.innerText = 'Cấu Hình Gói Hội Viên & Quyền Lợi (Membership Plans)';
-        subtitle.innerText = 'Thiết lập danh mục gói, đơn giá và các quyền lợi dịch vụ đi kèm';
+        subtitle.innerText = 'Danh mục gói dịch vụ trả trước và bảng quyền lợi';
         icon.innerHTML = '<i class="fa-solid fa-tags"></i>';
         renderPlansTable(body);
       
       } else if (type === 'cases') {
         title.innerText = 'Chăm Sóc Khách Hàng & Khiếu Nại (PetCare Cases)';
-        subtitle.innerText = 'Quy trình xử lý Service Recovery, giải quyết thắc mắc và đóng khiếu nại dịch vụ';
+        subtitle.innerText = 'Theo dõi và giải quyết phản hồi từ khách hàng';
         icon.innerHTML = '<i class="fa-solid fa-headset"></i>';
         renderCasesTable(body);
       } else if (type === 'opportunities') {
         title.innerText = 'Cơ Hội Bán Hàng & Nâng Cấp Gói (Sales Opportunities)';
-        subtitle.innerText = 'Theo dõi Pipeline bán thẻ VIP, xác suất chốt đơn và doanh thu tiềm năng';
+        subtitle.innerText = 'Quản lý pipeline tư vấn gói dịch vụ hội viên';
         icon.innerHTML = '<i class="fa-solid fa-funnel-dollar"></i>';
         renderOpportunitiesTable(body);
       } else if (type === 'customers') {
         title.innerText = 'Danh Sách Khách Hàng (Customers & Contacts)';
-        subtitle.innerText = 'Hồ sơ khách hàng chuẩn hóa, số điện thoại, chi tiêu tích lũy và số lượng thú cưng';
+        subtitle.innerText = 'Hồ sơ thông tin liên hệ và lịch sử giao dịch';
         icon.innerHTML = '<i class="fa-solid fa-users"></i>';
         renderCustomersTable(body);
       } else if (type === 'pets') {
         title.innerText = 'Hồ Sơ Thú Cưng Đã Định Danh (Pet Profiles)';
-        subtitle.innerText = 'Quản lý thông tin giống loài, ngày sinh, cân nặng, tiền sử và chủ nuôi';
+        subtitle.innerText = 'Thông tin giống loài, cân nặng và tiền sử chăm sóc';
         icon.innerHTML = '<i class="fa-solid fa-paw"></i>';
         renderPetsTable(body);
       } else if (type === 'services') {
         title.innerText = 'Bảng Giá & Danh Mục Dịch Vụ Chuẩn (PetCare Services)';
-        subtitle.innerText = 'Biểu phí niêm yết chuẩn, chu kỳ khuyến nghị và loài áp dụng';
+        subtitle.innerText = 'Biểu phí dịch vụ và chu kỳ khuyến nghị';
         icon.innerHTML = '<i class="fa-solid fa-list-check"></i>';
         renderServicesTable(body);
       } else if (type === 'transactions') {
         title.innerText = 'Lịch Sử Giao Dịch Ví Trả Trước (Wallet Transactions)';
-        subtitle.innerText = 'Sổ cái nạp ví và cấn trừ thanh toán minh bạch';
+        subtitle.innerText = 'Nhật ký nạp tiền ví và thanh toán dịch vụ';
         icon.innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i>';
         actionBtn.classList.add('hidden');
         renderTransactionsTable(body);
       } else if (type === 'tasks') {
         title.innerText = 'Nhiệm Vụ Nhân Viên & CSKH (Staff ToDos)';
-        subtitle.innerText = 'Công việc được hệ thống tự động giao cho nhân viên theo dõi đề xuất CSKH';
+        subtitle.innerText = 'Danh sách công việc chăm sóc khách hàng chủ động';
         icon.innerHTML = '<i class="fa-solid fa-list-ul"></i>';
         renderTasksTable(body);
       } else if (type === 'redemptions') {
         title.innerText = 'Sổ Cái Cấn Trừ Quyền Lợi (Benefit Redemption Ledger)';
-        subtitle.innerText = 'Audit Trail minh bạch: chi tiết từng lượt dịch vụ đã cấn trừ khỏi thẻ hội viên';
+        subtitle.innerText = 'Lịch sử khấu trừ lượt dịch vụ từ thẻ hội viên';
         icon.innerHTML = '<i class="fa-solid fa-clipboard-check"></i>';
         actionBtn.classList.add('hidden');
         renderRedemptionsTable(body);
       } else {
         title.innerText = `Quản Trị DocType: ${type.toUpperCase()}`;
-        subtitle.innerText = 'Đang kết nối dữ liệu từ Frappe DocType Controller';
+        subtitle.innerText = 'Dữ liệu Frappe DocType';
         icon.innerHTML = '<i class="fa-solid fa-database"></i>';
         body.innerHTML = `
           <div class="p-8 text-center text-slate-500">
