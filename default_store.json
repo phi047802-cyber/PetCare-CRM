@@ -1,0 +1,513 @@
+{
+  "customers": [
+    {
+      "id": "CUST-0001",
+      "name": "Nguyễn Văn An",
+      "phone": "0901234567",
+      "email": "an.nguyen@example.com",
+      "tier": "Gói Vàng VIP (Gold Care)",
+      "wallet": 850000,
+      "lastVisit": "2026-10-28",
+      "membershipId": "MEM-AN-GOLD-2026",
+      "membershipExpiry": "2027-04-01"
+    },
+    {
+      "id": "CUST-0002",
+      "name": "Trần Minh Tuấn",
+      "phone": "0912345678",
+      "email": "tuan.tran@example.com",
+      "tier": "Gói Bạc (Silver Care)",
+      "wallet": 200000,
+      "lastVisit": "2026-09-24",
+      "membershipId": "MEM-TUAN-SILVER",
+      "membershipExpiry": "2026-12-30"
+    },
+    {
+      "id": "CUST-0003",
+      "name": "Lê Thị Lan",
+      "phone": "0983456789",
+      "email": "lan.le@example.com",
+      "tier": "Gói Kim Cương (Diamond Care)",
+      "wallet": 1500000,
+      "lastVisit": "2026-11-01",
+      "membershipId": "MEM-LAN-DIAMOND",
+      "membershipExpiry": "2027-08-15"
+    },
+    {
+      "id": "CUST-0004",
+      "name": "Dương Bảo Châu",
+      "phone": "0918776655",
+      "email": "chau.duong@example.com",
+      "tier": "Khách Thân Thiết (Standard)",
+      "wallet": 450000,
+      "lastVisit": "2026-11-02",
+      "membershipId": "MEM-CHAU-STD",
+      "membershipExpiry": "2027-01-10"
+    }
+  ],
+  "pets": [
+    {
+      "id": "PET-BO",
+      "ownerId": "CUST-0001",
+      "name": "Bơ",
+      "kind": "dog",
+      "species": "Chó Corgi Wales",
+      "weight": "11.5 kg",
+      "ewmaCycleDays": 14,
+      "daysSinceLast": 12,
+      "benefits": [
+        {
+          "serviceId": "SVC-GROOM",
+          "label": "Tắm & Cắt tỉa lông (Grooming)",
+          "used": 3,
+          "total": 4
+        },
+        {
+          "serviceId": "SVC-SPA",
+          "label": "Spa Thư giãn Thảo dược",
+          "used": 4,
+          "total": 6
+        }
+      ]
+    },
+    {
+      "id": "PET-DAUDAU",
+      "ownerId": "CUST-0001",
+      "name": "Đậu Đậu",
+      "kind": "dog",
+      "species": "Chó Shiba Inu",
+      "weight": "9.2 kg",
+      "ewmaCycleDays": 21,
+      "daysSinceLast": 18,
+      "benefits": [
+        {
+          "serviceId": "SVC-NAIL",
+          "label": "Vệ sinh Tai & Cắt Móng",
+          "used": 2,
+          "total": 2
+        }
+      ]
+    },
+    {
+      "id": "PET-MIUMIU",
+      "ownerId": "CUST-0002",
+      "name": "Miu Miu",
+      "kind": "cat",
+      "species": "Mèo Anh lông ngắn",
+      "weight": "4.2 kg",
+      "ewmaCycleDays": 15,
+      "daysSinceLast": 55,
+      "benefits": [
+        {
+          "serviceId": "SVC-GROOM",
+          "label": "Tắm & Cắt tỉa lông (Grooming)",
+          "used": 4,
+          "total": 4
+        }
+      ]
+    },
+    {
+      "id": "PET-DAUPHONG",
+      "ownerId": "CUST-0003",
+      "name": "Đậu Phộng",
+      "kind": "dog",
+      "species": "Chó Poodle Tiny",
+      "weight": "4.3 kg",
+      "ewmaCycleDays": 14,
+      "daysSinceLast": 10,
+      "benefits": [
+        {
+          "serviceId": "SVC-GROOM",
+          "label": "Tắm & Cắt tỉa lông (Grooming)",
+          "used": 2,
+          "total": 8
+        },
+        {
+          "serviceId": "SVC-SPA",
+          "label": "Spa Thư giãn Thảo dược",
+          "used": 3,
+          "total": 6
+        }
+      ]
+    },
+    {
+      "id": "PET-BEBONG",
+      "ownerId": "CUST-0004",
+      "name": "Bé Bông",
+      "kind": "cat",
+      "species": "Mèo Ragdoll",
+      "weight": "4.6 kg",
+      "ewmaCycleDays": 20,
+      "daysSinceLast": 16,
+      "benefits": [
+        {
+          "serviceId": "SVC-SPA",
+          "label": "Spa Thư giãn Thảo dược",
+          "used": 1,
+          "total": 3
+        }
+      ]
+    }
+  ],
+  "plans": [
+    {
+      "name": "PLAN-BASIC",
+      "plan_name": "Gói Cơ Bản (Basic Care)",
+      "price": 1200000,
+      "duration_months": 3,
+      "description": "Phù hợp chăm sóc định kỳ 3 tháng cho 1 thú cưng.",
+      "benefits": [
+        {
+          "serviceId": "SVC-SPA",
+          "label": "Tắm & Spa Thảo dược",
+          "total": 3
+        },
+        {
+          "serviceId": "SVC-NAIL",
+          "label": "Vệ sinh Tai & Cắt Móng",
+          "total": 3
+        }
+      ]
+    },
+    {
+      "name": "PLAN-SILVER",
+      "plan_name": "Gói Bạc (Silver Care)",
+      "price": 2400000,
+      "duration_months": 6,
+      "description": "Tiết kiệm 20% chi phí Grooming và Spa trong 6 tháng.",
+      "benefits": [
+        {
+          "serviceId": "SVC-GROOM",
+          "label": "Tắm & Cắt tỉa lông (Grooming)",
+          "total": 4
+        },
+        {
+          "serviceId": "SVC-SPA",
+          "label": "Spa Thư giãn Thảo dược",
+          "total": 4
+        }
+      ]
+    },
+    {
+      "name": "PLAN-GOLD",
+      "plan_name": "Gói Vàng VIP (Gold Care)",
+      "price": 4800000,
+      "duration_months": 12,
+      "description": "Ưu đãi toàn diện 12 tháng, ưu tiên đặt hẹn và chiết khấu spa.",
+      "benefits": [
+        {
+          "serviceId": "SVC-GROOM",
+          "label": "Tắm & Cắt tỉa lông (Grooming)",
+          "total": 8
+        },
+        {
+          "serviceId": "SVC-SPA",
+          "label": "Spa Thư giãn Thảo dược",
+          "total": 6
+        },
+        {
+          "serviceId": "SVC-NAIL",
+          "label": "Vệ sinh Tai & Cắt Móng",
+          "total": 6
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "id": "SVC-GROOM",
+      "name": "Cắt tỉa & Tạo kiểu (Grooming)",
+      "price": 350000,
+      "duration": "90 phút",
+      "cycle": "14 ngày",
+      "icon": "scissors"
+    },
+    {
+      "id": "SVC-SPA",
+      "name": "Tắm & Spa Thảo dược",
+      "price": 250000,
+      "duration": "60 phút",
+      "cycle": "7 ngày",
+      "icon": "bath"
+    },
+    {
+      "id": "SVC-NAIL",
+      "name": "Vệ sinh Tai & Cắt Móng",
+      "price": 100000,
+      "duration": "30 phút",
+      "cycle": "14 ngày",
+      "icon": "sparkles"
+    },
+    {
+      "id": "SVC-VAX",
+      "name": "Tiêm phòng & Khám tổng quát",
+      "price": 300000,
+      "duration": "45 phút",
+      "cycle": "90 ngày",
+      "icon": "syringe"
+    }
+  ],
+  "visits": [
+    {
+      "id": "VIS-2026-0105",
+      "customerId": "CUST-0001",
+      "petName": "Bơ",
+      "serviceName": "Cắt tỉa & Tạo kiểu (Grooming)",
+      "date": "2026-10-28",
+      "orig": 350000,
+      "discount": 350000,
+      "final": 0,
+      "note": "Khấu trừ Gói Vàng VIP"
+    },
+    {
+      "id": "VIS-2026-0089",
+      "customerId": "CUST-0001",
+      "petName": "Đậu Đậu",
+      "serviceName": "Vệ sinh Tai & Cắt Móng",
+      "date": "2026-10-14",
+      "orig": 100000,
+      "discount": 100000,
+      "final": 0,
+      "note": "Khấu trừ Gói Vàng VIP"
+    },
+    {
+      "id": "VIS-2026-0072",
+      "customerId": "CUST-0002",
+      "petName": "Miu Miu",
+      "serviceName": "Cắt tỉa & Tạo kiểu (Grooming)",
+      "date": "2026-09-24",
+      "orig": 350000,
+      "discount": 350000,
+      "final": 0,
+      "note": "Khấu trừ Gói Bạc"
+    },
+    {
+      "id": "VIS-2026-0060",
+      "customerId": "CUST-0003",
+      "petName": "Đậu Phộng",
+      "serviceName": "Tắm & Spa Thảo dược",
+      "date": "2026-11-01",
+      "orig": 250000,
+      "discount": 250000,
+      "final": 0,
+      "note": "Khấu trừ Gói Kim Cương"
+    },
+    {
+      "id": "VIS-2026-0055",
+      "customerId": "CUST-0004",
+      "petName": "Bé Bông",
+      "serviceName": "Tắm & Spa Thảo dược",
+      "date": "2026-11-02",
+      "orig": 250000,
+      "discount": 250000,
+      "final": 0,
+      "note": "Khấu trừ Gói Thân Thiết"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "APT-001",
+      "customerId": "CUST-0001",
+      "customerName": "Nguyễn Văn An",
+      "petId": "PET-BO",
+      "petName": "Bơ",
+      "serviceId": "SVC-GROOM",
+      "serviceName": "Cắt tỉa & Tạo kiểu (Grooming)",
+      "date": "2026-11-20",
+      "time": "14:30",
+      "staff": "KTV. Hoàng Nam (Grooming)",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-002",
+      "customerId": "CUST-0002",
+      "customerName": "Trần Minh Tuấn",
+      "petId": "PET-MIUMIU",
+      "petName": "Miu Miu",
+      "serviceId": "SVC-SPA",
+      "serviceName": "Tắm & Spa Thảo dược",
+      "date": "2026-11-20",
+      "time": "16:00",
+      "staff": "KTV. Minh Tú (Spa)",
+      "status": "Scheduled"
+    },
+    {
+      "id": "APT-003",
+      "customerId": "CUST-0003",
+      "customerName": "Lê Thị Lan",
+      "petId": "PET-DAUPHONG",
+      "petName": "Đậu Phộng",
+      "serviceId": "SVC-GROOM",
+      "serviceName": "Cắt tỉa & Tạo kiểu (Grooming)",
+      "date": "2026-11-21",
+      "time": "10:00",
+      "staff": "KTV. Hoàng Nam (Grooming)",
+      "status": "Scheduled"
+    }
+  ],
+  "telemetry": [
+    {
+      "id": "REC-01",
+      "customerId": "CUST-0002",
+      "customerName": "Trần Minh Tuấn",
+      "petName": "Miu Miu",
+      "service": "Grooming",
+      "ewmaDays": 15,
+      "daysElapsed": 55,
+      "ratio": 3.67,
+      "type": "AT_RISK",
+      "status": "NEW",
+      "reason": "Vượt chu kỳ chăm sóc định kỳ (55 ngày chưa tái khám, chu kỳ 15 ngày)."
+    },
+    {
+      "id": "REC-02",
+      "customerId": "CUST-0001",
+      "customerName": "Nguyễn Văn An",
+      "petName": "Bơ",
+      "service": "Grooming",
+      "ewmaDays": 14,
+      "daysElapsed": 12,
+      "ratio": 0.86,
+      "type": "DUE_SOON",
+      "status": "NEW",
+      "reason": "Còn 1 lượt miễn phí Gói Vàng VIP, dự kiến đến hạn sau 2 ngày."
+    },
+    {
+      "id": "REC-03",
+      "customerId": "CUST-0001",
+      "customerName": "Nguyễn Văn An",
+      "petName": "Đậu Đậu",
+      "service": "Vệ sinh Tai & Móng",
+      "ewmaDays": 21,
+      "daysElapsed": 18,
+      "ratio": 0.86,
+      "type": "DUE_SOON",
+      "status": "NEW",
+      "reason": "Dự kiến đến lịch vệ sinh móng trong 3 ngày tới."
+    },
+    {
+      "id": "REC-04",
+      "customerId": "CUST-0003",
+      "customerName": "Lê Thị Lan",
+      "petName": "Đậu Phộng",
+      "service": "Grooming",
+      "ewmaDays": 14,
+      "daysElapsed": 10,
+      "ratio": 0.71,
+      "type": "NOMINAL",
+      "status": "NEW",
+      "reason": "Chu kỳ ổn định, còn 6 lượt Grooming trong Gói Kim Cương."
+    },
+    {
+      "id": "REC-05",
+      "customerId": "CUST-0004",
+      "customerName": "Dương Bảo Châu",
+      "petName": "Bé Bông",
+      "service": "Spa Thảo dược",
+      "ewmaDays": 20,
+      "daysElapsed": 16,
+      "ratio": 0.8,
+      "type": "DUE_SOON",
+      "status": "NEW",
+      "reason": "Sắp đến lịch thư giãn spa định kỳ cuối tháng."
+    }
+  ],
+  "leads": [
+    {
+      "id": "LEAD-001",
+      "name": "Hoàng Gia Bảo",
+      "phone": "0908112233",
+      "source": "Website Form",
+      "status": "Mới (New)"
+    },
+    {
+      "id": "LEAD-002",
+      "name": "Nguyễn Thu Hà",
+      "phone": "0919445566",
+      "source": "Facebook Ads",
+      "status": "Đã liên hệ"
+    },
+    {
+      "id": "LEAD-003",
+      "name": "Vũ Hải Đăng",
+      "phone": "0933778899",
+      "source": "Hotline",
+      "status": "Tiềm năng"
+    },
+    {
+      "id": "LEAD-004",
+      "name": "Phạm Kiều Trang",
+      "phone": "0977223344",
+      "source": "Giới thiệu",
+      "status": "Hẹn lịch khám"
+    }
+  ],
+  "opportunities": [
+    {
+      "title": "Gói Kim Cương Annual — Nguyễn Văn An",
+      "value": 18500000,
+      "stage": "Negotiation"
+    },
+    {
+      "title": "Gói Chăm Sóc Toàn Diện — Công ty PetHouse",
+      "value": 14200000,
+      "stage": "Proposal"
+    },
+    {
+      "title": "Gói Bạc 6 Tháng — Trần Minh Tuấn",
+      "value": 8500000,
+      "stage": "Qualified"
+    },
+    {
+      "title": "Gói Vàng VIP — Lê Thị Lan",
+      "value": 6200000,
+      "stage": "Won"
+    }
+  ],
+  "cases": [
+    {
+      "id": "CASE-101",
+      "customer": "Trần Minh Tuấn",
+      "subject": "Hỏi lịch tiêm phòng dại cho Miu Miu",
+      "priority": "Trung bình",
+      "status": "Đang xử lý"
+    },
+    {
+      "id": "CASE-102",
+      "customer": "Nguyễn Văn An",
+      "subject": "Yêu cầu xuất hóa đơn VAT gói VIP",
+      "priority": "Thấp",
+      "status": "Đã giải quyết"
+    }
+  ],
+  "outbox": [
+    {
+      "id": "MSG-1001",
+      "channel": "Email",
+      "recipient": "an.nguyen@example.com",
+      "subject": "[PetCare] Xác nhận quyền lợi Gói Vàng VIP — Bé Bơ",
+      "body": "Kính gửi Nguyễn Văn An, bé Bơ hiện còn 1 lượt Grooming miễn phí trong Gói Vàng VIP.",
+      "sent_at": "2026-11-20 09:15:00",
+      "status": "Delivered"
+    },
+    {
+      "id": "MSG-1002",
+      "channel": "Zalo ZNS",
+      "recipient": "0912345678",
+      "subject": "Nhắc lịch chăm sóc định kỳ cho bé Miu Miu",
+      "body": "Xin chào Trần Minh Tuấn, đã 55 ngày kể từ lần Grooming gần nhất của Miu Miu. PetCare tặng bạn mã ưu đãi đặt lịch sớm.",
+      "sent_at": "2026-11-20 10:30:00",
+      "status": "Delivered"
+    },
+    {
+      "id": "MSG-1003",
+      "channel": "Email",
+      "recipient": "lan.le@example.com",
+      "subject": "[PetCare] Chào mừng Hội viên Kim Cương — Bé Đậu Phộng",
+      "body": "Chúc mừng Lê Thị Lan đã đăng ký thành công Gói Kim Cương VIP thời hạn 12 tháng.",
+      "sent_at": "2026-11-20 11:00:00",
+      "status": "Delivered"
+    }
+  ],
+  "serviceRevenueMonth": 68400000
+}
