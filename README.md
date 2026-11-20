@@ -3,7 +3,7 @@
 > **Hệ Thống Quản Lý Quan Hệ Khách Hàng Chuyên Biệt Cho Ngành Chăm Sóc Thú Cưng**  
 > **Nền tảng**: Frappe Framework v15 (Desk Native Architecture)  
 > **Phiên bản hoàn thiện**: 2.0 (Prompt 10 Final Handover Release)  
-> **Kiểm thử tự động**: **106 / 106 Tests PASS (100.0%)**
+> **Kiểm thử tự động**: **173 / 173 Tests PASS (100.0%)**
 
 ---
 
@@ -45,7 +45,7 @@ python start_preview.py
 ```
 * **Cổng Khách Hàng & Thu Ngân POS**: `http://127.0.0.1:8080/`
 * **Không Gian Làm Việc Frappe Desk**: `http://127.0.0.1:8080/desk` (hoặc `/app`)
-* **Chạy 106 Bài Test Tự Động (100% PASS)**:
+* **Chạy 173 Bài Test Tự Động (100% PASS)**:
   ```bash
   python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
   ```
@@ -87,7 +87,7 @@ Tài liệu dataset, kịch bản demo và checklist ảnh minh chứng nằm t�
 
 ## 🧪 Kiểm Thử Tự Động (Automated Testing)
 
-Toàn bộ 106 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
+Toàn bộ 173 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
 
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
@@ -110,8 +110,11 @@ Executing Suite 9: WordPress Lead Capture Integration ... [PASS] (6 passed)
 Executing Suite 10: Audit Remediation & System Hardening ... [PASS] (14 passed)
 Executing Suite 11: WooCommerce Order Webhook Integration ... [PASS] (11 passed)
 Executing Suite 12: Reproducible Demo Dataset Contract ... [PASS] (7 passed)
+Executing Suite 13: Full System Public APIs & Controller Layer ... [PASS] (35 passed)
+Executing Suite 14: Scheduled Background Tasks & 13 DocType Controllers ... [PASS] (17 passed)
+Executing Suite 15: Live Preview Web Server & Utilities Engine ... [PASS] (15 passed)
 ================================================================================
-Tổng số kịch bản kiểm thử : 106 | Thành công: 106 (100.0%)
+Tổng số kịch bản kiểm thử : 173 | Thành công: 173 (100.0%)
 ================================================================================
 ```
 

@@ -4556,3 +4556,83 @@ def woocommerce_order_webhook(
     frappe.db.commit()
     return result
 
+
+@frappe.whitelist()
+def suggest_best_benefit(
+    customer: str,
+    service_type: str,
+    original_price: float = 0.0,
+    pet: Optional[str] = None,
+    check_date: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Dynamic Best-Benefit Matcher:
+    Quét tất cả thẻ hội viên đang ACTIVE của khách hàng, tính số tiền được giảm
+    cho `service_type` và đề xuất thẻ tối ưu nhất (giảm nhiều nhất, sắp hết hạn trước).
+    """
+    _check_rate_limit("suggest_best_benefit")
+    customer = _sanitize_string(customer, max_len=140)
+    service_type = _sanitize_string(service_type, max_len=100)
+    pet = _sanitize_string(pet, max_len=140, allow_none=True)
+    price = max(0.0, float(original_price or 0.0))
+    ref_date = _parse_date(check_date)
+
+    filters = {"customer": customer, "status": STATUS_ACTIVE}
+    memberships = frappe.get_all(
+        "Customer Membership",
+        filters=filters,
+        fields=["name", "membership_plan", "pet", "end_date"],
+    ) or []
+
+    candidates: List[Dict[str, Any]] = []
+    for ms_row in memberships:
+        ms_pet = ms_row.get("pet")
+        if pet and ms_pet and ms_pet != pet:
+            continue
+        end_date = _parse_date(ms_row.get("end_date"))
+        if end_date < ref_date:
+            continue
+
+        ms_doc = frappe.get_doc("Customer Membership", ms_row["name"])
+        for b in getattr(ms_doc, "benefits", []) or []:
+            if str(getattr(b, "benefit_type", "")).lower() != service_type.lower():
+                continue
+            total_qty = int(getattr(b, "total_quantity", 0) or 0)
+            used_qty = int(getattr(b, "used_quantity", 0) or 0)
+            remaining = max(0, total_qty - used_qty)
+            if remaining <= 0:
+                continue
+
+            d_type = str(getattr(b, "discount_type", "FREE") or "FREE").upper()
+            d_val = float(getattr(b, "discount_value", 0.0) or 0.0)
+            if d_type == "FREE":
+                discount_amount = price
+            elif d_type == "PERCENTAGE":
+                discount_amount = round(price * min(100.0, max(0.0, d_val)) / 100.0, 2)
+            else:
+                discount_amount = min(price, max(0.0, d_val))
+
+            candidates.append({
+                "membership": ms_row["name"],
+                "plan": ms_row.get("membership_plan"),
+                "pet": ms_pet,
+                "end_date": end_date.isoformat(),
+                "benefit_type": service_type,
+                "discount_type": d_type,
+                "discount_value": d_val,
+                "discount_amount": discount_amount,
+                "final_price": max(0.0, round(price - discount_amount, 2)),
+                "remaining_quantity": remaining,
+            })
+
+    candidates.sort(key=lambda c: (-c["discount_amount"], c["end_date"], c["remaining_quantity"]))
+    return {
+        "found": len(candidates) > 0,
+        "customer": customer,
+        "service_type": service_type,
+        "original_price": price,
+        "best_option": candidates[0] if candidates else None,
+        "alternatives": candidates[1:] if len(candidates) > 1 else [],
+    }
+
+

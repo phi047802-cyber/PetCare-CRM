@@ -17,6 +17,8 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'SAMEORIGIN')
         self.send_header('Connection', 'close')
         super().end_headers()
 
@@ -30,11 +32,60 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         clean_path = self.path.split('?')[0].rstrip('/')
+        if clean_path == '/api/health':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(b'{"status": "ok", "mode": "standalone-preview", "version": "2.0.0"}')
+            return
         if clean_path in ('', '/', '/frontend', '/frontend.html', '/index', '/index.html'):
             self.path = '/preview.html'
         elif clean_path in ('/app/petcare-crm', '/app', '/desk', '/desk_preview.html') or clean_path.startswith('/app/'):
             self.path = '/desk_preview.html'
         return super().do_GET()
+
+    def do_POST(self):
+        clean_path = self.path.split('?')[0].rstrip('/')
+        content_length = int(self.headers.get('Content-Length', 0))
+        body_bytes = self.rfile.read(content_length) if content_length > 0 else b''
+        
+        import json
+        try:
+            body = json.loads(body_bytes.decode('utf-8')) if body_bytes else {}
+        except Exception:
+            body = {}
+
+        if 'suggest_best_benefit' in clean_path:
+            cust = body.get('customer', 'CUST-0001')
+            service = body.get('service_type', 'Grooming')
+            price = float(body.get('original_price', 350000))
+            resp_payload = {
+                "message": {
+                    "found": True,
+                    "customer": cust,
+                    "service_type": service,
+                    "original_price": price,
+                    "best_option": {
+                        "membership": "MEM-AN-GOLD-2026",
+                        "plan": "G\u00f3i V\u00e0ng VIP (Gold Care)",
+                        "discount_type": "FREE",
+                        "discount_amount": price,
+                        "final_price": 0.0,
+                        "remaining_quantity": 1
+                    },
+                    "alternatives": []
+                }
+            }
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(resp_payload).encode('utf-8'))
+            return
+
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(b'{"message": {"success": true}}')
 
     def log_message(self, format, *args):
         # Format log ngắn gọn

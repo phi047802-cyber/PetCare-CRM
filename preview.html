@@ -396,6 +396,10 @@
 
         <!-- Right: Primary Actions & Desk Workspace Link -->
         <div class="flex items-center space-x-2 shrink-0">
+          <button type="button" onclick="showTopUpModal()" class="h-8.5 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition whitespace-nowrap cursor-pointer" title="Nạp tiền vào ví hội viên">
+            <i class="fa-solid fa-coins text-white text-xs"></i>
+            <span>Nạp Ví</span>
+          </button>
           <button type="button" onclick="showCreateCustomerModal()" class="h-8.5 px-3.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition whitespace-nowrap" title="Tạo mới hồ sơ khách hàng & thú cưng">
             <i class="fa-solid fa-user-plus text-xs"></i>
             <span>+ Thêm Khách</span>
@@ -478,14 +482,45 @@
       <!-- Results Container -->
       <div id="client-results-section" class="space-y-6">
         <!-- Initial Welcome Empty State -->
-        <div class="flat-card p-12 text-center text-slate-600 text-xs bg-white">
-          <div class="w-16 h-16 rounded-full bg-teal-50 text-teal-600 mx-auto flex items-center justify-center text-2xl mb-3 shadow-xs">
+        <div class="flat-card p-8 text-center text-slate-600 text-xs bg-white">
+          <div class="w-14 h-14 rounded-full bg-teal-50 text-teal-600 mx-auto flex items-center justify-center text-xl mb-3 shadow-xs">
             <i class="fa-solid fa-address-card"></i>
           </div>
           <h2 class="text-sm font-extrabold text-slate-900 mb-1">Tra Cứu Hồ Sơ & Quyền Lợi Hội Viên</h2>
-          <p class="text-xs text-slate-500 max-w-md mx-auto">
+          <p class="text-xs text-slate-500 max-w-md mx-auto mb-5">
             Nhập số điện thoại hoặc tên khách hàng ở thanh tìm kiếm phía trên để tra cứu hồ sơ.
           </p>
+
+          <!-- Quick Action Feature Grid (Clean, Zero Subtitle Jargon) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-3xl mx-auto text-left pt-4 border-t border-slate-100">
+            <div onclick="showCreateCustomerModal()" class="p-3.5 rounded-xl border border-slate-200/90 bg-slate-50/70 hover:bg-white hover:border-teal-500 hover:shadow-xs transition cursor-pointer group">
+              <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-teal-700 flex items-center justify-center text-sm mb-2 shadow-2xs group-hover:bg-teal-50 transition">
+                <i class="fa-solid fa-user-plus"></i>
+              </div>
+              <div class="font-bold text-xs text-slate-900">Thêm Khách Hàng</div>
+            </div>
+
+            <div onclick="showTopUpModal()" class="p-3.5 rounded-xl border border-slate-200/90 bg-slate-50/70 hover:bg-white hover:border-amber-500 hover:shadow-xs transition cursor-pointer group">
+              <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-amber-600 flex items-center justify-center text-sm mb-2 shadow-2xs group-hover:bg-amber-50 transition">
+                <i class="fa-solid fa-coins"></i>
+              </div>
+              <div class="font-bold text-xs text-slate-900">Nạp Tiền Ví Trả Trước</div>
+            </div>
+
+            <div onclick="fillSearch('0901234567')" class="p-3.5 rounded-xl border border-slate-200/90 bg-slate-50/70 hover:bg-white hover:border-sky-500 hover:shadow-xs transition cursor-pointer group">
+              <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-sky-600 flex items-center justify-center text-sm mb-2 shadow-2xs group-hover:bg-sky-50 transition">
+                <i class="fa-solid fa-id-card"></i>
+              </div>
+              <div class="font-bold text-xs text-slate-900">Hồ Sơ Mẫu (Nguyễn Văn An)</div>
+            </div>
+
+            <div onclick="switchTab('pos')" class="p-3.5 rounded-xl border border-slate-200/90 bg-slate-50/70 hover:bg-white hover:border-emerald-500 hover:shadow-xs transition cursor-pointer group">
+              <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-emerald-600 flex items-center justify-center text-sm mb-2 shadow-2xs group-hover:bg-emerald-50 transition">
+                <i class="fa-solid fa-cash-register"></i>
+              </div>
+              <div class="font-bold text-xs text-slate-900">Quầy Tiếp Nhận (POS)</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1027,6 +1062,8 @@
   let activeCycleFilter = 'all';
 
   function switchTab(tab) {
+    if (tab === 'ai' || tab === 'cskh') tab = 'cycle';
+    if (tab === 'kpi') tab = 'business';
     currentTab = tab;
     ['client', 'pos', 'cycle', 'business'].forEach(t => {
       const el = document.getElementById('tab-' + t);
@@ -1045,8 +1082,13 @@
 
     if (tab === 'pos') {
       if (currentPosSubView === 'appts') loadAppointmentsData();
+      else if (globalOverviewData && globalOverviewData.pets) renderPosSelectOptions(globalOverviewData.pets);
     }
     if (tab === 'business') loadBusinessDashboard();
+    if (tab === 'cycle') {
+      if (globalOverviewData) renderAiDashboard(globalOverviewData);
+      else loadOverviewData();
+    }
   }
 
   function switchPosSubView(subview) {
@@ -4461,9 +4503,25 @@
 
     if (method === 'top_up_membership') {
       const amt = Number(args.amount) || 500000;
-      const cust = MOCK_DB.customers[0];
-      cust.wallet_balance += amt;
+      const targetQuery = (args.customer || '').toLowerCase().trim();
+      let cust = MOCK_DB.customers.find(c => 
+        (c.customer_name && c.customer_name.toLowerCase().includes(targetQuery)) ||
+        (c.name && c.name.toLowerCase().includes(targetQuery)) ||
+        (c.phone && c.phone.includes(targetQuery))
+      ) || MOCK_DB.customers[0];
+
+      cust.wallet_balance = (Number(cust.wallet_balance) || 0) + amt;
       if (cust.membership) cust.membership.balance = cust.wallet_balance;
+      if (!cust.wallet_transactions) cust.wallet_transactions = [];
+      cust.wallet_transactions.unshift({
+        transaction_id: 'WTX-' + Date.now().toString().slice(-6),
+        date: new Date().toISOString().slice(0, 10),
+        type: 'Top-Up',
+        amount: amt,
+        balance_after: cust.wallet_balance,
+        payment_method: args.payment_method || 'Tiền mặt',
+        description: 'Nạp tiền vào tài khoản ví'
+      });
       return {
         success: true,
         message: 'Đã nạp thành công ' + amt.toLocaleString('vi-VN') + ' đ vào ví thành viên!',
@@ -4867,11 +4925,16 @@
         <div class="flat-card p-4 bg-white border border-slate-200/90 rounded-xl flex items-center justify-between shadow-2xs hover:border-slate-300 transition">
           <div>
             <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Số Dư Ví Tài Khoản</div>
-            <div class="text-base font-bold text-slate-900 mt-0.5 tabular-nums">${Number(primaryMs?.balance || 0).toLocaleString('vi-VN')} đ</div>
+            <div class="text-base font-bold text-slate-900 mt-0.5 tabular-nums">${Number(primaryMs?.balance || customer.wallet_balance || 0).toLocaleString('vi-VN')} đ</div>
             <div class="text-xs text-slate-500 font-normal mt-0.5">Khả dụng cho mọi dịch vụ</div>
           </div>
-          <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-base shrink-0">
-            <i class="fa-solid fa-wallet"></i>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="showTopUpModal('${displayName}', '${firstPetName}', '${primaryMs?.name || ''}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer" title="Nạp thêm tiền vào ví">
+              <i class="fa-solid fa-plus text-[10px]"></i> Nạp Ví
+            </button>
+            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-base shrink-0">
+              <i class="fa-solid fa-wallet"></i>
+            </div>
           </div>
         </div>
 
@@ -4947,7 +5010,7 @@
                 <i class="fa-solid fa-cash-register text-xs"></i> Tiếp Nhận Tại Quầy POS
               </button>
               <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="topUpPrompt('${customer.name}', '${firstPetName}', '${primaryMs?.name || ''}')" class="btn-white w-full h-8.5 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 shadow-2xs">
+                <button type="button" onclick="showTopUpModal('${displayName}', '${firstPetName}', '${primaryMs?.name || ''}')" class="btn-white w-full h-8.5 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 shadow-2xs hover:border-amber-400 hover:text-amber-700 cursor-pointer">
                   <i class="fa-solid fa-coins text-amber-600 text-xs"></i> Nạp Ví
                 </button>
                 ${isCustomerMember ? `
@@ -5118,7 +5181,7 @@
                 <span class="text-sm font-black">${Number(activeMs?.balance || 0).toLocaleString('vi-VN')} đ</span>
               </div>
               <div class="flex items-center gap-2">
-                <button type="button" onclick="topUpPrompt('${customer.name}', '${pet.pet_name || pet.name}', '${activeMs?.name || ''}')" class="btn-white h-8 px-3 text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs">
+                <button type="button" onclick="showTopUpModal('${displayName}', '${pet.pet_name || pet.name}', '${activeMs?.name || ''}')" class="btn-white h-8 px-3 text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs hover:border-amber-400 hover:text-amber-700 cursor-pointer">
                   <i class="fa-solid fa-coins text-amber-600 text-xs"></i> Nạp Ví
                 </button>
                 ${isPetMember ? `
@@ -6010,28 +6073,208 @@
   // ─────────────────────────────────────────────────────────────────
   // TOP UP & MEMBERSHIP REGISTRATION MODALS
   // ─────────────────────────────────────────────────────────────────
-  async function topUpPrompt(customerName, petName = null, membershipName = null) {
-    const targetTitle = petName ? `bé ${petName}` : `khách hàng ${customerName}`;
-    const amount = prompt(`Nhập số tiền nạp trực tiếp vào tài khoản ví của ${targetTitle} (VND):`, '500000');
-    if (!amount || isNaN(amount) || Number(amount) <= 0) {
-      if (amount !== null) showToast('Vui lòng nhập số tiền hợp lệ.', 'error');
-      return;
+  function showTopUpModal(customerName = null, petName = null, membershipName = null) {
+    let cust = customerName;
+    let pet = petName;
+    let currentBalance = 0;
+
+    if (!cust) {
+      const defaultPet = (globalOverviewData && globalOverviewData.pets && globalOverviewData.pets[0]) || null;
+      cust = defaultPet ? (defaultPet.owner_name || defaultPet.customer_id) : 'Nguyễn Văn An';
+      pet = defaultPet ? defaultPet.pet_name : 'Bơ';
     }
-    try {
-      const result = await callApi('top_up_membership', {
-        membership_name: membershipName,
-        customer: customerName,
-        pet: petName,
-        amount: Number(amount),
-        payment_method: 'Cash',
-      });
-      showToast(result.message, 'success');
-      searchClientPortal();
-      if (typeof loadOverviewData === 'function') loadOverviewData();
-    } catch (err) {
-      showToast(err.message, 'error');
+
+    const foundCust = (typeof MOCK_DB !== 'undefined' && MOCK_DB.customers && MOCK_DB.customers.find(c => 
+      (c.customer_name && c.customer_name.toLowerCase().includes(cust.toLowerCase())) ||
+      (c.name && c.name.toLowerCase().includes(cust.toLowerCase()))
+    )) || (typeof MOCK_DB !== 'undefined' && MOCK_DB.customers && MOCK_DB.customers[0]);
+
+    if (foundCust) {
+      cust = foundCust.customer_name || foundCust.name || cust;
+      currentBalance = Number(foundCust.wallet_balance || (foundCust.membership && foundCust.membership.balance) || 850000);
+    }
+
+    let existingOverlay = document.getElementById('topup-modal-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'topup-modal-overlay';
+    overlay.className = 'fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in';
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+    overlay.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200" role="dialog" aria-modal="true">
+        <!-- Header -->
+        <div class="p-5 border-b border-slate-200 flex justify-between items-start bg-slate-50/80">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center text-lg shadow-2xs">
+              <i class="fa-solid fa-coins"></i>
+            </div>
+            <div>
+              <h3 class="font-extrabold text-sm text-slate-900">Nạp Tiền Vào Ví Hội Viên</h3>
+              <div class="text-xs text-slate-500 font-medium mt-0.5">
+                Khách hàng: <span class="font-bold text-slate-800">${cust}</span>
+                ${pet ? ` · Bé: <span class="font-bold text-slate-800">${pet}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <button onclick="document.getElementById('topup-modal-overlay').remove()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <form class="p-5 space-y-4" onsubmit="submitTopUpForm(event, '${cust}', '${pet || ''}', '${membershipName || ''}')">
+          <!-- Balance info -->
+          <div class="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-xs text-amber-900">
+              <i class="fa-solid fa-wallet text-amber-600 text-sm"></i>
+              <span class="font-semibold">Số dư hiện tại:</span>
+            </div>
+            <span class="text-sm font-black text-amber-900 tabular-nums">${currentBalance.toLocaleString('vi-VN')} đ</span>
+          </div>
+
+          <!-- Amount Preset Chips -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Chọn Mức Nạp Nhanh</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="selectTopUpAmount(200000)" class="topup-chip-btn py-2 px-2.5 rounded-lg border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-bold text-slate-700 transition text-center cursor-pointer">+ 200.000 đ</button>
+              <button type="button" onclick="selectTopUpAmount(500000)" class="topup-chip-btn active py-2 px-2.5 rounded-lg border border-amber-500 bg-amber-50 text-xs font-bold text-amber-900 transition text-center cursor-pointer">+ 500.000 đ</button>
+              <button type="button" onclick="selectTopUpAmount(1000000)" class="topup-chip-btn py-2 px-2.5 rounded-lg border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-bold text-slate-700 transition text-center cursor-pointer">+ 1.000.000 đ</button>
+              <button type="button" onclick="selectTopUpAmount(2000000)" class="topup-chip-btn py-2 px-2.5 rounded-lg border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-bold text-slate-700 transition text-center cursor-pointer">+ 2.000.000 đ</button>
+              <button type="button" onclick="selectTopUpAmount(3000000)" class="topup-chip-btn py-2 px-2.5 rounded-lg border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-bold text-slate-700 transition text-center cursor-pointer">+ 3.000.000 đ</button>
+              <button type="button" onclick="selectTopUpAmount(5000000)" class="topup-chip-btn py-2 px-2.5 rounded-lg border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-bold text-slate-700 transition text-center cursor-pointer">+ 5.000.000 đ</button>
+            </div>
+          </div>
+
+          <!-- Custom Amount Input -->
+          <div>
+            <label for="topup-custom-amount" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Số Tiền Nạp (đ)</label>
+            <div class="relative">
+              <input type="number" id="topup-custom-amount" step="50000" min="50000" value="500000" required
+                oninput="onTopUpAmountChange(this.value)"
+                class="w-full px-3.5 py-2.5 form-control-custom text-sm font-bold text-slate-900 pr-14">
+              <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400 pointer-events-none">VND</span>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Hình Thức Thanh Toán</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white cursor-pointer text-xs font-semibold text-slate-800 has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50/50 has-[:checked]:text-teal-900">
+                <input type="radio" name="topup-method" value="Cash" checked class="text-teal-600 focus:ring-teal-500" onchange="toggleTopUpQr(false)">
+                <span>Tiền mặt</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white cursor-pointer text-xs font-semibold text-slate-800 has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50/50 has-[:checked]:text-teal-900">
+                <input type="radio" name="topup-method" value="VietQR" class="text-teal-600 focus:ring-teal-500" onchange="toggleTopUpQr(true)">
+                <span>VietQR</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white cursor-pointer text-xs font-semibold text-slate-800 has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50/50 has-[:checked]:text-teal-900">
+                <input type="radio" name="topup-method" value="Card" class="text-teal-600 focus:ring-teal-500" onchange="toggleTopUpQr(false)">
+                <span>Thẻ POS</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- VietQR Box (Hidden by default, shown when VietQR is selected) -->
+          <div id="topup-qr-box" class="hidden p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
+            <div class="text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-qrcode text-teal-600"></i> Quét mã VietQR Chuyển Khoản Nhanh
+            </div>
+            <div class="w-36 h-36 bg-white border border-slate-200 rounded-lg mx-auto flex items-center justify-center p-2 shadow-2xs">
+              <img id="topup-qr-img" src="https://api.vietqr.io/image/970422-0901234567-compact2.jpg?amount=500000&addInfo=NAPVI%20${encodeURIComponent(cust)}" alt="VietQR Nạp Ví" class="w-full h-full object-contain" onerror="this.src=''; this.parentElement.innerHTML='<div class=\\'text-[10px] text-slate-500 font-mono\\'>VietQR: MB Bank<br>STK: 0901234567<br>Số tiền: 500.000 đ</div>'">
+            </div>
+            <div class="text-[11px] text-slate-500 font-mono">Nội dung CK: <b class="text-slate-800">NAPVI ${cust}</b></div>
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            <button type="button" onclick="document.getElementById('topup-modal-overlay').remove()" class="btn-white px-4 py-2 text-xs font-semibold cursor-pointer">
+              Hủy
+            </button>
+            <button type="submit" id="btn-submit-topup" class="btn-teal px-5 py-2 text-xs font-bold flex items-center gap-1.5 shadow-sm bg-amber-600 hover:bg-amber-700 border-amber-600 cursor-pointer">
+              <i class="fa-solid fa-check"></i> Xác Nhận Nạp Tiền
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+  }
+
+  function selectTopUpAmount(val) {
+    const input = document.getElementById('topup-custom-amount');
+    if (input) input.value = val;
+    document.querySelectorAll('.topup-chip-btn').forEach(btn => {
+      if (btn.innerText.includes(val.toLocaleString('vi-VN'))) {
+        btn.className = 'topup-chip-btn active py-2 px-2.5 rounded-lg border border-amber-500 bg-amber-50 text-xs font-bold text-amber-900 transition text-center cursor-pointer';
+      } else {
+        btn.className = 'topup-chip-btn py-2 px-2.5 rounded-lg border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-bold text-slate-700 transition text-center cursor-pointer';
+      }
+    });
+    onTopUpAmountChange(val);
+  }
+
+  function onTopUpAmountChange(val) {
+    const qrImg = document.getElementById('topup-qr-img');
+    if (qrImg && qrImg.src) {
+      qrImg.src = qrImg.src.replace(/amount=\d+/, 'amount=' + (val || 0));
     }
   }
+
+  function toggleTopUpQr(show) {
+    const qrBox = document.getElementById('topup-qr-box');
+    if (qrBox) {
+      if (show) qrBox.classList.remove('hidden');
+      else qrBox.classList.add('hidden');
+    }
+  }
+
+  async function submitTopUpForm(e, custName, petName, msName) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-topup');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+    }
+
+    const amountInput = document.getElementById('topup-custom-amount');
+    const amount = Number(amountInput?.value || 500000);
+    const methodInput = document.querySelector('input[name="topup-method"]:checked');
+    const paymentMethod = methodInput ? methodInput.value : 'Cash';
+
+    try {
+      const res = await callApi('top_up_membership', {
+        customer: custName,
+        pet: petName,
+        membership_name: msName,
+        amount: amount,
+        payment_method: paymentMethod
+      });
+
+      const overlay = document.getElementById('topup-modal-overlay');
+      if (overlay) overlay.remove();
+
+      showToast(res.message || `Đã nạp thành công ${amount.toLocaleString('vi-VN')} đ vào ví!`, 'success');
+      
+      // Refresh current views
+      searchClientPortal();
+      if (typeof loadOverviewData === 'function') await loadOverviewData();
+      if (typeof loadBusinessDashboard === 'function') await loadBusinessDashboard();
+    } catch (err) {
+      showToast(err.message || 'Lỗi nạp ví.', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác Nhận Nạp Tiền';
+      }
+    }
+  }
+
+  // Backwards compatibility alias
+  window.topUpPrompt = showTopUpModal;
+  window.showTopUpModal = showTopUpModal;
 
   let selectedRegPlan = null;
 
@@ -6372,17 +6615,8 @@
     showRegisterMembershipDialog(targetCust, targetPet.trim() || petName);
   }
 
-  async function showQuickTopUpModal() {
-    const petList = (globalOverviewData && globalOverviewData.pets) || [];
-    let defaultPet = petList.find(p => p.membership_name) || petList[0];
-    let custName = defaultPet ? (defaultPet.customer_id || defaultPet.owner_name) : 'Nguyễn Văn An';
-    let petName = defaultPet ? defaultPet.pet_name : 'Bơ';
-    let msName = defaultPet ? defaultPet.membership_name : '';
-    
-    const choice = prompt(`Nhập Tên Khách Hàng nạp tiền ví (hoặc dùng mặc định: ${custName}):`, custName);
-    if (choice === null) return;
-    const targetCust = choice.trim() || custName;
-    topUpPrompt(targetCust, petName, msName);
+  function showQuickTopUpModal() {
+    showTopUpModal();
   }
 
   async function showQuickRenewModal() {
@@ -7348,6 +7582,7 @@ Nguyễn Minh Triết, 0987654321, triet.nguyen@demo.vn, 78 Hai Bà Trưng, Bé 
 
   window.addEventListener('DOMContentLoaded', async () => {
     await loadOverviewData();
+    await loadBusinessDashboard();
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
     const petParam = urlParams.get('pet');
@@ -7358,8 +7593,10 @@ Nguyễn Minh Triết, 0987654321, triet.nguyen@demo.vn, 78 Hai Bà Trưng, Bé 
       if (petParam) {
         setTimeout(() => quickSelectInPos('', petParam, 'Grooming'), 150);
       }
-    } else if (tabParam === 'ai' || tabParam === 'cskh') {
-      switchTab('ai');
+    } else if (tabParam === 'ai' || tabParam === 'cskh' || tabParam === 'cycle') {
+      switchTab('cycle');
+    } else if (tabParam === 'business' || tabParam === 'kpi') {
+      switchTab('business');
     } else {
       setTimeout(() => {
         fillSearch(queryParam || '0901234567');
