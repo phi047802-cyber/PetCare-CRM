@@ -3,7 +3,7 @@
 > **Hệ Thống Quản Lý Quan Hệ Khách Hàng Chuyên Biệt Cho Ngành Chăm Sóc Thú Cưng**  
 > **Nền tảng**: Frappe Framework v15 (Desk Native Architecture)  
 > **Phiên bản hoàn thiện**: 2.0 (Prompt 10 Final Handover Release)  
-> **Kiểm thử tự động**: **123 / 123 Tests PASS (100.0%)**
+> **Kiểm thử tự động**: **190 / 190 Tests PASS (100.0%)**
 
 ---
 
@@ -30,7 +30,7 @@ Hệ thống được thiết kế theo mô hình Clean Architecture 8 tầng, �
 * **Tầng 3 (Domain Layer)**: Business logic OOP thuần túy (`CarePatternAnalyzer`, `VisitPredictionService`, `RiskDetectionService`, `PricingEngine`).
 * **Tầng 2 (DocType Layer)**: Controllers và Schema JSON định nghĩa các thực thể và quan hệ cơ sở dữ liệu.
 * **Tầng 1 (Infrastructure Layer)**: Frappe Framework v15, MariaDB 11.x, Redis Cache & Queues.
-* **Tầng 7 & 8 (Automation & Testing)**: Tác vụ nền định kỳ và bộ kiểm thử tự động 123 test cases.
+* **Tầng 7 & 8 (Automation & Testing)**: Tác vụ nền định kỳ và bộ kiểm thử tự động 190 test cases.
 
 ---
 
@@ -45,7 +45,7 @@ python start_preview.py
 ```
 * **Cổng Khách Hàng & Thu Ngân POS**: `http://127.0.0.1:8080/`
 * **Không Gian Làm Việc Frappe Desk**: `http://127.0.0.1:8080/desk` (hoặc `/app`)
-* **Chạy 123 Bài Test Tự Động (100% PASS)**:
+* **Chạy 190 Bài Test Tự Động (100% PASS)**:
   ```bash
   python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
   ```
@@ -87,7 +87,7 @@ Tài liệu dataset, kịch bản demo và checklist ảnh minh chứng nằm t�
 
 ## 🧪 Kiểm Thử Tự Động (Automated Testing)
 
-Toàn bộ 123 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
+Toàn bộ 190 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
 
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
@@ -100,19 +100,22 @@ PETCARE CRM — AUTOMATED TEST SUITE & END-TO-END VALIDATOR
 ================================================================================
 Executing Suite 1: CRM Core & Lead/Opportunity Lifecycle ... [PASS] (4 passed)
 Executing Suite 2: PetCare Service Operations & Visit Catalog ... [PASS] (4 passed)
-Executing Suite 3: Membership Lifecycle, Benefits & Redemption ... [PASS] (8 passed)
+Executing Suite 3: Membership Lifecycle, Benefits & Redemption ... [PASS] (9 passed)
 Executing Suite 4: Care Intelligence, Pattern Analytics & Dedup ... [PASS] (11 passed)
 Executing Suite 5: Workflow Automation & Scheduled Jobs ... [PASS] (9 passed)
 Executing Suite 6: Security, RBAC Matrix & Analytics KPIs ... [PASS] (11 passed)
 Executing Suite 7: End-to-End (E2E) Scenarios A-F ... [PASS] (11 passed)
 Executing Suite 8: Advanced Extensions & Resolved Limitations ... [PASS] (10 passed)
 Executing Suite 9: WordPress Lead Capture Integration ... [PASS] (6 passed)
-Executing Suite 10: Audit Remediation & System Hardening ... [PASS] (14 passed)
+Executing Suite 10: Audit Remediation & System Hardening ... [PASS] (22 passed)
 Executing Suite 11: WooCommerce Order Webhook Integration ... [PASS] (11 passed)
 Executing Suite 12: Reproducible Demo Dataset Contract ... [PASS] (7 passed)
 Executing Suite 13: Frappe Runtime Readiness Contract ... [PASS] (8 passed)
+Executing Suite 14: Full System Public APIs & Controller Layer ... [PASS] (35 passed)
+Executing Suite 15: Scheduled Background Tasks & 13 DocType Controllers ... [PASS] (17 passed)
+Executing Suite 16: Live Preview Web Server & Utilities Engine ... [PASS] (15 passed)
 ================================================================================
-Tổng số kịch bản kiểm thử : 123 | Thành công: 123 (100.0%)
+Tổng số kịch bản kiểm thử : 190 | Thành công: 190 (100.0%)
 ================================================================================
 ```
 

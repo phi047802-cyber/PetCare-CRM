@@ -95,6 +95,24 @@ TEST_SUITES = [
         "name": "Suite 13: Frappe Runtime Readiness Contract",
         "layer": "Schema, API Security & RBAC Consistency",
         "description": "Đối chiếu truy vấn/payload với DocType, guest allowlist, backend authorization, secret và ma trận quyền."
+    },
+    {
+        "file": "apps/petcare_crm/petcare_crm/tests/test_all_api_functions.py",
+        "name": "Suite 14: Full System Public APIs & Controller Layer",
+        "layer": "API & Public Endpoints Layer",
+        "description": "Toàn bộ 61 hàm API @frappe.whitelist trong api.py: Membership, Care Engine, Appointments, Payments, Omnichannel, Leads, Opportunities, Cases, WooCommerce, Diagnostics."
+    },
+    {
+        "file": "apps/petcare_crm/petcare_crm/tests/test_all_tasks_and_doctypes.py",
+        "name": "Suite 15: Scheduled Background Tasks & 13 DocType Controllers",
+        "layer": "Automation Tasks & Entity Life-Cycle",
+        "description": "Toàn bộ 5 tác vụ nền Frappe Scheduler trong tasks.py và phương thức vòng đời 13 DocType Controllers."
+    },
+    {
+        "file": "apps/petcare_crm/petcare_crm/tests/test_live_server_and_services.py",
+        "name": "Suite 16: Live Preview Web Server & Utilities Engine",
+        "layer": "Live Network Transport & Domain Services",
+        "description": "Thực thi socket mạng thật trên DualStack/Threading HTTP Server (GET/HEAD, 200 OK), VietQR, Deals sync, Omnichannel và Mailtrap SMTP."
     }
 ]
 
