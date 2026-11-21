@@ -14,7 +14,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import nsdecls, qn
 
-BASE_DIR = r"C:\Users\pc\Documents\Doan_CRM\deliverables\bpmn\individual"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # -------------------------------------------------------------
 # 1. BPMN XML DEFINITIONS FOR 4 MEMBERS

@@ -3,6 +3,7 @@
 import ast
 import importlib
 import json
+import re
 import sys
 import types
 import unittest
@@ -227,9 +228,15 @@ class TestRuntimeReadinessContract(unittest.TestCase):
         payment_source = (APP_ROOT / "utils" / "payment_gateway.py").read_text(
             encoding="utf-8"
         )
+        email_source = (APP_ROOT / "utils" / "email_service.py").read_text(
+            encoding="utf-8"
+        )
         self.assertNotIn('frappe.set_user("Administrator")', source)
         self.assertNotIn("petcare_webhook_secret_key_2026", payment_source)
         self.assertNotIn("petcare-owner-portal-secret", source)
+        self.assertNotIn("9777c07" + "beed041", email_source)
+        self.assertNotIn("8a22d4e" + "766bb7a", email_source)
+        self.assertNotIn("customer@" + "petcare-demo.com", email_source)
         self.assertIn("MIN_WEBHOOK_SECRET_LENGTH", payment_source)
         self.assertIn("owner_portal_secret", source)
         repository_text = "\n".join(
@@ -285,6 +292,86 @@ class TestRuntimeReadinessContract(unittest.TestCase):
         missing_fixture = sorted(role for role in metadata_roles if role not in hooks_source)
         self.assertEqual(missing_install, [])
         self.assertEqual(missing_fixture, [])
+
+    def test_09_api_inventory_matches_whitelisted_source(self):
+        """The evidence inventory must not invent endpoints or stale Guest access."""
+        api_tree = ast.parse((APP_ROOT / "api.py").read_text(encoding="utf-8"))
+        source_access = {}
+        for node in api_tree.body:
+            if not isinstance(node, ast.FunctionDef):
+                continue
+            whitelist = None
+            for decorator in node.decorator_list:
+                if isinstance(decorator, ast.Call) and call_name(decorator.func) == "frappe.whitelist":
+                    whitelist = decorator
+                    break
+                if call_name(decorator) == "frappe.whitelist":
+                    whitelist = decorator
+                    break
+            if whitelist is None:
+                continue
+            source_access[node.name] = isinstance(whitelist, ast.Call) and any(
+                keyword.arg == "allow_guest"
+                and isinstance(keyword.value, ast.Constant)
+                and keyword.value.value is True
+                for keyword in whitelist.keywords
+            )
+
+        inventory_path = Path("deliverables/api/API_INVENTORY.md")
+        rows = [
+            line for line in inventory_path.read_text(encoding="utf-8").splitlines()
+            if re.match(r"\| \*\*\d+\*\* \|", line)
+        ]
+        documented_access = {}
+        for row in rows:
+            endpoint = re.search(r"`([^`]+)`", row)
+            self.assertIsNotNone(endpoint, row)
+            documented_access[endpoint.group(1)] = "Public Guest" in row
+
+        self.assertEqual(documented_access, source_access)
+
+        builder_source = Path("deliverables/api/build_api_deliverables.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotRegex(builder_source, r"BASE_DIR\s*=\s*r?[\"'][A-Za-z]:\\")
+
+    def test_10_frontend_literal_api_calls_are_whitelisted(self):
+        """Buttons must not call internal Python helpers through Frappe RPC."""
+        api_source = (APP_ROOT / "api.py").read_text(encoding="utf-8")
+        api_tree = ast.parse(api_source)
+        whitelisted = {
+            node.name
+            for node in api_tree.body
+            if isinstance(node, ast.FunctionDef)
+            and any(
+                (
+                    isinstance(decorator, ast.Call)
+                    and call_name(decorator.func) == "frappe.whitelist"
+                )
+                or call_name(decorator) == "frappe.whitelist"
+                for decorator in node.decorator_list
+            )
+        }
+        frontend_paths = [
+            APP_ROOT / "www" / "index.html",
+            APP_ROOT / "www" / "frontend.html",
+            Path("preview.html"),
+        ]
+        unknown = []
+        for path in frontend_paths:
+            source = path.read_text(encoding="utf-8")
+            calls = set(
+                re.findall(
+                    r"(?:callApi|apiCall)\(\s*['\"]([A-Za-z0-9_]+)['\"]",
+                    source,
+                )
+            )
+            unknown.extend(f"{path}: {name}" for name in sorted(calls - whitelisted))
+            self.assertIn('value="${p.id}"', source)
+            self.assertNotIn("pet: pet.pet_name", source)
+        self.assertEqual(unknown, [])
+        self.assertIn('"pet_id": pet_name', api_source)
+        self.assertIn('"pet_name": p.get("pet_name") or pet_name', api_source)
 
 
 if __name__ == "__main__":

@@ -88,7 +88,7 @@ bench start
 Hệ thống cung cấp Master Test Runner độc lập, có thể chạy trực tiếp bằng Python mà không bắt buộc khởi động container daemon:
 
 ```powershell
-# Chạy toàn bộ 106 kịch bản kiểm thử (12 Test Suites)
+# Chạy toàn bộ 197 kịch bản kiểm thử (16 Test Suites)
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 ```
 
@@ -97,8 +97,8 @@ Kết quả mong đợi:
 ================================================================================
 TỔNG HỢP KẾT QUẢ KIỂM THỬ (AUDIT SUMMARY)
 ================================================================================
-Tổng số kịch bản kiểm thử (Total Tests) : 106
-Thành công (PASS)                      : 106
+Tổng số kịch bản kiểm thử (Total Tests) : 197
+Thành công (PASS)                      : 197
 Thất bại (FAIL)                        : 0
 Lỗi cú pháp / runtime (ERRORS)         : 0
 Bỏ qua (SKIPPED)                       : 0

@@ -2,7 +2,7 @@
 
 Thực hiện trên site thử nghiệm trước khi merge/deploy production. Không đưa secret thật vào Git.
 
-Với `deploy_clean.ps1`, đặt trước bốn biến môi trường: `PETCARE_ADMIN_PASSWORD`, `PETCARE_OWNER_PORTAL_SECRET`, `PETCARE_VIETQR_WEBHOOK_SECRET`, `PETCARE_WOOCOMMERCE_WEBHOOK_SECRET`.
+Với `deploy_clean.ps1`, đặt trước các biến môi trường: `PETCARE_ADMIN_PASSWORD`, `PETCARE_OWNER_PORTAL_SECRET`, `PETCARE_VIETQR_WEBHOOK_SECRET`, `PETCARE_WOOCOMMERCE_WEBHOOK_SECRET`, `PETCARE_VIETQR_ACCOUNT_NO`, `PETCARE_VIETQR_ACCOUNT_NAME`. Có thể đặt thêm `PETCARE_VIETQR_BANK_BIN` và `PETCARE_VIETQR_TEMPLATE`; mặc định lần lượt là `970436` và `compact2`.
 
 ## 1. Cấu hình bắt buộc
 
@@ -11,6 +11,10 @@ Trong `sites/<site>/site_config.json`, cấu hình hai secret ngẫu nhiên, m�
 ```json
 {
   "owner_portal_secret": "<random-secret-min-32-characters>",
+  "vietqr_bank_bin": "<napas-bin-6-digits>",
+  "vietqr_account_no": "<bank-account-6-to-19-digits>",
+  "vietqr_account_name": "<bank-account-holder>",
+  "vietqr_template": "compact2",
   "vietqr_webhook_secret": "<random-secret-min-32-characters>",
   "woocommerce_webhook_secret": "<woocommerce-shared-secret>"
 }

@@ -38,7 +38,7 @@ def get_service_visits_for_pet(pet_name: str, service_type: str = None) -> list:
     Lấy danh sách Service Visit từ Frappe DB,
     convert sang ServiceVisit dataclass để service layer dùng.
     """
-    filters = {"pet": pet_name}
+    filters = {"pet": pet_name, "status": "Completed", "docstatus": ["!=", 2]}
     if service_type:
         filters["service_type"] = service_type
 

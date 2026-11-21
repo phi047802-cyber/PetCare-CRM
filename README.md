@@ -3,7 +3,7 @@
 > **Hệ Thống Quản Lý Quan Hệ Khách Hàng Chuyên Biệt Cho Ngành Chăm Sóc Thú Cưng**  
 > **Nền tảng**: Frappe Framework v15 (Desk Native Architecture)  
 > **Phiên bản hoàn thiện**: 2.0 (Prompt 10 Final Handover Release)  
-> **Kiểm thử tự động**: **190 / 190 Tests PASS (100.0%)**
+> **Kiểm thử tự động**: **203 / 203 Tests PASS (100.0%)**
 
 ---
 
@@ -25,12 +25,12 @@
 Hệ thống được thiết kế theo mô hình Clean Architecture 8 tầng, đảm bảo tính phân tách trách nhiệm (Separation of Concerns) và khả năng kiểm thử độc lập:
 
 * **Tầng 6 (Presentation Layer)**: Workspace `PetCare CRM`, Form scripts (`pet.js`, `service_visit.js`, `customer_membership.js`), Script Report `petcare_kpi_overview`.
-* **Tầng 5 (API / Controller Layer)**: Các endpoint `@frappe.whitelist()` trong [`petcare_crm/api.py`](file:///c:/Users/pc/Documents/Doan_CRM/apps/petcare_crm/petcare_crm/api.py).
+* **Tầng 5 (API / Controller Layer)**: Các endpoint `@frappe.whitelist()` trong [`petcare_crm/api.py`](apps/petcare_crm/petcare_crm/api.py).
 * **Tầng 4 (Application Layer)**: Các Coordinator điều phối nghiệp vụ (`LeadConversionCoordinator`, `CareRecommendationCoordinator`, `AutomationCoordinator`, `AnalyticsService`).
 * **Tầng 3 (Domain Layer)**: Business logic OOP thuần túy (`CarePatternAnalyzer`, `VisitPredictionService`, `RiskDetectionService`, `PricingEngine`).
 * **Tầng 2 (DocType Layer)**: Controllers và Schema JSON định nghĩa các thực thể và quan hệ cơ sở dữ liệu.
 * **Tầng 1 (Infrastructure Layer)**: Frappe Framework v15, MariaDB 11.x, Redis Cache & Queues.
-* **Tầng 7 & 8 (Automation & Testing)**: Tác vụ nền định kỳ và bộ kiểm thử tự động 190 test cases.
+* **Tầng 7 & 8 (Automation & Testing)**: Tác vụ nền định kỳ và bộ kiểm thử tự động 203 test cases.
 
 ---
 
@@ -45,7 +45,7 @@ python start_preview.py
 ```
 * **Cổng Khách Hàng & Thu Ngân POS**: `http://127.0.0.1:8080/`
 * **Không Gian Làm Việc Frappe Desk**: `http://127.0.0.1:8080/desk` (hoặc `/app`)
-* **Chạy 190 Bài Test Tự Động (100% PASS)**:
+* **Chạy 203 Bài Test Tự Động (100% PASS)**:
   ```bash
   python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
   ```
@@ -87,7 +87,7 @@ Tài liệu dataset, kịch bản demo và checklist ảnh minh chứng nằm t�
 
 ## 🧪 Kiểm Thử Tự Động (Automated Testing)
 
-Toàn bộ 190 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
+Toàn bộ 203 kịch bản kiểm thử độc lập có thể chạy trực tiếp bằng Master Test Runner:
 
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
@@ -100,22 +100,22 @@ PETCARE CRM — AUTOMATED TEST SUITE & END-TO-END VALIDATOR
 ================================================================================
 Executing Suite 1: CRM Core & Lead/Opportunity Lifecycle ... [PASS] (4 passed)
 Executing Suite 2: PetCare Service Operations & Visit Catalog ... [PASS] (4 passed)
-Executing Suite 3: Membership Lifecycle, Benefits & Redemption ... [PASS] (9 passed)
-Executing Suite 4: Care Intelligence, Pattern Analytics & Dedup ... [PASS] (11 passed)
+Executing Suite 3: Membership Lifecycle, Benefits & Redemption ... [PASS] (10 passed)
+Executing Suite 4: Care Intelligence, Pattern Analytics & Dedup ... [PASS] (12 passed)
 Executing Suite 5: Workflow Automation & Scheduled Jobs ... [PASS] (9 passed)
 Executing Suite 6: Security, RBAC Matrix & Analytics KPIs ... [PASS] (11 passed)
 Executing Suite 7: End-to-End (E2E) Scenarios A-F ... [PASS] (11 passed)
 Executing Suite 8: Advanced Extensions & Resolved Limitations ... [PASS] (10 passed)
 Executing Suite 9: WordPress Lead Capture Integration ... [PASS] (6 passed)
-Executing Suite 10: Audit Remediation & System Hardening ... [PASS] (22 passed)
+Executing Suite 10: Audit Remediation & System Hardening ... [PASS] (26 passed)
 Executing Suite 11: WooCommerce Order Webhook Integration ... [PASS] (11 passed)
 Executing Suite 12: Reproducible Demo Dataset Contract ... [PASS] (7 passed)
-Executing Suite 13: Frappe Runtime Readiness Contract ... [PASS] (8 passed)
-Executing Suite 14: Full System Public APIs & Controller Layer ... [PASS] (35 passed)
+Executing Suite 13: Frappe Runtime Readiness Contract ... [PASS] (10 passed)
+Executing Suite 14: Full System Public APIs & Controller Layer ... [PASS] (40 passed)
 Executing Suite 15: Scheduled Background Tasks & 13 DocType Controllers ... [PASS] (17 passed)
 Executing Suite 16: Live Preview Web Server & Utilities Engine ... [PASS] (15 passed)
 ================================================================================
-Tổng số kịch bản kiểm thử : 190 | Thành công: 190 (100.0%)
+Tổng số kịch bản kiểm thử : 203 | Thành công: 203 (100.0%)
 ================================================================================
 ```
 
@@ -123,15 +123,15 @@ Tổng số kịch bản kiểm thử : 190 | Thành công: 190 (100.0%)
 
 ## 📚 Hệ Thống Tài Liệu Kỹ Thuật (Documentation Index)
 
-Toàn bộ tài liệu chi tiết được lưu trữ trong thư mục [`docs/`](file:///c:/Users/pc/Documents/Doan_CRM/docs/):
+Toàn bộ tài liệu chi tiết được lưu trữ trong thư mục [`docs/`](docs/):
 
-1. **[Báo Cáo Nghiệm Thu Tổng Thể](file:///c:/Users/pc/Documents/Doan_CRM/docs/FINAL_IMPLEMENTATION_REPORT.md)** (`FINAL_IMPLEMENTATION_REPORT.md`): Báo cáo chi tiết về tính năng, kiến trúc, thuật toán, kết quả test và bàn giao.
-2. **[Kịch Bản Trình Diễn Đồ Án](file:///c:/Users/pc/Documents/Doan_CRM/docs/DEMO_SCRIPT.md)** (`DEMO_SCRIPT.md`): Hướng dẫn demo từng bước 3 câu chuyện cốt lõi (Lead, Service/Membership, Care Intelligence).
-3. **[Hướng Dẫn Cài Đặt](file:///c:/Users/pc/Documents/Doan_CRM/docs/SETUP_GUIDE.md)** (`SETUP_GUIDE.md`): Cài đặt Docker, Native Bench, cấu hình môi trường và xử lý sự cố.
-4. **[Quy Tắc Nghiệp Vụ](file:///c:/Users/pc/Documents/Doan_CRM/docs/BUSINESS_RULES.md)** (`BUSINESS_RULES.md`): Đặc tả toàn bộ quy tắc bất biến (Invariants) về định giá, chống trùng khách hàng, an toàn số dư và thuật toán chu kỳ.
-5. **[Đặc Tả API](file:///c:/Users/pc/Documents/Doan_CRM/docs/API_DOCUMENTATION.md)** (`API_DOCUMENTATION.md`): Danh mục các REST/Whitelisted endpoints, tham số và mẫu JSON request/response.
-6. **[Ma Trận Phân Quyền](file:///c:/Users/pc/Documents/Doan_CRM/docs/ROLE_PERMISSION_MATRIX.md)** (`ROLE_PERMISSION_MATRIX.md`): Bảng ma trận quyền hạn 5 vai trò (System Manager, CRM Manager, Sales, Technician, Analyst) và kiểm soát sở hữu chéo.
-7. **[Hướng Dẫn Kiểm Thử](file:///c:/Users/pc/Documents/Doan_CRM/docs/TEST_GUIDE.md)** (`TEST_GUIDE.md`): Cấu trúc 7 test suites và phương pháp chạy kiểm thử.
-8. **[Các Giới Hạn Hiện Tại & Hướng Mở Rộng](file:///c:/Users/pc/Documents/Doan_CRM/docs/KNOWN_LIMITATIONS.md)** (`KNOWN_LIMITATIONS.md`): Tuyên bố trung thực về phạm vi prototype nâng cao và lộ trình phát triển.
-9. **[Kiến Trúc Tổng Thể](file:///c:/Users/pc/Documents/Doan_CRM/docs/SYSTEM_ARCHITECTURE.md)** (`SYSTEM_ARCHITECTURE.md`): Sơ đồ chi tiết 8 tầng kiến trúc Clean Architecture.
-10. **[Hợp Đồng Dữ Liệu & ERD](file:///c:/Users/pc/Documents/Doan_CRM/docs/DATA_CONTRACT.md)** (`DATA_CONTRACT.md`): Sơ đồ ERD thực thể và quy tắc liên kết giữa Customer, Pet, Membership, Service Visit.
+1. **[Báo Cáo Nghiệm Thu Tổng Thể](docs/FINAL_IMPLEMENTATION_REPORT.md)** (`FINAL_IMPLEMENTATION_REPORT.md`): Báo cáo chi tiết về tính năng, kiến trúc, thuật toán, kết quả test và bàn giao.
+2. **[Kịch Bản Trình Diễn Đồ Án](docs/DEMO_SCRIPT.md)** (`DEMO_SCRIPT.md`): Hướng dẫn demo từng bước 3 câu chuyện cốt lõi (Lead, Service/Membership, Care Intelligence).
+3. **[Hướng Dẫn Cài Đặt](docs/SETUP_GUIDE.md)** (`SETUP_GUIDE.md`): Cài đặt Docker, Native Bench, cấu hình môi trường và xử lý sự cố.
+4. **[Quy Tắc Nghiệp Vụ](docs/BUSINESS_RULES.md)** (`BUSINESS_RULES.md`): Đặc tả toàn bộ quy tắc bất biến (Invariants) về định giá, chống trùng khách hàng, an toàn số dư và thuật toán chu kỳ.
+5. **[Đặc Tả API](docs/API_DOCUMENTATION.md)** (`API_DOCUMENTATION.md`): Danh mục các REST/Whitelisted endpoints, tham số và mẫu JSON request/response.
+6. **[Ma Trận Phân Quyền](docs/ROLE_PERMISSION_MATRIX.md)** (`ROLE_PERMISSION_MATRIX.md`): Bảng ma trận quyền hạn 5 vai trò (System Manager, CRM Manager, Sales, Technician, Analyst) và kiểm soát sở hữu chéo.
+7. **[Hướng Dẫn Kiểm Thử](docs/TEST_GUIDE.md)** (`TEST_GUIDE.md`): Cấu trúc 16 test suites và phương pháp chạy kiểm thử.
+8. **[Các Giới Hạn Hiện Tại & Hướng Mở Rộng](docs/KNOWN_LIMITATIONS.md)** (`KNOWN_LIMITATIONS.md`): Tuyên bố trung thực về phạm vi prototype nâng cao và lộ trình phát triển.
+9. **[Kiến Trúc Tổng Thể](docs/SYSTEM_ARCHITECTURE.md)** (`SYSTEM_ARCHITECTURE.md`): Sơ đồ chi tiết 8 tầng kiến trúc Clean Architecture.
+10. **[Hợp Đồng Dữ Liệu & ERD](docs/DATA_CONTRACT.md)** (`DATA_CONTRACT.md`): Sơ đồ ERD thực thể và quy tắc liên kết giữa Customer, Pet, Membership, Service Visit.

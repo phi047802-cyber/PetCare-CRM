@@ -171,6 +171,9 @@ class TestExtendedCapabilities(unittest.TestCase):
             visit_id="SV-2026-00042",
             amount=350000.0,
             customer_name="Nguyễn Văn A",
+            bank_bin="970436",
+            account_no="0000000001",
+            account_name="PETCARE TEST",
         )
         self.assertEqual(visit_qr["status"], "success")
         self.assertEqual(visit_qr["transfer_content"], "PC-SVC-SV-2026-00042")
@@ -183,6 +186,9 @@ class TestExtendedCapabilities(unittest.TestCase):
             membership_id="MB-2026-00008",
             amount=1000000.0,
             transaction_id="TXN99",
+            bank_bin="970436",
+            account_no="0000000001",
+            account_name="PETCARE TEST",
         )
         self.assertEqual(mem_qr["status"], "success")
         self.assertEqual(mem_qr["transfer_content"], "PC-MEM-MB-2026-00008-TXN99")

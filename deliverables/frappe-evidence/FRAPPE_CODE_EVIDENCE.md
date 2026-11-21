@@ -203,7 +203,7 @@ bench --site petcare.localhost run-tests --app petcare_crm
 | RBAC, Workspace, Form Script | Đã xác minh từ code |
 | Scheduler và Script Report | Đã xác minh từ code |
 | WooCommerce → Frappe integration | Đã có code và automated tests |
-| Bộ kiểm thử Python hiện tại | 106/106 PASS |
+| Bộ kiểm thử Python hiện tại | 197/197 PASS |
 | Cài app trên Frappe Bench thật | Chưa có bằng chứng trong repository |
 | Kiểm thử WordPress ↔ Frappe live | Chưa có bằng chứng trong repository |
 

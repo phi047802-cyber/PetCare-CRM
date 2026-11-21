@@ -87,10 +87,14 @@
         min-height: 68px;
         padding: 12px 16px !important;
         gap: 12px;
+        flex-direction: column;
+        align-items: stretch;
       }
-      body > header > div > div:last-child { flex-wrap: wrap; justify-content: flex-end; }
+      body > header > div > div:last-child { flex-wrap: wrap; justify-content: flex-start; gap: 8px; }
+      body > header > div > div:last-child > * { margin-left: 0 !important; }
       body > header > div > div:last-child span { display: none; }
       body > main { padding: 20px 16px 36px !important; }
+      body > main, body > main > * { min-width: 0; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -4326,7 +4330,7 @@ Nguyễn Minh Triết, 0987654321, triet.nguyen@demo.vn, 78 Hai Bà Trưng, Bé 
                 <span>Mailtrap SMTP Sandbox</span>
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">● Đã Kết Nối</span>
               </div>
-              <div class="text-[11px] text-slate-500 font-mono mt-0.5">Host: sandbox.smtp.mailtrap.io | Port: 2525 (TLS) | User: 9777c07beed041</div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">Host: sandbox.smtp.mailtrap.io | Port: 2525 (TLS) | User: cấu hình qua site/env</div>
             </div>
           </div>
           <button onclick="sendDiagnosticTestEmail()" class="px-3 py-1.5 rounded-lg border border-sky-300 bg-white hover:bg-sky-50 text-sky-800 font-bold text-xs shadow-2xs flex items-center gap-1.5 transition">

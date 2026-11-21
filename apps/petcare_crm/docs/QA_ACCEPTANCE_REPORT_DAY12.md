@@ -14,7 +14,7 @@
 ## 2. Flow 2 — Due Soon Pattern
 - [x] `get_care_status` Mochi / Grooming → `status: "DUE_SOON"`
 - [x] `days_until_due <= 5` (dự đoán đúng chu kỳ 28-30 ngày)
-- [x] `Care Recommendation` tự động tạo sau `run_care_scan()` hoặc `daily_petcare_scan()`
+- [x] `Care Recommendation` tự động tạo sau `run_care_intelligence_scan()` hoặc `daily_petcare_scan()`
 - [x] Linked Membership và thông điệp quyền lợi ưu đãi còn lại được đính kèm vào nội dung đề xuất
 - [x] Priority: Medium
 

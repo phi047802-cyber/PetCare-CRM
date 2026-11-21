@@ -58,6 +58,11 @@ class ServiceVisit(Document):
         self.status = "Cancelled"
         self.revert_benefit_redemptions(reason=f"Phiếu dịch vụ {self.name} bị hủy bỏ (on_cancel)")
 
+    def on_trash(self):
+        """Restore benefits when an unsubmitted visit is deleted."""
+        if getattr(self, "docstatus", 0) == 0:
+            self.revert_benefit_redemptions(reason=f"Phiếu dịch vụ nháp {self.name} bị xóa")
+
     def revert_benefit_redemptions(self, reason: str = "Hủy phiếu dịch vụ"):
         """Hoàn tác toàn bộ quyền lợi đã cấn trừ trong Service Visit này."""
         if not frappe.db.exists("DocType", "Benefit Redemption Ledger"):

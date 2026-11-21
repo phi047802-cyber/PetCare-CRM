@@ -11,11 +11,19 @@ if ([string]::IsNullOrWhiteSpace($petcareAdminPassword) -or $petcareAdminPasswor
 $petcareOwnerPortalSecret = $env:PETCARE_OWNER_PORTAL_SECRET
 $petcareVietqrSecret = $env:PETCARE_VIETQR_WEBHOOK_SECRET
 $petcareWooSecret = $env:PETCARE_WOOCOMMERCE_WEBHOOK_SECRET
+$petcareVietqrBankBin = if ($env:PETCARE_VIETQR_BANK_BIN) { $env:PETCARE_VIETQR_BANK_BIN } else { "970436" }
+$petcareVietqrAccountNo = $env:PETCARE_VIETQR_ACCOUNT_NO
+$petcareVietqrAccountName = $env:PETCARE_VIETQR_ACCOUNT_NAME
+$petcareVietqrTemplate = if ($env:PETCARE_VIETQR_TEMPLATE) { $env:PETCARE_VIETQR_TEMPLATE } else { "compact2" }
 foreach ($requiredSecret in @($petcareOwnerPortalSecret, $petcareVietqrSecret, $petcareWooSecret)) {
     if ([string]::IsNullOrWhiteSpace($requiredSecret) -or $requiredSecret.Length -lt 32) {
         Write-Error "Hay cau hinh ba webhook/portal secret PETCARE_* (moi secret toi thieu 32 ky tu)."
         exit 1
     }
+}
+if ($petcareVietqrBankBin -notmatch '^\d{6}$' -or $petcareVietqrAccountNo -notmatch '^\d{6,19}$' -or [string]::IsNullOrWhiteSpace($petcareVietqrAccountName)) {
+    Write-Error "Hay cau hinh PETCARE_VIETQR_ACCOUNT_NO (6-19 chu so) va PETCARE_VIETQR_ACCOUNT_NAME; PETCARE_VIETQR_BANK_BIN phai co 6 chu so."
+    exit 1
 }
 Write-Host "         PETCARE CRM -- 1-CLICK CLEAN DEPLOYMENT          " -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -54,6 +62,10 @@ foreach ($c in $containers) {
 $petcareSiteConfigs = @(
     @{ Name = "owner_portal_secret"; Value = $petcareOwnerPortalSecret },
     @{ Name = "vietqr_webhook_secret"; Value = $petcareVietqrSecret },
+    @{ Name = "vietqr_bank_bin"; Value = $petcareVietqrBankBin },
+    @{ Name = "vietqr_account_no"; Value = $petcareVietqrAccountNo },
+    @{ Name = "vietqr_account_name"; Value = $petcareVietqrAccountName },
+    @{ Name = "vietqr_template"; Value = $petcareVietqrTemplate },
     @{ Name = "woocommerce_webhook_secret"; Value = $petcareWooSecret }
 )
 foreach ($siteConfig in $petcareSiteConfigs) {

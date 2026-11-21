@@ -8,6 +8,8 @@ Addresses KNOWN_LIMITATIONS Section 2.2:
 import hmac
 import hashlib
 import json
+import math
+import os
 import re
 from datetime import datetime
 from typing import Any, Dict, Optional, Tuple, Union
@@ -29,13 +31,59 @@ def _is_mock_frappe() -> bool:
 
 
 class VietQRConfig:
-    """Default banking configuration for PetCare clinic."""
+    """Banking configuration for PetCare clinic."""
     DEFAULT_BANK_BIN: str = "970436"             # Vietcombank Napas BIN
     DEFAULT_BANK_NAME: str = "Vietcombank"
-    DEFAULT_ACCOUNT_NO: str = "0388889999"
     DEFAULT_ACCOUNT_NAME: str = "PHONG KHAM PETCARE CRM"
     DEFAULT_TEMPLATE: str = "compact2"           # compact, compact2, qr_only, print
     MIN_WEBHOOK_SECRET_LENGTH: int = 32
+    ALLOWED_TEMPLATES = {"compact", "compact2", "qr_only", "print"}
+
+    @classmethod
+    def _config_value(cls, site_key: str, env_key: str, fallback: str = "") -> str:
+        value = None
+        if frappe and hasattr(frappe, "conf") and frappe.conf:
+            candidate = frappe.conf.get(site_key)
+            if isinstance(candidate, (str, int, float)):
+                value = candidate
+        if not value:
+            value = os.getenv(env_key)
+        return str(value or fallback).strip()
+
+    @classmethod
+    def get_bank_config(
+        cls,
+        bank_bin: Optional[str] = None,
+        account_no: Optional[str] = None,
+        account_name: Optional[str] = None,
+        template: Optional[str] = None,
+    ) -> Tuple[str, str, str, str]:
+        """Resolve VietQR data without embedding a destination account in source."""
+        clean_bin = str(bank_bin or cls._config_value(
+            "vietqr_bank_bin", "PETCARE_VIETQR_BANK_BIN", cls.DEFAULT_BANK_BIN
+        )).strip()
+        clean_account = str(account_no or cls._config_value(
+            "vietqr_account_no", "PETCARE_VIETQR_ACCOUNT_NO"
+        )).strip()
+        clean_name = str(account_name or cls._config_value(
+            "vietqr_account_name", "PETCARE_VIETQR_ACCOUNT_NAME", cls.DEFAULT_ACCOUNT_NAME
+        )).strip()
+        clean_template = str(template or cls._config_value(
+            "vietqr_template", "PETCARE_VIETQR_TEMPLATE", cls.DEFAULT_TEMPLATE
+        )).strip()
+
+        if not re.fullmatch(r"\d{6}", clean_bin):
+            raise ValidationError("vietqr_bank_bin phải gồm đúng 6 chữ số Napas BIN.")
+        if not re.fullmatch(r"\d{6,19}", clean_account):
+            raise ValidationError(
+                "Vui lòng cấu hình vietqr_account_no/PETCARE_VIETQR_ACCOUNT_NO "
+                "gồm 6-19 chữ số trước khi tạo mã thanh toán."
+            )
+        if not clean_name:
+            raise ValidationError("Vui lòng cấu hình tên chủ tài khoản VietQR.")
+        if clean_template not in cls.ALLOWED_TEMPLATES:
+            raise ValidationError("Mẫu VietQR không hợp lệ.")
+        return clean_bin, clean_account, clean_name, clean_template
 
     @classmethod
     def get_webhook_secret_key(cls) -> str:
@@ -45,7 +93,6 @@ class VietQRConfig:
             conf_secret = frappe.conf.get("vietqr_webhook_secret")
             if conf_secret:
                 secret = str(conf_secret)
-        import os
         if not secret:
             env_secret = os.getenv("PETCARE_WEBHOOK_SECRET")
             if env_secret:
@@ -78,11 +125,21 @@ class VietQRGenerator:
         """
         Builds dynamic VietQR image URL with embedded transfer content and amount.
         """
-        b_bin = str(bank_bin or VietQRConfig.DEFAULT_BANK_BIN).strip()
-        acc_no = str(account_no or VietQRConfig.DEFAULT_ACCOUNT_NO).strip()
-        acc_name = quote(str(account_name or VietQRConfig.DEFAULT_ACCOUNT_NAME).strip())
-        tmpl = str(template or VietQRConfig.DEFAULT_TEMPLATE).strip()
-        amt = int(round(float(amount))) if amount > 0 else 0
+        try:
+            clean_amount = float(amount)
+        except (TypeError, ValueError):
+            raise ValidationError("Số tiền VietQR không hợp lệ.")
+        if not math.isfinite(clean_amount) or clean_amount <= 0 or clean_amount > 100_000_000:
+            raise ValidationError("Số tiền VietQR phải từ 1đ đến 100,000,000đ.")
+
+        b_bin, acc_no, clean_account_name, tmpl = VietQRConfig.get_bank_config(
+            bank_bin=bank_bin,
+            account_no=account_no,
+            account_name=account_name,
+            template=template,
+        )
+        acc_name = quote(clean_account_name)
+        amt = int(round(clean_amount))
         info = quote(str(add_info).strip())
 
         return f"https://img.vietqr.io/image/{b_bin}-{acc_no}-{tmpl}.png?amount={amt}&addInfo={info}&accountName={acc_name}"
@@ -103,12 +160,18 @@ class VietQRGenerator:
         """
         clean_visit_id = str(visit_id).strip()
         transfer_content = f"PC-SVC-{clean_visit_id}"
-        qr_url = cls.build_vietqr_url(
-            amount=amount,
-            add_info=transfer_content,
+        resolved_bin, resolved_account, resolved_name, resolved_template = VietQRConfig.get_bank_config(
             bank_bin=bank_bin,
             account_no=account_no,
             account_name=account_name,
+        )
+        qr_url = cls.build_vietqr_url(
+            amount=amount,
+            add_info=transfer_content,
+            bank_bin=resolved_bin,
+            account_no=resolved_account,
+            account_name=resolved_name,
+            template=resolved_template,
         )
 
         return {
@@ -117,9 +180,9 @@ class VietQRGenerator:
             "reference_id": clean_visit_id,
             "transfer_content": transfer_content,
             "amount": float(amount),
-            "bank_bin": bank_bin or VietQRConfig.DEFAULT_BANK_BIN,
-            "account_no": account_no or VietQRConfig.DEFAULT_ACCOUNT_NO,
-            "account_name": account_name or VietQRConfig.DEFAULT_ACCOUNT_NAME,
+            "bank_bin": resolved_bin,
+            "account_no": resolved_account,
+            "account_name": resolved_name,
             "qr_image_url": qr_url,
             "instructions": (
                 f"Quý khách vui lòng quét mã VietQR hoặc chuyển khoản đúng số tiền "
@@ -144,12 +207,18 @@ class VietQRGenerator:
         clean_mem_id = str(membership_id).strip()
         txn_suffix = f"-{transaction_id.strip()}" if transaction_id else ""
         transfer_content = f"PC-MEM-{clean_mem_id}{txn_suffix}"
-        qr_url = cls.build_vietqr_url(
-            amount=amount,
-            add_info=transfer_content,
+        resolved_bin, resolved_account, resolved_name, resolved_template = VietQRConfig.get_bank_config(
             bank_bin=bank_bin,
             account_no=account_no,
             account_name=account_name,
+        )
+        qr_url = cls.build_vietqr_url(
+            amount=amount,
+            add_info=transfer_content,
+            bank_bin=resolved_bin,
+            account_no=resolved_account,
+            account_name=resolved_name,
+            template=resolved_template,
         )
 
         return {
@@ -158,9 +227,9 @@ class VietQRGenerator:
             "reference_id": clean_mem_id,
             "transfer_content": transfer_content,
             "amount": float(amount),
-            "bank_bin": bank_bin or VietQRConfig.DEFAULT_BANK_BIN,
-            "account_no": account_no or VietQRConfig.DEFAULT_ACCOUNT_NO,
-            "account_name": account_name or VietQRConfig.DEFAULT_ACCOUNT_NAME,
+            "bank_bin": resolved_bin,
+            "account_no": resolved_account,
+            "account_name": resolved_name,
             "qr_image_url": qr_url,
             "instructions": (
                 f"Nạp tiền ví hội viên {clean_mem_id}: chuyển khoản đúng số tiền "
@@ -228,7 +297,7 @@ class PaymentWebhookService:
             clean_amount = float(amount)
         except (TypeError, ValueError):
             clean_amount = 0.0
-        if clean_amount <= 0:
+        if not math.isfinite(clean_amount) or clean_amount <= 0:
             return {
                 "status": "error",
                 "error_code": "INVALID_AMOUNT",

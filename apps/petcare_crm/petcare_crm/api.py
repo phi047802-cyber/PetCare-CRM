@@ -14,6 +14,7 @@ import re
 import json
 import hmac
 import hashlib
+import math
 import time
 from typing import Optional, Dict, Any, List
 
@@ -45,6 +46,9 @@ from petcare_crm.utils.security import (
     ROLE_TECHNICIAN,
     check_role_permission,
     require_any_role,
+    is_valid_vietnam_phone,
+    sanitize_phone,
+    sanitize_input_string,
 )
 
 try:
@@ -143,14 +147,22 @@ def _parse_date(date_str=None) -> date:
 def _sanitize_string(val, max_len=140, allow_none=False) -> Optional[str]:
 
     """Sanitize và validate chuỗi đầu vào."""
+    return sanitize_input_string(
+        val,
+        max_length=max_len,
+        allow_none=allow_none,
+    )
 
-    if val is None:
 
-        return None if allow_none else ""
-
-    s = str(val).strip()
-
-    return s[:max_len]
+def _parse_finite_float(value, field_label: str) -> float:
+    """Parse an API numeric value and reject NaN/Infinity before persistence."""
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        frappe.throw(_("{0} không hợp lệ.").format(field_label), frappe.ValidationError)
+    if not math.isfinite(parsed):
+        frappe.throw(_("{0} không hợp lệ.").format(field_label), frappe.ValidationError)
+    return parsed
 
 
 
@@ -255,6 +267,10 @@ def get_remaining_benefit(membership_name, service_type):
 
         return None
 
+    frappe.db.sql(
+        "SELECT name FROM `tabCustomer Membership` WHERE name = %s FOR UPDATE",
+        membership_name,
+    )
     ms_doc = frappe.get_doc("Customer Membership", membership_name, ignore_permissions=True)
 
     for b in ms_doc.benefits:
@@ -334,7 +350,7 @@ def record_benefit_usage(membership_name, service_type, count=1):
 
         """
 
-        SELECT name, status, end_date
+        SELECT name, status, start_date, end_date
 
         FROM `tabCustomer Membership`
 
@@ -359,6 +375,9 @@ def record_benefit_usage(membership_name, service_type, count=1):
 
 
     ms_row = ms_records[0]
+
+    if ms_row.get("start_date") and frappe.utils.getdate(ms_row["start_date"]) > frappe.utils.getdate(frappe.utils.nowdate()):
+        frappe.throw(_("Gói hội viên chưa đến ngày hiệu lực."))
 
     if not ms_row.get("status") or str(ms_row["status"]).strip().lower() != STATUS_ACTIVE.lower():
 
@@ -497,10 +516,6 @@ def record_benefit_usage(membership_name, service_type, count=1):
         },
 
     )
-
-    frappe.db.commit()
-
-
 
     return {
 
@@ -688,13 +703,8 @@ def get_care_status(pet_name, service_type, check_date=None):
 
 
 
-@frappe.whitelist()
-
-def predict_next_service(pet_name, service_type, enable_seasonal_adjustment=False, enable_age_adjustment=False):
-
-    """T11 & H1: Dự đoán ngày dịch vụ tiếp theo dựa trên lịch sử (hỗ trợ hệ số mùa vụ & độ tuổi)."""
-
-    check_role_permission("Service Visit", "read", raise_exception=True)
+def _predict_next_service(pet_name, service_type, enable_seasonal_adjustment=False, enable_age_adjustment=False):
+    """Internal prediction after the caller has completed its authorization check."""
     pet_name = _sanitize_string(pet_name, max_len=140)
 
     service_type = _sanitize_string(service_type, max_len=100)
@@ -720,6 +730,8 @@ def predict_next_service(pet_name, service_type, enable_seasonal_adjustment=Fals
             "last_visit_date": "",
 
             "insufficient_data": True,
+
+            "confidence": "NONE",
 
         }
 
@@ -765,6 +777,8 @@ def predict_next_service(pet_name, service_type, enable_seasonal_adjustment=Fals
 
         "insufficient_data": result.get("insufficient_data", True),
 
+        "confidence": result.get("confidence", "NONE"),
+
         "seasonal_factor": result.get("seasonal_factor", 1.0),
 
         "age_factor": result.get("age_factor", 1.0),
@@ -774,6 +788,21 @@ def predict_next_service(pet_name, service_type, enable_seasonal_adjustment=Fals
         "reason": result.get("reason", ""),
 
     }
+
+
+@frappe.whitelist()
+
+def predict_next_service(pet_name, service_type, enable_seasonal_adjustment=False, enable_age_adjustment=False):
+
+    """T11 & H1: Dự đoán ngày dịch vụ tiếp theo dựa trên lịch sử (hỗ trợ hệ số mùa vụ & độ tuổi)."""
+
+    check_role_permission("Service Visit", "read", raise_exception=True)
+    return _predict_next_service(
+        pet_name,
+        service_type,
+        enable_seasonal_adjustment=enable_seasonal_adjustment,
+        enable_age_adjustment=enable_age_adjustment,
+    )
 
 
 
@@ -1132,7 +1161,8 @@ def get_portal_overview():
 
     """
 
-    check_role_permission("Care Recommendation", "report", raise_exception=True)
+    require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK, ROLE_SALES, ROLE_ANALYST)
+    check_role_permission("Pet", "read", raise_exception=True)
 
     today = date.today()
 
@@ -1260,6 +1290,8 @@ def get_portal_overview():
 
         "Service Visit",
 
+        filters={"status": "Completed", "docstatus": ["!=", 2]},
+
         fields=["name", "pet", "customer", "service_type", "visit_date", "original_price", "final_price", "membership"],
 
         order_by="visit_date asc",
@@ -1384,15 +1416,13 @@ def get_portal_overview():
 
         pets_summary.append({
 
-            "pet_name": pet_name,
+            "pet_id": pet_name,
+
+            "pet_name": p.get("pet_name") or pet_name,
 
             "species": p.get("species"),
 
             "breed": p.get("breed"),
-
-            "gender": p.get("gender"),
-
-            "color": p.get("color"),
 
             "weight_kg": p.get("weight_kg"),
 
@@ -1425,6 +1455,10 @@ def get_portal_overview():
             "care_status_spa": spa_status,
 
             "last_visit": last_visit_dict,
+
+            "last_visit_date": last_visit_dict.get("visit_date") if last_visit_dict else None,
+
+            "status": grooming_status.get("status"),
 
         })
 
@@ -1506,6 +1540,7 @@ def get_customer_portal_details(query):
 
     """
 
+    require_any_role(ROLE_CRM_MANAGER, ROLE_FRONT_DESK, ROLE_SALES, ROLE_ANALYST)
     check_role_permission("Pet", "read", raise_exception=True)
     _check_rate_limit("portal_search", max_requests=100, window_sec=60)
 
@@ -1842,15 +1877,13 @@ def quick_record_visit(customer, pet, service_type, original_price=300000):
 
         frappe.throw(_("Vui lòng cung cấp đầy đủ thông tin khách hàng, thú cưng và loại dịch vụ."))
 
+    pet_owner = frappe.db.get_value("Pet", pet, "customer")
+    if not pet_owner or pet_owner != customer:
+        frappe.throw(_("Thú cưng không thuộc khách hàng đã chọn."), frappe.ValidationError)
 
 
-    try:
 
-        original_price = float(original_price)
-
-    except (ValueError, TypeError):
-
-        frappe.throw(_("Giá dịch vụ gốc không hợp lệ: {0}").format(original_price))
+    original_price = _parse_finite_float(original_price, _("Giá dịch vụ gốc"))
 
 
 
@@ -1884,6 +1917,8 @@ def quick_record_visit(customer, pet, service_type, original_price=300000):
 
     benefit_used = ""
 
+    discount_type_used = None
+
     final_price = original_price
 
     benefit_message = "Thanh toán giá gốc (Không dùng gói hội viên)."
@@ -1906,6 +1941,8 @@ def quick_record_visit(customer, pet, service_type, original_price=300000):
 
                 benefit_used = b.benefit_type
 
+                discount_type_used = b.discount_type or "FREE"
+
                 if b.discount_type == "FREE":
 
                     final_price = 0.0
@@ -1917,6 +1954,9 @@ def quick_record_visit(customer, pet, service_type, original_price=300000):
                     final_price = original_price * (1 - b.discount_value / 100.0)
 
                     benefit_message = f"✓ Trừ 1 lượt '{b.benefit_type}' giảm {b.discount_value}%! Giá còn: {final_price:,.0f}đ."
+
+                elif b.discount_type == "FIXED":
+                    final_price = max(0.0, original_price - float(b.discount_value or 0))
 
                 break
 
@@ -1947,6 +1987,18 @@ def quick_record_visit(customer, pet, service_type, original_price=300000):
         "notes": f"Check-in qua Cổng Dịch Vụ. {benefit_message}",
 
     }).insert(ignore_permissions=True)
+
+    if used_membership:
+        frappe.get_doc({
+            "doctype": "Benefit Redemption Ledger",
+            "membership": used_membership,
+            "service_visit": sv.name,
+            "benefit_type": benefit_used,
+            "discount_type": discount_type_used,
+            "quantity_redeemed": 1,
+            "discount_applied": original_price - final_price,
+            "status": "Applied",
+        }).insert(ignore_permissions=True)
 
 
 
@@ -2133,13 +2185,7 @@ def top_up_membership(membership_name=None, customer=None, pet=None, amount=0, p
 
 
 
-    try:
-
-        amount = float(amount)
-
-    except (ValueError, TypeError):
-
-        frappe.throw(_("Số tiền nạp không hợp lệ."))
+    amount = _parse_finite_float(amount, _("Số tiền nạp"))
 
     if amount <= 0 or amount > 100_000_000:
 
@@ -2488,6 +2534,9 @@ def register_membership(customer, pet, plan_name):
 
         frappe.throw(_("Không tìm thấy thú cưng '{0}'.").format(pet))
 
+    if pet and frappe.db.get_value("Pet", pet, "customer") != customer:
+        frappe.throw(_("Thú cưng không thuộc khách hàng đã chọn."), frappe.ValidationError)
+
 
 
     if not frappe.db.exists("Membership Plan", plan_name):
@@ -2741,13 +2790,11 @@ def send_test_email(recipient_email=None):
 
 
 
+    recipient_email = _sanitize_string(recipient_email, max_len=140)
+
     if not recipient_email:
 
-        recipient_email = "test@petcare.com"
-
-
-
-    recipient_email = _sanitize_string(recipient_email, max_len=140)
+        frappe.throw(_("Vui lòng nhập địa chỉ email nhận thử."), frappe.ValidationError)
 
 
 
@@ -2843,6 +2890,14 @@ def renew_membership(membership_name=None, customer=None, pet=None, new_plan_nam
 
 
     ms_doc = frappe.get_doc("Customer Membership", membership_name, ignore_permissions=True)
+
+    if customer and ms_doc.customer != customer:
+        frappe.throw(_("Thẻ hội viên không thuộc khách hàng đã chọn."), frappe.ValidationError)
+    if pet:
+        if frappe.db.get_value("Pet", pet, "customer") != ms_doc.customer:
+            frappe.throw(_("Thú cưng không thuộc chủ thẻ hội viên."), frappe.ValidationError)
+        if ms_doc.pet and ms_doc.pet != pet:
+            frappe.throw(_("Thẻ hội viên thuộc thú cưng khác."), frappe.ValidationError)
 
     if (ms_doc.status or "").lower() != "active":
 
@@ -3394,6 +3449,91 @@ def convert_lead_to_customer(
 
         frappe.throw(str(e))
 
+
+
+
+
+@frappe.whitelist()
+def create_customer_and_pet(
+    name: str,
+    phone: str,
+    pet_name: str,
+    email: Optional[str] = None,
+    pet_breed: Optional[str] = None,
+    species: Optional[str] = None,
+):
+    """Create or reuse a customer Contact, then attach a new Pet record."""
+    check_role_permission("Pet", "create", raise_exception=True)
+
+    clean_name = _sanitize_string(name, max_len=140)
+    clean_phone = sanitize_phone(phone)
+    clean_email = _sanitize_string(email, max_len=140, allow_none=True)
+    clean_pet_name = _sanitize_string(pet_name, max_len=140)
+    clean_breed = _sanitize_string(pet_breed, max_len=140, allow_none=True)
+    clean_species = _sanitize_string(species, max_len=20, allow_none=True)
+    if not clean_species:
+        breed_hint = (clean_breed or "").casefold()
+        if "mèo" in breed_hint or "cat" in breed_hint:
+            clean_species = "Cat"
+        elif "thỏ" in breed_hint or "rabbit" in breed_hint:
+            clean_species = "Rabbit"
+        elif "chó" in breed_hint or "dog" in breed_hint:
+            clean_species = "Dog"
+        else:
+            clean_species = "Other"
+
+    if not clean_name or not clean_pet_name:
+        frappe.throw(_("Tên khách hàng và tên thú cưng là bắt buộc."), frappe.ValidationError)
+    if not is_valid_vietnam_phone(clean_phone):
+        frappe.throw(_("Số điện thoại Việt Nam không hợp lệ."), frappe.ValidationError)
+    if clean_email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", clean_email):
+        frappe.throw(_("Địa chỉ email không hợp lệ."), frappe.ValidationError)
+    if clean_species not in {"Dog", "Cat", "Rabbit", "Other"}:
+        frappe.throw(_("Loài thú cưng không hợp lệ."), frappe.ValidationError)
+
+    from petcare_crm.utils.customer_service import CustomerService
+
+    existing = CustomerService.find_existing_customer(clean_phone, clean_email)
+    customer_created = not bool(existing)
+    if existing:
+        customer_id = existing.get("name") if isinstance(existing, dict) else existing.name
+    else:
+        name_parts = clean_name.split(" ", 1)
+        contact_payload = {
+            "doctype": "Contact",
+            "first_name": name_parts[0],
+            "last_name": name_parts[1] if len(name_parts) > 1 else "",
+            "phone": clean_phone,
+            "mobile_no": clean_phone,
+            "phone_nos": [{
+                "phone": clean_phone,
+                "is_primary_phone": 1,
+                "is_primary_mobile_no": 1,
+            }],
+            "is_primary_contact": 1,
+        }
+        if clean_email:
+            contact_payload["email_id"] = clean_email
+            contact_payload["email_ids"] = [{"email_id": clean_email, "is_primary": 1}]
+        contact = frappe.get_doc(contact_payload)
+        contact.insert(ignore_permissions=True)
+        customer_id = contact.name
+
+    pet = frappe.get_doc({
+        "doctype": "Pet",
+        "pet_name": clean_pet_name,
+        "customer": customer_id,
+        "species": clean_species,
+        "breed": clean_breed,
+    })
+    pet.insert(ignore_permissions=True)
+
+    return {
+        "success": True,
+        "customer_id": customer_id,
+        "pet_id": pet.name,
+        "customer_created": customer_created,
+    }
 
 
 
@@ -4044,7 +4184,7 @@ def get_membership_topup_qr(membership_id, amount):
 
     membership_id = _sanitize_string(membership_id, max_len=140)
 
-    amount = float(amount or 0.0)
+    amount = _parse_finite_float(amount or 0.0, _("Số tiền nạp"))
 
     if amount <= 0:
 
@@ -4362,7 +4502,9 @@ def owner_portal_get_pets(customer_id, portal_token=None):
 
         p_dict = dict(p)
 
-        pred = predict_next_service(p["name"], "Grooming")
+        # Ownership/token access was verified above. Calling the public staff API
+        # here would incorrectly require a Service Visit role from portal users.
+        pred = _predict_next_service(p["name"], "Grooming")
 
         p_dict["predicted_next_grooming"] = pred.get("predicted_next_visit") or ""
 

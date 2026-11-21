@@ -74,6 +74,12 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #D6D0C4; border-radius: 3px; }
+    @media (max-width: 767px) {
+      #quick-customer-pills { max-width: 100%; overflow-x: auto; }
+      #customer-profile-strip .grid.grid-cols-3 { grid-template-columns: 1fr; }
+      #customer-pets-list .surface-card > div:first-child { flex-wrap: wrap; }
+      main { min-width: 0; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -149,15 +155,15 @@
 
     <!-- Mobile Nav -->
     <div class="md:hidden flex items-center gap-4 px-6 h-10 border-t hairline overflow-x-auto text-xs whitespace-nowrap">
-      <button type="button" onclick="switchTab('customer')" class="font-medium text-[#0F766E]">Hồ sơ &amp; Hội viên</button>
-      <button type="button" onclick="switchTab('pos')" class="text-[#57534E]">Tiếp nhận &amp; POS</button>
-      <button type="button" onclick="switchTab('telemetry')" class="text-[#57534E]">Care Telemetry</button>
-      <button type="button" onclick="switchTab('kpi')" class="text-[#57534E]">Điều hành &amp; Outbox</button>
+      <button type="button" data-mobile-tab="customer" aria-current="page" onclick="switchTab('customer')" class="font-medium text-[#0F766E]">Hồ sơ &amp; Hội viên</button>
+      <button type="button" data-mobile-tab="pos" onclick="switchTab('pos')" class="text-[#57534E]">Tiếp nhận &amp; POS</button>
+      <button type="button" data-mobile-tab="telemetry" onclick="switchTab('telemetry')" class="text-[#57534E]">Theo dõi chăm sóc</button>
+      <button type="button" data-mobile-tab="kpi" onclick="switchTab('kpi')" class="text-[#57534E]">Điều hành &amp; thông báo</button>
     </div>
   </header>
 
   <!-- Toast -->
-  <div id="toast-banner" class="fixed bottom-6 right-6 z-50 hidden">
+  <div id="toast-banner" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-50 hidden">
     <div class="bg-[#1C1917] text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5 text-xs font-medium">
       <span class="dot dot-nominal"></span>
       <span id="toast-message">Đã cập nhật dữ liệu</span>
@@ -195,7 +201,7 @@
       <div class="rounded-xl border border-[#EAE6DF] bg-gradient-to-r from-[#F0FDFA] via-white to-[#FFFBEB] px-5 py-3 flex flex-wrap items-center justify-between gap-4 text-xs">
         <div class="flex items-center gap-2 font-medium text-[#0F766E] whitespace-nowrap">
           <span class="dot dot-nominal animate-pulse"></span>
-          <span>Đồng bộ trực tiếp với Server Backend</span>
+          <span id="sync-status">Đang kết nối máy chủ...</span>
         </div>
         <div id="pulse-stats" class="flex items-center gap-6 flex-wrap text-[#57534E] whitespace-nowrap">
           <span><strong class="mono text-[#1C1917]" id="pulse-cust-count">3</strong> Khách hàng</span>
@@ -556,6 +562,13 @@
         <button type="button" onclick="closeModal('modal-membership')" class="text-[#A8A29E] hover:text-[#1C1917]"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form onsubmit="submitMembershipRegister(event)" class="space-y-4 text-xs">
+        <div>
+          <label for="mem-action" class="block font-medium text-[#57534E] mb-1">Thao tác hội viên</label>
+          <select id="mem-action" class="input-clean w-full h-9 px-3">
+            <option value="register">Đăng ký gói mới</option>
+            <option value="renew">Gia hạn gói hiện có</option>
+          </select>
+        </div>
         <div>
           <label class="block font-medium text-[#57534E] mb-1.5">Chọn gói hội viên</label>
           <div id="membership-plan-options" class="space-y-2"></div>
@@ -1262,7 +1275,11 @@
       ...JSON.parse(JSON.stringify(DEFAULT_STORE))
     };
 
+    let syncReady = false;
     async function apiCall(method, args = {}, isGet = false) {
+      if (!isGet && !syncReady && method !== 'suggest_best_benefit') {
+        throw new Error('Chưa kết nối dữ liệu. Vui lòng tải lại trang và kiểm tra máy chủ.');
+      }
       if (isGet) {
         const params = new URLSearchParams(args).toString();
         const res = await fetch(`/api/method/petcare_crm.api.${method}${params ? '?' + params : ''}`);
@@ -1280,11 +1297,19 @@
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
+      if (data.message?.success === false || data.message?.status === 'error') {
+        throw new Error(data.message.message || data.message.error || 'Máy chủ không hoàn tất thao tác.');
+      }
       return data.message;
     }
 
     async function syncFromServer() {
+      syncReady = false;
       const overview = await apiCall('get_portal_overview', {}, true);
+      if (!Array.isArray(overview?.customers) || !Array.isArray(overview?.pets)) {
+        syncReady = false;
+        throw new Error('Dữ liệu máy chủ chưa tương thích với giao diện này.');
+      }
       appState.customers = overview.customers || [];
       appState.pets = overview.pets || [];
       appState.plans = overview.plans || [];
@@ -1295,6 +1320,8 @@
       appState.opportunities = overview.opportunities || [];
       appState.outbox = overview.outbox || [];
       appState.serviceRevenueMonth = overview.serviceRevenueMonth || 0;
+      syncReady = true;
+      document.getElementById('sync-status').innerText = 'Đã đồng bộ với máy chủ';
 
       if (!appState.customers.find(c => c.id === appState.selectedCustomerId) && appState.customers.length > 0) {
         appState.selectedCustomerId = appState.customers[0].id;
@@ -1303,6 +1330,7 @@
     }
 
     async function resetDemoState() {
+      if (!confirm('Khôi phục dữ liệu demo? Các thay đổi trên dữ liệu mẫu sẽ bị mất.')) return;
       await apiCall('reset_demo_dataset', {});
       await syncFromServer();
       showToast('Đã khôi phục dữ liệu mẫu gốc trên Server');
@@ -1325,6 +1353,12 @@
         document.getElementById('view-' + id).classList.toggle('hidden', id !== tabId);
         const btn = document.getElementById('tab-btn-' + id);
         if (btn) btn.classList.toggle('active', id === tabId);
+      });
+      document.querySelectorAll('[data-mobile-tab]').forEach(btn => {
+        const selected = btn.dataset.mobileTab === tabId;
+        btn.classList.toggle('text-[#0F766E]', selected);
+        btn.classList.toggle('text-[#57534E]', !selected);
+        btn.setAttribute('aria-current', selected ? 'page' : 'false');
       });
       if (tabId === 'pos') renderPosView();
       if (tabId === 'telemetry') renderTelemetryView();
@@ -1622,7 +1656,8 @@
       custSel.innerHTML = appState.customers.map(c =>
         `<option value="${c.id}" ${c.id === appState.selectedCustomerId ? 'selected' : ''}>${c.name} (${c.phone})</option>`
       ).join('');
-      document.getElementById('pos-date').value = new Date().toISOString().slice(0, 10);
+      const dateInput = document.getElementById('pos-date');
+      if (!dateInput.value) dateInput.value = new Date().toLocaleDateString('en-CA');
 
       document.getElementById('pos-service-catalog').innerHTML = appState.services.map(s => {
         const active = s.id === appState.selectedServiceId;
@@ -1666,7 +1701,11 @@
     function onPosCustomerChange() {
       const custId = document.getElementById('pos-customer').value;
       const pets = appState.pets.filter(p => p.ownerId === custId);
-      document.getElementById('pos-pet').innerHTML = pets.map(p => `<option value="${p.id}">${p.name} (${p.species})</option>`).join('');
+      const petSelect = document.getElementById('pos-pet');
+      const previousPet = petSelect.value;
+      petSelect.innerHTML = pets.map(p => `<option value="${p.id}">${p.name} (${p.species})</option>`).join('');
+      if (pets.some(p => p.id === previousPet)) petSelect.value = previousPet;
+      appState.selectedCustomerId = custId;
       updatePosSummary();
     }
 
@@ -1675,7 +1714,9 @@
       renderPosView();
     }
 
+    let posSummaryRequest = 0;
     async function updatePosSummary() {
+      const requestId = ++posSummaryRequest;
       const custId = document.getElementById('pos-customer').value;
       const petId = document.getElementById('pos-pet').value;
       const svc = appState.services.find(s => s.id === appState.selectedServiceId) || appState.services[0];
@@ -1688,6 +1729,7 @@
         service_type: svc.name,
         original_price: svc.price
       });
+      if (requestId !== posSummaryRequest) return;
 
       const best = match?.best_option;
       const discount = best ? best.discount_amount : 0;
@@ -1733,9 +1775,11 @@
 
     async function checkInAppointment(aptId) {
       const res = await apiCall('check_in_appointment', { appointment_name: aptId });
-      if (res?.success && res.appointment) {
-        appState.selectedCustomerId = res.appointment.customerId;
-        appState.selectedServiceId = res.appointment.serviceId;
+      if (res?.success) {
+        if (res.appointment) {
+          appState.selectedCustomerId = res.appointment.customerId;
+          appState.selectedServiceId = res.appointment.serviceId;
+        }
         await syncFromServer();
         renderPosView();
         showToast(`Đã Check-in lịch hẹn ${aptId} vào quầy POS`);
@@ -1743,7 +1787,11 @@
     }
 
     async function cancelAppointment(aptId) {
-      await apiCall('cancel_appointment', { appointment_name: aptId });
+      const reason = prompt('Lý do hủy lịch hẹn:');
+      if (reason === null) return;
+      if (!reason.trim()) { showToast('Vui lòng nhập lý do hủy lịch.'); return; }
+      const result = await apiCall('cancel_appointment', { appointment_name: aptId, reason: reason.trim() });
+      if (!result?.success) throw new Error(result?.message || 'Không thể hủy lịch.');
       await syncFromServer();
       renderPosView();
       showToast(`Đã hủy lịch hẹn ${aptId}`);
@@ -1857,18 +1905,35 @@
     // -------------------------------------------------------------------
     function openModal(id) {
       const el = document.getElementById(id);
+      el.dataset.returnFocus = document.activeElement?.id || '';
+      window.petcareModalTrigger = document.activeElement;
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-modal', 'true');
       el.classList.remove('hidden');
       el.classList.add('flex');
+      el.querySelector('input, select, textarea, button')?.focus();
       lucide.createIcons();
     }
     function closeModal(id) {
       const el = document.getElementById(id);
       el.classList.add('hidden');
       el.classList.remove('flex');
+      window.petcareModalTrigger?.focus();
     }
+    document.addEventListener('keydown', (event) => {
+      const modal = document.querySelector('[id^="modal-"][role="dialog"]:not(.hidden)');
+      if (!modal) return;
+      if (event.key === 'Escape') { closeModal(modal.id); return; }
+      if (event.key !== 'Tab') return;
+      const controls = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]')];
+      if (!controls.length) return;
+      if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls[controls.length - 1].focus(); }
+      else if (!event.shiftKey && document.activeElement === controls[controls.length - 1]) { event.preventDefault(); controls[0].focus(); }
+    });
 
     function openTopUpModal(custId) {
       const cust = appState.customers.find(c => c.id === custId) || appState.customers[0];
+      if (!cust) { showToast('Chưa có khách hàng để nạp ví.'); return; }
       appState.selectedCustomerId = cust.id;
       document.getElementById('topup-cust-name').innerText = `${cust.name} (${cust.phone})`;
       document.getElementById('topup-current-wallet').innerText = fmtVND(cust.wallet);
@@ -1881,39 +1946,28 @@
       const payment_method = document.getElementById('topup-method').value;
       if (amount <= 0) return;
 
-      const cust = appState.customers.find(c => c.id === appState.selectedCustomerId);
-      if (cust) {
-        cust.wallet = (Number(cust.wallet) || 0) + amount;
-        appState.visits.unshift({
-          id: 'TOPUP-' + Math.floor(1000 + Math.random() * 9000),
-          customerId: cust.id,
-          petName: 'Ví Hội Viên',
-          serviceName: `Nạp tiền vào ví (${payment_method})`,
-          date: new Date().toISOString().slice(0, 10),
-          orig: amount,
-          discount: 0,
-          final: amount,
-          note: `Nạp thành công qua ${payment_method}`
-        });
-      }
-
+      const submit = e.submitter;
+      if (submit) submit.disabled = true;
       try {
-        await apiCall('top_up_membership', {
+        const result = await apiCall('top_up_membership', {
           customer: appState.selectedCustomerId,
           amount: amount,
           payment_method: payment_method
         });
+        if (!result?.success) throw new Error(result?.message || 'Không thể nạp ví');
+        closeModal('modal-topup');
+        await syncFromServer();
+        showToast(`Đã nạp ${fmtVND(amount)} vào ví`);
       } catch (err) {
-        console.warn('API sync deferred, local update applied:', err);
+        showToast(`Không thể nạp ví: ${err.message}`);
+      } finally {
+        if (submit) submit.disabled = false;
       }
-
-      closeModal('modal-topup');
-      renderAll();
-      showToast(`Đã nạp ${fmtVND(amount)} vào ví · Số dư mới: ${fmtVND(cust ? cust.wallet : amount)}`);
     }
 
     function openMembershipModal(custId) {
       const cust = appState.customers.find(c => c.id === custId) || appState.customers[0];
+      if (!cust) { showToast('Chưa có khách hàng để đăng ký hội viên.'); return; }
       appState.selectedCustomerId = cust.id;
       const pets = appState.pets.filter(p => p.ownerId === cust.id);
       document.getElementById('mem-pet-select').innerHTML = pets.map(p => `<option value="${p.id}">${p.name} (${p.species})</option>`).join('');
@@ -1940,16 +1994,19 @@
       e.preventDefault();
       const pet = document.getElementById('mem-pet-select').value;
       const allow_rollover = document.getElementById('mem-rollover').checked ? 1 : 0;
-      const res = await apiCall('renew_membership', {
-        customer: appState.selectedCustomerId,
-        pet,
-        plan_name: appState.selectedPlanName,
-        allow_rollover
-      });
+      const action = document.getElementById('mem-action').value;
+      const args = action === 'renew'
+        ? { customer: appState.selectedCustomerId, pet, new_plan_name: appState.selectedPlanName, allow_rollover }
+        : { customer: appState.selectedCustomerId, pet, plan_name: appState.selectedPlanName };
+      const button = e.submitter;
+      if (button) button.disabled = true;
+      let res;
+      try { res = await apiCall(action === 'renew' ? 'renew_membership' : 'register_membership', args); }
+      finally { if (button) button.disabled = false; }
       if (res?.success) {
         closeModal('modal-membership');
         await syncFromServer();
-        showToast(`Đã kích hoạt gói ${res.membership_id} (Hạn: ${res.expiry})`);
+        showToast(res.message || (action === 'renew' ? 'Đã gia hạn gói hội viên.' : 'Đã đăng ký gói hội viên.'));
       }
     }
 
@@ -1976,8 +2033,14 @@
     }
 
     async function sendQuickTestEmail() {
+      const recipient = prompt('Nhập địa chỉ email nhận thư kiểm tra:');
+      if (recipient === null) return;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient.trim())) {
+        showToast('Vui lòng nhập địa chỉ email hợp lệ.');
+        return;
+      }
       const res = await apiCall('send_test_email', {
-        recipient_email: 'admin@petcare.vn',
+        recipient_email: recipient.trim(),
         subject: '[PetCare Test Mail] Kiểm tra kết nối SMTP & Giao diện Email',
         body: 'Đây là email kiểm thử tự động từ PetCare CRM 2.0 Outbox.'
       });
@@ -2049,11 +2112,12 @@
 
     async function submitNewLead(e) {
       e.preventDefault();
-      await apiCall('create_opportunity', {
+      const result = await apiCall('create_opportunity', {
         title: document.getElementById('new-opp-title').value.trim(),
         value: Number(document.getElementById('new-opp-val').value || 0),
         stage: document.getElementById('new-opp-stage').value
       });
+      if (!result?.success && result?.status !== 'success') throw new Error(result?.message || 'Không thể tạo cơ hội.');
       closeModal('modal-new-lead');
       await syncFromServer();
       showToast('Đã thêm cơ hội mới vào Pipeline');
@@ -2074,8 +2138,23 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('label:not([for])').forEach(label => {
+        const control = label.parentElement.querySelector('input, select, textarea');
+        if (control?.id && !label.contains(control)) label.htmlFor = control.id;
+      });
+      document.querySelectorAll('[id^="modal-"] button[onclick^="closeModal"]').forEach(button => {
+        if (!button.textContent.trim()) button.setAttribute('aria-label', 'Đóng hộp thoại');
+      });
       renderAll();
-      syncFromServer().catch(() => {});
+      syncFromServer().catch(err => {
+        document.getElementById('sync-status').innerText = 'Không kết nối được — đang hiển thị dữ liệu mẫu';
+        document.querySelector('#view-customer .animate-pulse')?.classList.remove('animate-pulse');
+        showToast('Không đồng bộ được dữ liệu: ' + err.message);
+      });
+    });
+    window.addEventListener('unhandledrejection', event => {
+      event.preventDefault();
+      showToast('Không thể hoàn tất thao tác: ' + (event.reason?.message || 'Vui lòng thử lại.'));
     });
   </script>
 </body>

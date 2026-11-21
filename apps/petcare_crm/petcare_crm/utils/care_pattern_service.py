@@ -95,6 +95,9 @@ class CarePatternAnalyzer:
 
         matching_visits = []
         for v in visits:
+            status = str(_get_field(v, "status") or "").strip().lower()
+            if status in {"cancelled", "canceled", "draft", "in progress"} or _get_field(v, "docstatus") == 2:
+                continue
             v_pet = _get_field(v, "pet")
             v_service = _get_field(v, "service_type") or _get_field(v, "service") or ""
 

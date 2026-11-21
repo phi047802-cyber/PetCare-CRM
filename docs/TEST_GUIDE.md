@@ -2,14 +2,14 @@
 
 > **Dự án**: PetCare CRM  
 > **Nền tảng**: Frappe Framework v15  
-> **Tổng số kịch bản kiểm thử**: **106 tests / 12 suites** (Tỷ lệ Pass hiện tại: **100%**)
+> **Tổng số kịch bản kiểm thử**: **197 tests / 16 suites** (Tỷ lệ Pass hiện tại: **100%**)
 
 ---
 
 ## 1. Triết Lý & Chiến Lược Kiểm Thử (Testing Strategy)
 
 Hệ thống PetCare CRM áp dụng chiến lược kiểm thử đa tầng (Test Pyramid) nghiêm ngặt:
-1. **Kiểm thử độc lập không phụ thuộc Daemon (Pure Python Mock Architecture)**: Toàn bộ 106 kịch bản kiểm thử có thể chạy trực tiếp trên bất kỳ máy trạm có cài Python 3.10+ mà không bắt buộc khởi động container Docker hay MariaDB server.
+1. **Kiểm thử độc lập không phụ thuộc Daemon (Pure Python Mock Architecture)**: Toàn bộ 197 kịch bản kiểm thử có thể chạy trực tiếp trên bất kỳ máy trạm có cài Python 3.10+ mà không bắt buộc khởi động container Docker hay MariaDB server.
 2. **Nguyên tắc "Chạy Thật — Không Làm Yếu Assertion"**:
    * Không đánh dấu Pass nếu test chưa thực sự chạy và in kết quả.
    * Khi gặp lỗi, truy tìm nguyên nhân gốc rễ (Root Cause) để sửa code logic, tuyệt đối không xóa bỏ assert hoặc hạ thấp tiêu chuẩn kiểm thử.
@@ -48,7 +48,7 @@ Thư mục kiểm thử: [`apps/petcare_crm/petcare_crm/tests/`](file:///c:/User
 ```powershell
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 ```
-*Thời gian chạy tham khảo*: khoảng 2–5 giây cho toàn bộ 106 tests, tùy máy.
+*Thời gian chạy tham khảo*: khoảng 2–5 giây cho toàn bộ 197 tests, tùy máy.
 
 ### 3.2. Chạy Riêng Lẻ Từng Suite Cụ Thể
 ```powershell

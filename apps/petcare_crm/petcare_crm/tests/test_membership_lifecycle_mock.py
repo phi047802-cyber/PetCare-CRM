@@ -56,6 +56,7 @@ sys.modules["frappe.model"] = mock_frappe.model
 sys.modules["frappe.model.document"] = mock_frappe_doc
 
 from petcare_crm.petcare_crm.doctype.benefit_redemption_ledger.benefit_redemption_ledger import BenefitRedemptionLedger
+from petcare_crm.petcare_crm.doctype.service_visit.service_visit import ServiceVisit
 from petcare_crm.utils.service_operations import (
     ServiceCatalogService,
     ServiceVisitService,
@@ -351,6 +352,17 @@ class TestMembershipLifecycleAndRedemptionMock(unittest.TestCase):
         self.assertEqual(ledger.status, "Reverted")
         self.assertEqual(mock_benefit.used_quantity, 2)
         self.assertEqual(mock_benefit.remaining_quantity, 3)
+
+    def test_draft_visit_deletion_requests_redemption_reversal(self):
+        visit = ServiceVisit(name="SV-001", docstatus=0)
+        visit.revert_benefit_redemptions = MagicMock()
+        visit.on_trash()
+        visit.revert_benefit_redemptions.assert_called_once()
+
+        visit.docstatus = 2
+        visit.revert_benefit_redemptions.reset_mock()
+        visit.on_trash()
+        visit.revert_benefit_redemptions.assert_not_called()
 
     def test_09_and_10_renewal_rollover_and_immutable_history(self):
         """Kịch bản 9 & 10: Gia hạn thẻ -> Kế thừa lượt tồn, bảo toàn số dư và lịch sử cũ."""

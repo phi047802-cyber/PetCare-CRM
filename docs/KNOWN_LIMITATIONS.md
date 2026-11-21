@@ -3,14 +3,14 @@
 > **Dự án**: PetCare CRM (Hệ Thống CRM Dịch Vụ Chăm Sóc Thú Cưng)  
 > **Nền tảng**: Frappe Framework v15  
 > **Phiên bản tài liệu**: 2.0 (Post-Prompt 10 Extension Release)  
-> **Trạng thái kiểm thử độc lập**: 106/106 Tests PASS (100%) across 12 Test Suites
+> **Trạng thái kiểm thử độc lập**: 197/197 Tests PASS (100%) across 16 Test Suites
 
 ---
 
 ## 1. Tuyên Bố Về Trạng Thái Hệ Thống (Maturity Declaration)
 
 > [!IMPORTANT]
-> PetCare CRM đã được nâng cấp từ cấp độ Proof of Concept lên **Advanced Functional Prototype Ready-for-Integration** với các luồng nghiệp vụ cốt lõi, kiến trúc Clean Architecture và bộ kiểm thử độc lập **106/106 tests** đạt 100%; trạng thái này không thay thế kiểm thử tích hợp live trên Frappe Bench.
+> PetCare CRM đã được nâng cấp từ cấp độ Proof of Concept lên **Advanced Functional Prototype Ready-for-Integration** với các luồng nghiệp vụ cốt lõi, kiến trúc Clean Architecture và bộ kiểm thử độc lập **197/197 tests** đạt 100%; trạng thái này không thay thế kiểm thử tích hợp live trên Frappe Bench.
 > 
 > Hệ thống đáp ứng trọn vẹn yêu cầu bảo vệ giao dịch (Atomic Transaction), chống trùng lặp (Idempotency), đối soát ngân hàng tự động (Dynamic VietQR IPN), điều phối thông báo đa kênh (Zalo ZNS & SMS Brandname), và bộ API chuyên biệt dành riêng cho Ứng dụng di động của Chủ nuôi (Pet Owner Mobile App).
 

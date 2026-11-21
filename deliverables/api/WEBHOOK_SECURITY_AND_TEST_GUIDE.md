@@ -16,7 +16,7 @@
   * Mỗi webhook request gửi sang phải đính kèm Header `X-Signature` hoặc trường `signature` trong JSON body.
   * Chuỗi chữ ký được tạo bằng thuật toán:
     $$	ext{Signature} = 	ext{HMAC-SHA256}(	ext{Raw Payload Body}, 	ext{Shared Secret Key})$$
-  * Hệ thống PetCare CRM băm lại request body với khóa bí mật `VIETQR_WEBHOOK_SECRET` lưu trong môi trường server. Nếu hai chuỗi hash không trùng khớp, hệ thống lập tức từ chối và phản hồi `HTTP 401 Unauthorized`.
+  * Hệ thống PetCare CRM băm lại request body với khóa bí mật `vietqr_webhook_secret` trong `site_config.json` hoặc `PETCARE_WEBHOOK_SECRET` trong môi trường server. Nếu hai chuỗi hash không trùng khớp, hệ thống lập tức từ chối và phản hồi `HTTP 401 Unauthorized`.
 
 ### 1.2. Khóa Khử Trùng Chống Gạch Nợ Hai Lần (Idempotency Key Protection)
 * **Vấn đề**: Do đặc thù mạng Internet chập chờn, ngân hàng có thể gửi lặp lại 1 thông báo giao dịch nhiều lần (Retry Mechanism). Nếu CRM không có cơ chế khử trùng, 1 lần khách chuyển khoản 350.000 VNĐ có thể bị ghi nhận 2-3 lần vào doanh thu hoặc cộng dồn sai vào ví.
@@ -37,13 +37,17 @@
     * Phản hồi `HTTP 200` giúp ngân hàng biết giao dịch đã nhận và ngừng gửi lại, đồng thời CSDL của phòng khám được bảo toàn 100% không bị sai lệch số dư.
 
 ### 1.3. Phân Tích & Đối Soát Cú Pháp Tự Động (Auto-Reconciliation)
-* **Phiếu dịch vụ**: Nội dung chuyển khoản chứa cú pháp `PETCARE_VISIT_{ID}` (ví dụ: `PETCARE_VISIT_VISIT-2026-00120`) -> Hệ thống tự động chuyển trạng thái phiếu dịch vụ sang `Paid`, đối chiếu số tiền thanh toán thực tế với `final_price` và cấn trừ lượt thẻ hội viên tương ứng.
-* **Nạp tiền ví hội viên**: Nội dung chứa cú pháp `PETCARE_TOPUP_{ID}` -> Hệ thống tự động cộng dồn số dư vào thẻ hội viên `Customer Membership` và ghi nhận giao dịch `Top Up`.
+* **Phiếu dịch vụ**: Nội dung chuyển khoản chứa cú pháp `PC-SVC-{visit_id}` (ví dụ: `PC-SVC-SV-2026-00120`) -> Hệ thống tự động chuyển trạng thái phiếu dịch vụ sang `Paid` và đối chiếu số tiền thanh toán thực tế với `final_price`.
+* **Nạp tiền ví hội viên**: Nội dung chứa cú pháp `PC-MEM-{membership_id}` -> Hệ thống tự động cộng dồn số dư vào thẻ hội viên `Customer Membership` và ghi nhận giao dịch `Top Up`.
 * **Sai lệch cú pháp**: Nếu khách hàng gõ sai nội dung (ví dụ: "chuyen tien cho phong kham"), hệ thống ghi nhận vào danh sách `Unmatched Transactions` để Kế toán đối soát thủ công bằng tay, **tuyệt đối không làm mất tiền của khách hàng**.
 
 ### 1.4. Ghi Log Tối Thiểu & Bảo Vệ Dữ Liệu Riêng Tư (Minimal Logging & Zero Data Leak)
 * Tuyệt đối không log thông tin số tài khoản ngân hàng, mã PIN, hoặc OTP của khách hàng vào tệp log hệ thống.
 * Log kiểm toán chỉ lưu lại: `Timestamp`, `Gateway (VIETQR)`, `Transaction ID`, `Amount`, `Status (SUCCESS/DUPLICATE/REJECTED)`.
+
+### 1.5. Cấu Hình VietQR Bắt Buộc
+
+Không lưu số tài khoản hoặc secret thật trong Git. Cấu hình tại `site_config.json` bằng các khóa `vietqr_bank_bin`, `vietqr_account_no`, `vietqr_account_name`, `vietqr_template`, `vietqr_webhook_secret`; hoặc dùng biến môi trường tương ứng `PETCARE_VIETQR_BANK_BIN`, `PETCARE_VIETQR_ACCOUNT_NO`, `PETCARE_VIETQR_ACCOUNT_NAME`, `PETCARE_VIETQR_TEMPLATE`, `PETCARE_WEBHOOK_SECRET`. Secret webhook phải có ít nhất 32 ký tự.
 
 ---
 
@@ -73,7 +77,7 @@ TỔNG KẾT: 4/4 KỊCH BẢN WEBHOOK ĐẠT CHUẨN AN TOÀN NGÂN HÀNG (PASS
 ## 3. DANH SÁCH ENDPOINTS ĐÃ KIỂM TRA THỰC TẾ (AUDIT TRACEABILITY)
 
 ### 3.1. Các Endpoints Đã Chạy Test Thực Tế Trên Môi Trường Test (Runtime Tested)
-Toàn bộ các endpoints cốt lõi đã chạy cùng bộ kiểm thử và vượt qua 106 test cases trong `run_all_tests.py`:
+Toàn bộ các endpoints cốt lõi đã chạy cùng bộ kiểm thử và vượt qua 197 test cases trong `run_all_tests.py`:
 1. `create_lead` (`test_lead_sales.py`, `test_crm_core_mock.py`)
 2. `submit_website_lead` (`test_wordpress_lead_integration.py`)
 3. `update_lead_status` (`test_lead_sales.py`)
@@ -117,12 +121,11 @@ Các endpoints phụ trợ hoặc cổng tự phục vụ đã được đọc, 
 12. `reset_demo_dataset`
 13. `analyze_pet_care_pattern`
 14. `get_pet_recommendations`
-15. `run_care_scan`
-16. `run_daily_automation`
-17. `run_hourly_workflow`
-18. `get_portal_overview`
-19. `get_customer_portal_details`
-20. `owner_portal_get_pets`
-21. `owner_portal_get_health_timeline`
-22. `owner_portal_get_membership_wallet`
-23. `owner_portal_book_appointment`
+15. `run_daily_automation`
+16. `run_hourly_workflow`
+17. `get_portal_overview`
+18. `get_customer_portal_details`
+19. `owner_portal_get_pets`
+20. `owner_portal_get_health_timeline`
+21. `owner_portal_get_membership_wallet`
+22. `owner_portal_book_appointment`

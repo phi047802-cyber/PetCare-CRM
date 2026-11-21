@@ -246,6 +246,9 @@ class TestLiveServerAndServices(unittest.TestCase):
         qr_data = VietQRGenerator.generate_service_visit_qr(
             visit_id="SV-2026-0001",
             amount=250000.0,
+            bank_bin="970436",
+            account_no="0388889999",
+            account_name="PHONG KHAM PETCARE CRM",
         )
         self.assertEqual(qr_data["status"], "success")
         self.assertEqual(qr_data["payment_type"], "SERVICE_VISIT")
@@ -257,6 +260,9 @@ class TestLiveServerAndServices(unittest.TestCase):
         qr_data = VietQRGenerator.generate_membership_topup_qr(
             membership_id="MEM-2026-0001",
             amount=500000.0,
+            bank_bin="970436",
+            account_no="0388889999",
+            account_name="PHONG KHAM PETCARE CRM",
         )
         self.assertEqual(qr_data["status"], "success")
         self.assertEqual(qr_data["payment_type"], "MEMBERSHIP_TOPUP")

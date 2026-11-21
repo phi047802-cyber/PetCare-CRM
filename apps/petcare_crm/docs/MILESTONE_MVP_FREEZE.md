@@ -20,7 +20,7 @@
    - `petcare_crm.api.get_care_status`
    - `petcare_crm.api.predict_next_service`
    - `petcare_crm.api.check_membership_renewal`
-   - `petcare_crm.api.run_care_scan` (trigger quét toàn hệ thống)
+   - `petcare_crm.api.run_care_intelligence_scan` (trigger quét toàn hệ thống)
 
 ---
 

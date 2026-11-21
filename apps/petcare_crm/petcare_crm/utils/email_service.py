@@ -2,19 +2,21 @@
 PetCare CRM Email Service — Mailtrap Integration.
 Thiết kế template email chuẩn HTML Responsive, hiện đại, phong cách Medical Teal & Clean Fintech.
 """
+import os
+import re
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import parseaddr
+from html import escape
 
 try:
     import frappe
 except ImportError:
     frappe = None
 
-# Mailtrap SMTP Credentials (configurable via site_config or env)
-import os
-
 def _get_smtp_config():
+    """Read SMTP settings at send time; credentials must come from config/env."""
     host = "sandbox.smtp.mailtrap.io"
     port = 2525
     user = None
@@ -23,15 +25,45 @@ def _get_smtp_config():
         user = frappe.conf.get("mailtrap_user")
         pwd = frappe.conf.get("mailtrap_pass")
         host = frappe.conf.get("mailtrap_host") or host
-        port = int(frappe.conf.get("mailtrap_port") or port)
+        try:
+            port = int(frappe.conf.get("mailtrap_port") or port)
+        except (TypeError, ValueError):
+            port = 2525
     if not user:
-        user = os.environ.get("MAILTRAP_USER", "9777c07beed041")
+        user = os.environ.get("MAILTRAP_USER")
     if not pwd:
-        pwd = os.environ.get("MAILTRAP_PASS", "8a22d4e766bb7a")
-    return host, port, user, pwd
+        pwd = os.environ.get("MAILTRAP_PASS")
+    return str(host).strip(), port, str(user or "").strip(), str(pwd or "").strip()
 
-DEFAULT_SENDER = "PetCare Clinic & Spa <no-reply@petcare.com>"
-MAILTRAP_HOST, MAILTRAP_PORT, MAILTRAP_USER, MAILTRAP_PASS = _get_smtp_config()
+DEFAULT_SENDER_EMAIL = "no-reply@petcare.com"
+DEFAULT_SENDER = f"PetCare Clinic & Spa <{DEFAULT_SENDER_EMAIL}>"
+EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+
+
+def _clean_email_address(value):
+    """Return a normalized email address or None for malformed input."""
+    _, address = parseaddr(str(value or "").strip())
+    return address if EMAIL_PATTERN.fullmatch(address) else None
+
+
+def _get_contact_recipient(customer_name):
+    """Resolve the real Contact email; never redirect customer mail to demo inboxes."""
+    if not frappe:
+        return None, str(customer_name or "").strip()
+
+    try:
+        contact = frappe.get_doc("Contact", customer_name)
+    except Exception as exc:
+        frappe.logger("petcare_crm").warning(
+            f"Cannot load Contact {customer_name!r} for email notification: {exc}"
+        )
+        return None, str(customer_name or "").strip()
+
+    email = getattr(contact, "email_id", None)
+    if not email and getattr(contact, "email_ids", None):
+        email = getattr(contact.email_ids[0], "email_id", None)
+    display_name = getattr(contact, "first_name", None) or customer_name
+    return _clean_email_address(email), str(display_name or "").strip()
 
 
 def _get_base_template(header_badge, title, subtitle, main_content):
@@ -41,6 +73,9 @@ def _get_base_template(header_badge, title, subtitle, main_content):
     - Tone màu Teal y tế kết hợp Slate cao cấp
     - Hỗ trợ tốt trên mọi trình duyệt & ứng dụng email (Gmail, Outlook, Mailtrap)
     """
+    header_badge = escape(str(header_badge or ""))
+    title = escape(str(title or ""))
+    subtitle = escape(str(subtitle or ""))
     return f"""
     <!DOCTYPE html>
     <html lang="vi">
@@ -108,77 +143,100 @@ def _get_base_template(header_badge, title, subtitle, main_content):
 
 
 def _send_smtp_email(to_email, subject, html_content):
-    """Gửi email trực tiếp qua SMTP Mailtrap với fallback về frappe.sendmail."""
-    try:
+    """Send through configured Mailtrap SMTP, then fall back to Frappe Email Account."""
+    recipient = _clean_email_address(to_email)
+    if not recipient:
+        if frappe:
+            frappe.logger("petcare_crm").warning(
+                f"Email notification skipped because recipient is invalid: {to_email!r}"
+            )
+        return False
+
+    clean_subject = str(subject or "").replace("\r", " ").replace("\n", " ")[:200]
+    host, port, user, password = _get_smtp_config()
+
+    if user and password:
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
+        msg["Subject"] = clean_subject
         msg["From"] = DEFAULT_SENDER
-        msg["To"] = to_email
+        msg["To"] = recipient
         msg.attach(MIMEText(html_content, "html", "utf-8"))
 
-        server = smtplib.SMTP(MAILTRAP_HOST, MAILTRAP_PORT, timeout=12)
-        server.starttls()
-        server.login(MAILTRAP_USER, MAILTRAP_PASS)
-        server.sendmail(DEFAULT_SENDER, [to_email], msg.as_string())
-        server.quit()
-        if frappe:
-            frappe.logger("petcare_crm").info(f"Direct Mailtrap email sent to {to_email}: {subject}")
-        return True
-    except Exception as e:
-        if frappe:
-            frappe.logger("petcare_crm").warning(f"Direct Mailtrap SMTP error: {e}. Trying frappe.sendmail fallback...")
-            try:
-                frappe.sendmail(
-                    recipients=[to_email],
-                    subject=subject,
-                    message=html_content,
-                    now=True,
+        server = None
+        try:
+            server = smtplib.SMTP(host, port, timeout=12)
+            server.starttls()
+            server.login(user, password)
+            server.sendmail(DEFAULT_SENDER_EMAIL, [recipient], msg.as_string())
+            if frappe:
+                frappe.logger("petcare_crm").info(
+                    f"Direct Mailtrap email sent to {recipient}: {clean_subject}"
                 )
-                return True
-            except Exception as fe:
-                frappe.logger("petcare_crm").error(f"frappe.sendmail failed as well: {fe}")
-                return False
-        else:
-            return False
+            return True
+        except Exception as exc:
+            if frappe:
+                frappe.logger("petcare_crm").warning(
+                    f"Direct Mailtrap SMTP error: {exc}. Trying frappe.sendmail fallback."
+                )
+        finally:
+            if server:
+                try:
+                    server.quit()
+                except Exception:
+                    pass
+
+    if not frappe:
+        return False
+
+    try:
+        frappe.sendmail(
+            recipients=[recipient],
+            subject=clean_subject,
+            message=html_content,
+            now=True,
+        )
+        return True
+    except Exception as exc:
+        frappe.logger("petcare_crm").error(f"frappe.sendmail failed: {exc}")
+        return False
 
 
 def send_membership_welcome_email(customer_name, membership_name, plan_doc):
     """Gửi email chào mừng khi đăng ký hội viên mới với card giao diện sang trọng."""
-    contact = None
-    if frappe:
-        try:
-            contact = frappe.get_doc("Contact", customer_name)
-        except Exception:
-            pass
-
-    email = getattr(contact, "email_id", None) if contact else None
-    if not email and contact and getattr(contact, "email_ids", None):
-        email = contact.email_ids[0].email_id
-
+    email, customer_display = _get_contact_recipient(customer_name)
     if not email:
-        email = "customer@petcare-demo.com"
+        if frappe:
+            frappe.logger("petcare_crm").info(
+                f"Welcome email skipped because Contact {customer_name!r} has no valid email."
+            )
+        return False
 
-    customer_display = getattr(contact, "first_name", None) if contact else customer_name
-    plan_name = getattr(plan_doc, "plan_name", "Hội Viên")
-    plan_price = float(getattr(plan_doc, "price", 0) or 0)
+    safe_customer_display = escape(customer_display)
+    plan_name = str(getattr(plan_doc, "plan_name", "Hội Viên") or "Hội Viên")
+    safe_plan_name = escape(plan_name)
+    safe_membership_name = escape(str(membership_name or ""))
     duration = getattr(plan_doc, "duration_months", 12)
 
     # Render danh sách quyền lợi dạng cards nhỏ
     benefits_rows = ""
     for b in getattr(plan_doc, "benefits", []):
-        disc_text = "Miễn phí 100%" if b.discount_type == "FREE" else (f"Giảm {b.discount_value}%" if b.discount_type == "PERCENTAGE" else f"Giảm {float(b.discount_value):,.0f}đ")
+        discount_type = getattr(b, "discount_type", None)
+        discount_value = getattr(b, "discount_value", 0) or 0
+        disc_text = "Miễn phí 100%" if discount_type == "FREE" else (f"Giảm {discount_value}%" if discount_type == "PERCENTAGE" else f"Giảm {float(discount_value):,.0f}đ")
+        safe_benefit_type = escape(str(getattr(b, "benefit_type", "") or ""))
+        safe_total_quantity = escape(str(getattr(b, "total_quantity", 0) or 0))
         benefits_rows += f"""
         <tr>
           <td style="padding: 10px 14px; border-bottom: 1px solid #EDF2F7; font-size: 13px; font-weight: 600; color: #1E293B;">
             <span style="display: inline-block; width: 8px; height: 8px; background-color: #0D9488; border-radius: 50%; margin-right: 8px;"></span>
-            {b.benefit_type}
+            {safe_benefit_type}
           </td>
           <td style="padding: 10px 14px; border-bottom: 1px solid #EDF2F7; font-size: 13px; color: #0F766E; font-weight: 700; text-align: center;">
-            {b.total_quantity} lượt
+            {safe_total_quantity} lượt
           </td>
           <td style="padding: 10px 14px; border-bottom: 1px solid #EDF2F7; font-size: 12px; color: #64748B; text-align: right;">
             <span style="background-color: #F0FDFA; color: #0F766E; border: 1px solid #99F6E4; padding: 2px 8px; border-radius: 12px; font-weight: 600;">
-              {disc_text}
+              {escape(disc_text)}
             </span>
           </td>
         </tr>
@@ -186,7 +244,7 @@ def send_membership_welcome_email(customer_name, membership_name, plan_doc):
 
     content = f"""
       <p style="font-size: 15px; line-height: 1.6; margin: 0 0 20px 0; color: #334155;">
-        Xin chào <strong>{customer_display}</strong>,<br>
+        Xin chào <strong>{safe_customer_display}</strong>,<br>
         Chào mừng bạn cùng thú cưng đã chính thức trở thành Hội viên tại <strong>PetCare Clinic &amp; Spa</strong>! Gói dịch vụ chăm sóc toàn diện của bạn đã được kích hoạt thành công trên hệ thống.
       </p>
 
@@ -198,7 +256,7 @@ def send_membership_welcome_email(customer_name, membership_name, plan_doc):
               <tr>
                 <td>
                   <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #94A3B8;">Digital Membership Card</span>
-                  <div style="font-size: 20px; font-weight: 800; color: #38BDF8; margin-top: 4px;">{plan_name}</div>
+                  <div style="font-size: 20px; font-weight: 800; color: #38BDF8; margin-top: 4px;">{safe_plan_name}</div>
                 </td>
                 <td align="right" valign="top">
                   <span style="background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; color: #4ADE80;">ĐANG HOẠT ĐỘNG</span>
@@ -210,7 +268,7 @@ def send_membership_welcome_email(customer_name, membership_name, plan_doc):
                     <tr>
                       <td>
                         <span style="font-size: 10px; text-transform: uppercase; color: #94A3B8;">Mã Thẻ Hội Viên</span>
-                        <div style="font-family: monospace; font-size: 14px; font-weight: 700; color: #FFFFFF; letter-spacing: 1px;">{membership_name}</div>
+                        <div style="font-family: monospace; font-size: 14px; font-weight: 700; color: #FFFFFF; letter-spacing: 1px;">{safe_membership_name}</div>
                       </td>
                       <td align="right">
                         <span style="font-size: 10px; text-transform: uppercase; color: #94A3B8;">Thời Hạn Gói</span>
@@ -257,30 +315,25 @@ def send_membership_welcome_email(customer_name, membership_name, plan_doc):
         subtitle=f"Chúc mừng bạn và bé đã gia nhập {plan_name}",
         main_content=content
     )
-    _send_smtp_email(email, f"🎉 Chào mừng Hội viên {plan_name} — PetCare Clinic & Spa", html)
+    return _send_smtp_email(email, f"🎉 Chào mừng Hội viên {plan_name} — PetCare Clinic & Spa", html)
 
 
 def send_topup_confirmation_email(customer_name, membership_name, amount, balance_after):
     """Gửi email biên lai nạp tiền đẹp mắt phong cách Fintech Banking receipt."""
-    contact = None
-    if frappe:
-        try:
-            contact = frappe.get_doc("Contact", customer_name)
-        except Exception:
-            pass
-
-    email = getattr(contact, "email_id", None) if contact else None
-    if not email and contact and getattr(contact, "email_ids", None):
-        email = contact.email_ids[0].email_id
-
+    email, customer_display = _get_contact_recipient(customer_name)
     if not email:
-        email = "customer@petcare-demo.com"
+        if frappe:
+            frappe.logger("petcare_crm").info(
+                f"Top-up email skipped because Contact {customer_name!r} has no valid email."
+            )
+        return False
 
-    customer_display = getattr(contact, "first_name", None) if contact else customer_name
+    safe_customer_display = escape(customer_display)
+    safe_membership_name = escape(str(membership_name or ""))
 
     content = f"""
       <p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #334155;">
-        Xin chào <strong>{customer_display}</strong>,<br>
+        Xin chào <strong>{safe_customer_display}</strong>,<br>
         Tài khoản hội viên của bạn vừa được nạp tiền thành công tại quầy lễ tân. Dưới đây là thông tin biên lai giao dịch:
       </p>
 
@@ -302,11 +355,11 @@ def send_topup_confirmation_email(customer_name, membership_name, amount, balanc
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 13px;">
               <tr>
                 <td style="padding: 6px 0; color: #64748B;">Mã Thẻ Hội Viên:</td>
-                <td align="right" style="padding: 6px 0; font-family: monospace; font-weight: 700; color: #0F172A;">{membership_name}</td>
+                <td align="right" style="padding: 6px 0; font-family: monospace; font-weight: 700; color: #0F172A;">{safe_membership_name}</td>
               </tr>
               <tr>
                 <td style="padding: 6px 0; color: #64748B;">Khách Hàng:</td>
-                <td align="right" style="padding: 6px 0; font-weight: 600; color: #0F172A;">{customer_display}</td>
+                <td align="right" style="padding: 6px 0; font-weight: 600; color: #0F172A;">{safe_customer_display}</td>
               </tr>
               <tr>
                 <td style="padding: 6px 0; color: #64748B;">Hình Thức:</td>
@@ -336,21 +389,23 @@ def send_topup_confirmation_email(customer_name, membership_name, amount, balanc
         subtitle=f"Số dư mới: {balance_after:,.0f} đ",
         main_content=content
     )
-    _send_smtp_email(email, f"💰 Biên lai nạp tiền {amount:,.0f}đ — PetCare Clinic & Spa", html)
+    return _send_smtp_email(email, f"💰 Biên lai nạp tiền {amount:,.0f}đ — PetCare Clinic & Spa", html)
 
 
 def send_demo_test_email(recipient_email):
     """Gửi email test HTML thiết kế đẹp kiểm tra kết nối Mailtrap."""
+    host, port, user, password = _get_smtp_config()
+    smtp_status = "Mailtrap SMTP đã cấu hình" if user and password else "Frappe Email Account / chưa cấu hình Mailtrap"
     content = f"""
       <div style="text-align: center; padding: 10px 0 20px 0;">
         <div style="display: inline-block; width: 64px; height: 64px; background-color: #DCFCE7; border-radius: 50%; line-height: 64px; font-size: 30px; margin-bottom: 14px;">
           🚀
         </div>
         <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 800; color: #0F172A;">
-          Kết Nối Mailtrap Hoàn Hảo!
+          Email Kiểm Tra Đã Được Tạo
         </h2>
         <p style="margin: 0; font-size: 14px; color: #64748B; line-height: 1.5;">
-          Hệ thống Email Service của <strong>PetCare CRM</strong> đã được liên kết chính xác với Mailtrap SMTP Sandbox.
+          Email này dùng để xác minh cấu hình gửi thư của <strong>PetCare CRM</strong> qua Mailtrap SMTP hoặc Email Account trong Frappe.
         </p>
       </div>
 
@@ -366,21 +421,21 @@ def send_demo_test_email(recipient_email):
             <table border="0" cellpadding="0" cellspacing="0" width="100%">
               <tr>
                 <td style="padding: 4px 0; color: #64748B; width: 120px;">SMTP Host:</td>
-                <td style="padding: 4px 0; font-family: monospace; font-weight: 600; color: #0F172A;">sandbox.smtp.mailtrap.io</td>
+                <td style="padding: 4px 0; font-family: monospace; font-weight: 600; color: #0F172A;">{escape(host)}</td>
               </tr>
               <tr>
                 <td style="padding: 4px 0; color: #64748B;">Port:</td>
-                <td style="padding: 4px 0; font-family: monospace; font-weight: 600; color: #0F172A;">2525 (TLS/STARTTLS)</td>
+                <td style="padding: 4px 0; font-family: monospace; font-weight: 600; color: #0F172A;">{port} (TLS/STARTTLS)</td>
               </tr>
               <tr>
-                <td style="padding: 4px 0; color: #64748B;">Username:</td>
-                <td style="padding: 4px 0; font-family: monospace; font-weight: 600; color: #0F172A;">9777c07beed041</td>
+                <td style="padding: 4px 0; color: #64748B;">Cấu hình:</td>
+                <td style="padding: 4px 0; font-family: monospace; font-weight: 600; color: #0F172A;">{escape(smtp_status)}</td>
               </tr>
               <tr>
                 <td style="padding: 4px 0; color: #64748B;">Trạng Thái:</td>
                 <td style="padding: 4px 0;">
                   <span style="background-color: #DCFCE7; color: #166534; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px;">
-                    ● Authenticated &amp; Ready
+                    ● Kiểm tra khi gửi
                   </span>
                 </td>
               </tr>
@@ -396,12 +451,14 @@ def send_demo_test_email(recipient_email):
 
     html = _get_base_template(
         header_badge="System Diagnostics",
-        title="Kiểm Tra Kết Nối Mailtrap",
+        title="Kiểm Tra Kết Nối Email",
         subtitle="Hệ thống gửi thư điện tử PetCare CRM v1.0",
         main_content=content
     )
-    sent = _send_smtp_email(recipient_email, "🧪 [Mailtrap Demo] Kiểm Tra Kết Nối PetCare CRM", html)
+    sent = _send_smtp_email(recipient_email, "🧪 Kiểm Tra Kết Nối Email PetCare CRM", html)
     if sent:
-        return {"success": True, "message": f"Đã gửi email test HTML trực tiếp tới Mailtrap Sandbox ({recipient_email})!"}
-    else:
-        return {"success": True, "message": f"Đã khởi tạo email template HTML gửi tới {recipient_email} (Mailtrap Sandbox / Chế độ mô phỏng email thành công)!"}
+        return {"success": True, "message": f"Đã gửi email test HTML tới {recipient_email}."}
+    return {
+        "success": False,
+        "message": f"Không thể gửi email tới {recipient_email}. Hãy kiểm tra Mailtrap hoặc Email Account trong Frappe.",
+    }

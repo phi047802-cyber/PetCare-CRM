@@ -89,6 +89,18 @@ class TestCareIntelligenceMock(unittest.TestCase):
         self.assertTrue(pred.insufficient_data)
         self.assertIsNone(pred.predicted_next_visit)
 
+    def test_cancelled_and_unfinished_visits_do_not_affect_cycle(self):
+        visits = [
+            {"pet": "PET-MOCHI", "service_type": "Grooming", "visit_date": "2026-09-01", "status": "Completed"},
+            {"pet": "PET-MOCHI", "service_type": "Grooming", "visit_date": "2026-10-01", "status": "Completed"},
+            {"pet": "PET-MOCHI", "service_type": "Grooming", "visit_date": "2026-10-25", "status": "Cancelled"},
+            {"pet": "PET-MOCHI", "service_type": "Grooming", "visit_date": "2026-10-26", "status": "Draft"},
+        ]
+        result = CarePatternAnalyzer.analyze_pattern("PET-MOCHI", "Grooming", visits)
+        self.assertEqual(result.number_of_visits, 2)
+        self.assertEqual(result.last_visit_date, date(2026, 10, 1))
+        self.assertEqual(result.typical_interval, 30)
+
     # ─────────────────────────────────────────────────────────────────
     # Scenario 2: 1 Service Visit
     # ─────────────────────────────────────────────────────────────────

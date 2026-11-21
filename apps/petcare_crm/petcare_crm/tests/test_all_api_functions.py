@@ -728,6 +728,69 @@ class TestAllApiFunctions(unittest.TestCase):
         self.assertEqual(res["best_option"]["final_price"], 0.0)
         self.assertEqual(len(res["alternatives"]), 1)
 
+    def test_36_create_customer_and_pet(self):
+        """The customer form is backed by a real whitelisted Frappe endpoint."""
+        with patch(
+            "petcare_crm.utils.customer_service.CustomerService.find_existing_customer",
+            return_value=None,
+        ):
+            result = api.create_customer_and_pet(
+                name="Nguyen Van An",
+                phone="0901234567",
+                email="an@example.com",
+                pet_name="Milo",
+                pet_breed="Poodle",
+                species="Dog",
+            )
+        self.assertTrue(result["success"])
+        self.assertTrue(result["customer_created"])
+        self.assertIn("customer_id", result)
+        self.assertIn("pet_id", result)
+
+    def test_37_quick_visit_redemption_ledger_and_failure(self):
+        benefit = MockDoc(benefit_type="Grooming", remaining_quantity=1,
+                          discount_type="FREE", discount_value=0)
+        membership = MockDoc(name="MEM-001", benefits=[benefit])
+        payloads = []
+
+        def make_document(payload):
+            payloads.append(payload)
+            return MockDoc(payload)
+
+        mock_frappe.db.commit = MagicMock()
+        with patch.object(api, "get_active_membership_object", return_value=membership), \
+             patch.object(api, "record_benefit_usage", return_value={"success": True}), \
+             patch.object(mock_frappe, "get_doc", side_effect=make_document):
+            api.quick_record_visit("CUST-001", "PET-001", "Grooming", 300000)
+        ledger = next(p for p in payloads if p["doctype"] == "Benefit Redemption Ledger")
+        self.assertEqual(ledger["membership"], "MEM-001")
+        self.assertEqual(ledger["discount_applied"], 300000)
+        self.assertEqual(ledger["service_visit"], "DOC-001")
+
+        mock_frappe.db.commit.reset_mock()
+        with patch.object(api, "get_active_membership_object", return_value=membership), \
+             patch.object(api, "record_benefit_usage", return_value={"success": True}), \
+             patch.object(mock_frappe, "get_doc", side_effect=RuntimeError("insert failed")):
+            with self.assertRaises(RuntimeError):
+                api.quick_record_visit("CUST-001", "PET-001", "Grooming", 300000)
+        mock_frappe.db.commit.assert_not_called()
+
+    def test_38_benefit_deduction_does_not_commit_before_visit(self):
+        mock_frappe.db.commit = MagicMock()
+        api.record_benefit_usage("MEM-001", "Grooming")
+        mock_frappe.db.commit.assert_not_called()
+
+    def test_39_registration_rejects_other_customers_pet(self):
+        with patch.object(mock_frappe.db, "get_value", return_value="OTHER-CUSTOMER"):
+            with self.assertRaises(MockValidationError):
+                api.register_membership("CUST-001", "PET-001", "PLAN-01")
+
+    def test_40_renewal_rejects_other_customers_membership(self):
+        membership = MockDoc(name="MEM-001", customer="OTHER-CUSTOMER", pet="PET-001")
+        with patch.object(mock_frappe, "get_doc", return_value=membership):
+            with self.assertRaises(MockValidationError):
+                api.renew_membership(membership_name="MEM-001", customer="CUST-001")
+
 
 if __name__ == "__main__":
     unittest.main()

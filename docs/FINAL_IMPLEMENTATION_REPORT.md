@@ -34,7 +34,7 @@ Hệ thống ban đầu chỉ tập trung vào hai module quản lý hội viên
 | **Care Intelligence & Retention** | Prompt 6 | Lọc ngoại lai IQR, trung bình động EWMA, dự đoán ngày ghé thăm tiếp theo, phát hiện Due Soon / At Risk, khử trùng lặp đề xuất. | **Hoàn thành** |
 | **Workflow, Automation & Follow-up** | Prompt 7 | Tác vụ nền Frappe Scheduler idempotent: nhắc Lead quá 24h, tự động hết hạn thẻ, cảnh báo gia hạn, giám sát SLA, Safe Mode. | **Hoàn thành** |
 | **Security, API & Native Desk UI** | Prompt 8 | Ma trận phân quyền RBAC 5 vai trò, bảo vệ sở hữu chéo, API an toàn, Workspace Desk, Action buttons và Báo cáo 8 KPI. | **Hoàn thành** |
-| **Automated Testing & E2E Validation** | Prompt 9 | Xây dựng 106 test cases trong 12 suites với Master Test Runner đạt tỷ lệ Pass 100%. | **Hoàn thành** |
+| **Automated Testing & E2E Validation** | Prompt 9 | Xây dựng 197 test cases trong 16 suites với Master Test Runner đạt tỷ lệ Pass 100%. | **Hoàn thành** |
 | **Tích Hợp Cuối, Refactor & Bàn Giao** | Prompt 10 | Refactor kiến trúc, bộ Seed Data mẫu thuần Việt, bộ tài liệu bàn giao hoàn chỉnh và Kịch bản Demo 3 câu chuyện. | **Hoàn thành** |
 
 ---
@@ -79,7 +79,7 @@ Hệ thống được thiết kế theo mô hình **Clean Architecture 8 Tầng*
 
 *Hai tầng hỗ trợ xuyên suốt*:
 * **Tầng 7 (Automation & Scheduler)**: `tasks.py`, `workflow_automation.py` thực thi background jobs định kỳ.
-* **Tầng 8 (Testing & Quality Assurance)**: Bộ kiểm thử độc lập 106 tests trong 12 suites với Master Test Runner.
+* **Tầng 8 (Testing & Quality Assurance)**: Bộ kiểm thử độc lập 197 tests trong 16 suites với Master Test Runner.
 
 ---
 
@@ -175,7 +175,7 @@ python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 * **Số lượng test lỗi runtime (Errors)**: `0`
 * **Số lượng test bị bỏ qua (Skipped)**: `0`
 * **Số lượng test bị chặn (Blocked)**: `0`
-* **Kết luận**: Toàn bộ 106 kịch bản kiểm thử độc lập đều đã chạy và đạt tỷ lệ thành công **100.0%**; kiểm thử Frappe runtime vẫn phải chạy riêng bằng `bench run-tests` trên site thật.
+* **Kết luận**: Toàn bộ 197 kịch bản kiểm thử độc lập đều đã chạy và đạt tỷ lệ thành công **100.0%**; kiểm thử Frappe runtime vẫn phải chạy riêng bằng `bench run-tests` trên site thật.
 
 ---
 
@@ -202,6 +202,6 @@ python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 * Từ một ứng dụng đơn lẻ quản lý hội viên ban đầu, hệ thống đã phát triển thành một **CRM chuyên biệt ngành dịch vụ thú cưng hoàn chỉnh**.
 * Kiến trúc mã nguồn được phân tách mạch lạc theo Clean Architecture, tách biệt rõ giữa tầng ORM Frappe và tầng Domain Logic hướng đối tượng (OOP).
 * Hệ thống vận hành mượt mà trên nền tảng chuẩn mực Frappe Desk, cung cấp Workspace, List/Form views, Action buttons, Query filters và Báo cáo quản trị 8 KPI chi tiết.
-* Các quy tắc nghiệp vụ, tính an toàn số dư, tích hợp và dataset contract được bảo vệ bởi **bộ kiểm thử tự động 106 kịch bản**.
+* Các quy tắc nghiệp vụ, tính an toàn số dư, tích hợp và dataset contract được bảo vệ bởi **bộ kiểm thử tự động 197 kịch bản**.
 
 Hệ thống đã hoàn toàn sẵn sàng cho phiên trình diễn nghiệm thu trước Hội đồng chấm đồ án.

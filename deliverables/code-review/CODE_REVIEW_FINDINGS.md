@@ -1,12 +1,12 @@
 # Báo cáo rà soát và khắc phục mã nguồn PetCare CRM
 
-Ngày rà soát: 15/11/2026  
+Ngày rà soát gần nhất: 20/11/2026
 Nhánh thực hiện: `audit/frappe-runtime-readiness`  
 Phạm vi: Frappe API, DocType schema, RBAC, Owner Portal, lịch hẹn, Membership, VietQR và test contract.
 
 ## Kết quả hiện tại
 
-- 13 test suite, tổng cộng **123/123 test pass**.
+- 16 test suite, tổng cộng **197/197 test pass**.
 - Python compile, JSON parse và đối chiếu field truy vấn/payload với DocType đều pass.
 - Toàn bộ API đăng nhập có authorization guard; guest endpoint được giới hạn bằng allowlist cố định.
 - Không còn `frappe.set_user("Administrator")` trong API và không còn secret mặc định trong code.
@@ -27,9 +27,15 @@ Phạm vi: Frappe API, DocType schema, RBAC, Owner Portal, lịch hẹn, Members
 | AUD-009 | P1 | Renewal dùng field không tồn tại `validity_days` và đặt status `Renewed` ngoài Select schema. | Dùng `duration_months`, `add_months` và bổ sung trạng thái lịch sử `Renewed`. | Payload/schema contract và Membership suite. | Đã sửa |
 | AUD-010 | P2 | Public WordPress endpoint trả thẳng exception nội bộ, có thể lộ thông tin DB. | Log lỗi phía server và chỉ trả thông báo chung cho client. | WordPress suite + source review. | Đã sửa |
 | AUD-011 | P2 | Catalog/payment thiếu một số validation số âm, category/species và amount bằng 0. | Thêm whitelist/biên dữ liệu và từ chối webhook amount không dương. | Audit `03c` và Service Operations suite. | Đã sửa |
-| AUD-012 | P1 | Test cũ dùng dữ liệu mock sai schema nên vẫn xanh dù runtime query/payload sai. | Thêm Suite 13 kiểm tra compile, JSON, query fields, get_doc payload, guest allowlist, secrets và RBAC consistency. | 8/8 Runtime Readiness Contract pass. | Đã sửa |
+| AUD-012 | P1 | Test cũ dùng dữ liệu mock sai schema nên vẫn xanh dù runtime query/payload sai. | Thêm Suite 13 kiểm tra compile, JSON, query fields, get_doc payload, guest allowlist, secrets, tài liệu API và RBAC consistency. | 10/10 Runtime Readiness Contract pass. | Đã sửa |
 | AUD-013 | P1 | Mật khẩu Administrator demo cố định được ghi trong script và nhiều tài liệu, dễ bị tái sử dụng ngoài local. | Xóa credential mặc định; deploy bắt buộc `PETCARE_ADMIN_PASSWORD` tối thiểu 12 ký tự và đặt lại mật khẩu trên site. | PowerShell parse + repository secret regression check. | Đã sửa |
 | AUD-014 | P1 | Script deploy copy controller/DocType mới nhưng không chạy migrate và không copy hooks/setup, có thể để code mới chạy trên schema/quyền cũ. | Đồng bộ hooks/setup, bắt buộc `bench migrate`, dừng ngay nếu migrate hoặc runtime test lỗi. | PowerShell parse; live execution còn chờ Docker/Bench. | Đã sửa mã nguồn, chờ chạy live |
+| AUD-015 | P0 | Credential Mailtrap và username hiển thị demo bị hardcode; email khách không có địa chỉ bị chuyển sang inbox demo. | Chỉ đọc credential từ site config/env, bỏ fallback inbox demo, che thông tin cấu hình và trả đúng trạng thái gửi. | Audit tests `03f`–`03h` + secret regression contract. | Đã sửa mã nguồn; phải rotate credential cũ |
+| AUD-016 | P1 | Nút quét chu kỳ trên ba bản frontend gọi `run_care_scan`, là hàm nội bộ không whitelist nên sẽ lỗi khi chạy trên Frappe. | Chuyển toàn bộ UI và tài liệu sang endpoint whitelist `run_care_intelligence_scan`. | Runtime Readiness Contract `test_10` + JavaScript syntax check. | Đã sửa |
+| AUD-017 | P1 | API inventory ghi 48 endpoint, gắn nhầm 26 endpoint là Guest và builder ghi cứng đường dẫn máy thành viên cũ. | Builder tự đọc AST từ `api.py`, hiện sinh đủ 56 endpoint với 48 Auth/8 Guest và dùng đường dẫn tương đối. | Runtime Readiness Contract `test_09`. | Đã sửa |
+| AUD-018 | P1 | Giá trị `NaN`/`Infinity` có thể vượt qua kiểm tra `amount <= 0`, gây dữ liệu tiền không hữu hạn. | Thêm kiểm tra `math.isfinite` tại API và Payment Webhook service. | Audit tests `03c`. | Đã sửa |
+| AUD-019 | P1 | Portal dùng tên hiển thị của thú cưng thay cho khóa DocType khi mở hồ sơ hoặc ghi giao dịch; một số trường hiển thị không tồn tại trong schema. | Backend trả riêng `pet_id`/`pet_name`; frontend dùng ID cho API và tên cho giao diện, đồng thời ánh xạ lại ngày khám, trạng thái và số dư. | Runtime Readiness Contract `test_10` + JavaScript syntax check. | Đã sửa |
+| AUD-020 | P0 | Role Customer Portal có quyền đọc DocType chung nhưng API chung không lọc theo chủ sở hữu, tạo nguy cơ xem dữ liệu khách khác. | Gỡ quyền backend chung của role này; mọi truy cập portal đi qua `owner_portal_*` có kiểm tra session/token và ownership. | Security/RBAC suite + Audit authorization tests. | Đã sửa |
 
 ## Lệnh xác minh đã chạy
 
@@ -37,7 +43,7 @@ Phạm vi: Frappe API, DocType schema, RBAC, Owner Portal, lịch hẹn, Members
 python apps/petcare_crm/petcare_crm/tests/run_all_tests.py
 ```
 
-Kết quả: `123 passed`, `0 failed`, `0 errors`, `0 skipped`, `0 blocked`.
+Kết quả: `197 passed`, `0 failed`, `0 errors`, `0 skipped`, `0 blocked`.
 
 ## Giới hạn xác minh
 

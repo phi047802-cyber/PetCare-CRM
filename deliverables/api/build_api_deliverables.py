@@ -2,7 +2,7 @@
 """
 Builder script for PetCare CRM API Documentation Package (Rubric A4.7).
 Generates:
-1. deliverables/api/API_INVENTORY.md (48 whitelisted endpoints complete matrix)
+1. deliverables/api/API_INVENTORY.md (whitelisted endpoints complete matrix)
 2. deliverables/api/PetCare_CRM_API_Specification_Group.md & .docx (Group Guide & Webhook deep-dive)
 3. deliverables/api/PetCare_CRM_API_Specification_Individual_Template.md & .docx (4 members allocation)
 4. deliverables/api/postman/PetCare_CRM_API_Collection.postman_collection.json
@@ -10,16 +10,24 @@ Generates:
 6. deliverables/api/WEBHOOK_SECURITY_AND_TEST_GUIDE.md
 """
 
-import os
+import ast
 import json
-from docx import Document
-from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.oxml import OxmlElement, parse_xml
-from docx.oxml.ns import nsdecls, qn
+import os
+from pathlib import Path
+try:
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.oxml import OxmlElement, parse_xml
+    from docx.oxml.ns import nsdecls, qn
+except ImportError:
+    Document = None
+    Inches = Pt = RGBColor = None
+    WD_ALIGN_PARAGRAPH = WD_TABLE_ALIGNMENT = None
+    OxmlElement = parse_xml = nsdecls = qn = None
 
-BASE_DIR = r"C:\Users\pc\Documents\Doan_CRM\deliverables\api"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 POSTMAN_DIR = os.path.join(BASE_DIR, "postman")
 os.makedirs(POSTMAN_DIR, exist_ok=True)
 
@@ -27,7 +35,15 @@ os.makedirs(POSTMAN_DIR, exist_ok=True)
 # DOCX HELPER FUNCTIONS
 # -----------------------------------------------------------------------------
 
+def _require_python_docx():
+    if Document is None:
+        raise RuntimeError(
+            "Thiếu python-docx. Cài bằng 'python -m pip install python-docx' "
+            "nếu cần sinh tài liệu Word; API_INVENTORY.md không cần thư viện này."
+        )
+
 def set_cell_background(cell, fill_hex):
+    _require_python_docx()
     tcPr = cell._tc.get_or_add_tcPr()
     shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_hex}"/>')
     tcPr.append(shd)
@@ -43,6 +59,7 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
     tcPr.append(tcMar)
 
 def create_styled_table(doc, headers, data_rows, col_widths=None):
+    _require_python_docx()
     table = doc.add_table(rows=len(data_rows) + 1, cols=len(headers))
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
@@ -84,7 +101,10 @@ def create_styled_table(doc, headers, data_rows, col_widths=None):
     doc.add_paragraph()
     return table
 
-print("[OK] Loaded Docx helpers.")
+if Document is None:
+    print("[INFO] python-docx unavailable; Markdown generators remain usable.")
+else:
+    print("[OK] Loaded Docx helpers.")
 
 # -----------------------------------------------------------------------------
 # 1. API INVENTORY DATA AND GENERATOR
@@ -407,16 +427,6 @@ API_LIST = [
         "side_effect": "Quét toàn bộ thú cưng; tạo Care Recommendation mới & ToDo cho CSKH",
         "errors": "None", "test": "test_care_intelligence_mock.py, test_tasks.py", "safety": "Anti-duplicate 7-day Gating"
     },
-    {
-        "id": 34, "name": "run_care_scan", "module": "petcare_crm.api.run_care_scan",
-        "url": "/api/method/petcare_crm.api.run_care_scan", "method": "POST",
-        "auth": "Public Guest (allow_guest=True)",
-        "inputs": "check_date (opt)",
-        "output": "{status: 'success', scan_results: {...}}",
-        "side_effect": "Alias gọi run_care_intelligence_scan",
-        "errors": "None", "test": "test_care_intelligence_mock.py", "safety": "Rate Limit"
-    },
-
     # Module 5: Tự động hóa & Đa kênh (Automation & Omnichannel)
     {
         "id": 35, "name": "run_daily_automation", "module": "petcare_crm.api.run_daily_automation",
@@ -556,6 +566,103 @@ API_LIST = [
     }
 ]
 
+
+def _call_name(node):
+    parts = []
+    while isinstance(node, ast.Attribute):
+        parts.append(node.attr)
+        node = node.value
+    if isinstance(node, ast.Name):
+        parts.append(node.id)
+    return ".".join(reversed(parts))
+
+
+def _format_api_inputs(function_node):
+    args = function_node.args.args
+    defaults = [None] * (len(args) - len(function_node.args.defaults)) + list(
+        function_node.args.defaults
+    )
+    formatted = []
+    for arg, default in zip(args, defaults):
+        if default is None:
+            formatted.append(f"{arg.arg} (req)")
+        else:
+            formatted.append(f"{arg.arg} (opt, default={ast.unparse(default)})")
+    return ", ".join(formatted) or "None"
+
+
+def _read_whitelisted_api_contract():
+    repo_root = Path(__file__).resolve().parents[2]
+    api_path = repo_root / "apps" / "petcare_crm" / "petcare_crm" / "api.py"
+    tree = ast.parse(api_path.read_text(encoding="utf-8"))
+    contract = {}
+    for node in tree.body:
+        if not isinstance(node, ast.FunctionDef):
+            continue
+        whitelist = None
+        for decorator in node.decorator_list:
+            if isinstance(decorator, ast.Call) and _call_name(decorator.func) == "frappe.whitelist":
+                whitelist = decorator
+                break
+            if _call_name(decorator) == "frappe.whitelist":
+                whitelist = decorator
+                break
+        if whitelist is None:
+            continue
+        is_guest = isinstance(whitelist, ast.Call) and any(
+            keyword.arg == "allow_guest"
+            and isinstance(keyword.value, ast.Constant)
+            and keyword.value.value is True
+            for keyword in whitelist.keywords
+        )
+        contract[node.name] = {
+            "guest": is_guest,
+            "inputs": _format_api_inputs(node),
+        }
+    return contract
+
+
+def _guest_access_label(name):
+    if name in {"payment_webhook", "woocommerce_order_webhook"}:
+        return "Public Guest (allow_guest=True) — bắt buộc chữ ký HMAC-SHA256"
+    if name.startswith("owner_portal_"):
+        return "Public Guest (allow_guest=True) — bắt buộc portal_token hợp lệ"
+    if name == "submit_website_lead":
+        return "Public Guest (allow_guest=True) — rate limit + honeypot"
+    return "Public Guest (allow_guest=True) — dữ liệu công khai chỉ đọc"
+
+
+def _synchronize_api_inventory(documented_apis):
+    """Use api.py as the source of truth for endpoint names, inputs and guest access."""
+    contract = _read_whitelisted_api_contract()
+    documented_by_name = {item["name"]: item for item in documented_apis}
+    synchronized = []
+    for index, (name, source_info) in enumerate(contract.items(), start=1):
+        item = dict(documented_by_name.get(name, {}))
+        item.update({
+            "id": index,
+            "name": name,
+            "module": f"petcare_crm.api.{name}",
+            "url": f"/api/method/petcare_crm.api.{name}",
+            "method": item.get("method", "POST"),
+            "auth": (
+                _guest_access_label(name)
+                if source_info["guest"]
+                else "Authenticated — Frappe Session/Token + backend RBAC"
+            ),
+            "inputs": source_info["inputs"],
+            "output": item.get("output", "Phản hồi JSON theo nghiệp vụ"),
+            "side_effect": item.get("side_effect", "Xem mã nguồn API và test contract tương ứng"),
+            "errors": item.get("errors", "ValidationError / PermissionError"),
+            "test": item.get("test", "test_runtime_readiness_contract.py"),
+            "safety": item.get("safety", "Authorization contract verified by AST"),
+        })
+        synchronized.append(item)
+    return synchronized
+
+
+API_LIST = _synchronize_api_inventory(API_LIST)
+
 def generate_api_inventory_md():
     out_path = os.path.join(BASE_DIR, "API_INVENTORY.md")
     total = len(API_LIST)
@@ -566,26 +673,26 @@ def generate_api_inventory_md():
 ## HỆ THỐNG PETCARE CRM - KIỂM CHỨNG TỪ NGUỒN MÃ THỰC TẾ
 
 > **Dự án**: PetCare CRM (Quản lý Quan hệ Khách hàng Dịch vụ Thú cưng)  
-> **Nền tảng**: Frappe Framework v15 (Python 3.10/3.14, MariaDB 10.6)  
+> **Nền tảng**: Frappe Framework v15, Python, MariaDB
 > **Giao thức**: REST API & Whitelisted RPC  
 > **Mã tài liệu**: `DOC-API-INVENTORY-2026`  
-> **Tổng số API Whitelisted thực tế**: **{total} endpoints** (22 Yêu cầu Xác thực + 26 Public Guest được bảo vệ)  
-> **Tỷ lệ kiểm thử tự động xác minh**: **100% Pass** ({total}/{total} endpoints có test case hoặc test mock bảo chứng)  
+> **Tổng số API Whitelisted thực tế**: **{total} endpoints** ({auth_count} yêu cầu xác thực + {guest_count} Public Guest được bảo vệ)
+> **Kiểm chứng**: Tên API, chữ ký tham số và trạng thái Guest được trích trực tiếp từ `petcare_crm/api.py` bằng AST.
 
 ---
 
 ## 1. NGUYÊN TẮC QUẢN TRỊ AN TOÀN & BẢO VỆ TOKEN
 1. **Không bao giờ đưa Credential thật vào tài liệu**: Mọi cú pháp cURL, Postman Collection và Environment mẫu đều dùng placeholder dạng biến môi trường: `{{{{base_url}}}}`, `{{{{api_key}}}}`, `{{{{api_secret}}}}`.
 2. **Phân biệt rạch ròi REST Method & Quyền truy cập**:
-   * **Authenticated Endpoints ({auth_count} APIs)**: Bắt buộc phiên đăng nhập Session Cookie hoặc Token Header `Authorization: token {{{{api_key}}}}:{{{{api_secret}}}}`. Được bảo vệ bằng ma trận Frappe RBAC 4 nhóm quyền.
-   * **Public Guest Endpoints ({guest_count} APIs)**: Được phép truy cập không cần đăng nhập nhưng bắt buộc kiểm soát qua các cơ chế phòng vệ hạ tầng: **Rate Limiting** (Frappe Cache), **Honeypot Bot Trap**, và **Xác thực chữ ký HMAC-SHA256** (đối với Webhook thanh toán).
+   * **Authenticated Endpoints ({auth_count} APIs)**: Bắt buộc phiên đăng nhập Session Cookie hoặc Token Header `Authorization: token {{{{api_key}}}}:{{{{api_secret}}}}`, sau đó kiểm tra backend RBAC.
+   * **Public Guest Endpoints ({guest_count} APIs)**: Được phép truy cập không cần đăng nhập; cơ chế bảo vệ tùy luồng gồm **Rate Limiting/Honeypot** cho form công khai, **session hoặc token có kiểm tra ownership** cho Owner Portal, và **HMAC-SHA256** cho webhook.
 3. **Phân loại Trạng thái Kiểm chứng**:
-   * `[VERIFIED RUNTIME]`: Đã được chạy trực tiếp qua bộ kiểm thử tự động 9 Suites (74/74 tests PASS).
-   * `[VERIFIED CODE-AUDIT]`: Đã được đọc, phân tích cú pháp AST và xác minh logic qua mã nguồn thực tế tại `petcare_crm/api.py`.
+   * `[VERIFIED LOCAL]`: Đã được kiểm tra bằng bộ test local và hợp đồng mã nguồn.
+   * `[PENDING LIVE BENCH]`: Cần xác minh lại request/response trên Frappe Bench thật trước khi nghiệm thu.
 
 ---
 
-## 2. MA TRẬN 48 ENDPOINTS WHITELISTED CHI TIẾT
+## 2. MA TRẬN {total} ENDPOINTS WHITELISTED CHI TIẾT
 
 | STT | Tên API | URL Method Frappe | HTTP Method | Quyền / Roles | Tham số đầu vào (Inputs) | Cấu trúc phản hồi (Output Schema) | Tác động dữ liệu (Side Effects) | Mã lỗi thường gặp | Bộ Test kiểm chứng | Trạng thái bảo mật |
 | :---: | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -593,26 +700,20 @@ def generate_api_inventory_md():
     for a in API_LIST:
         md += f"| **{a['id']:02d}** | `{a['name']}` | `{a['url']}` | `{a['method']}` | {a['auth']} | {a['inputs']} | `{a['output']}` | {a['side_effect']} | `{a['errors']}` | `{a['test']}` | {a['safety']} |\n"
 
-    md += """
+    md += f"""
 ---
 
-## 3. THỐNG KÊ PHÂN LOẠI THEO PHÂN HỆ NGHIỆP VỤ
+## 3. THỐNG KÊ QUYỀN TRUY CẬP
 
 ```text
-┌────────────────────────────────────────────────────────┬────────────┬─────────────────────────────┐
-│ Phân Hệ Chức Năng                                      │ Số Lượng   │ Tỷ Lệ Bảo Vệ Xác Thực       │
-├────────────────────────────────────────────────────────┼────────────┼─────────────────────────────┤
-│ 1. CRM Tiếp Thị, Bán Hàng & Hoạt Động (Lead & Deal)   │ 11 APIs    │ 10 Authenticated + 1 Guest  │
-│ 2. Vận Hành Dịch Vụ, Bảng Giá & Khiếu Nại (Visit)     │ 06 APIs    │ 05 Authenticated + 1 Guest  │
-│ 3. Thẻ Hội Viên, Quyền Lợi & Ví Trả Trước (Membership) │ 10 APIs    │ 01 Authenticated + 9 Guest  │
-│ 4. Động Cơ Trí Tuệ & Giữ Chân Khách Hàng (Care Engine) │ 07 APIs    │ 00 Authenticated + 7 Guest  │
-│ 5. Tự Động Hóa Định Kỳ & Đa Kênh (Automation/Omni)    │ 04 APIs    │ 02 Authenticated + 2 Guest  │
-│ 6. Cổng Thanh Toán Số & Webhook IPN (VietQR)          │ 03 APIs    │ 02 Authenticated + 1 HMAC   │
-│ 7. Cổng Tự Phục Vụ Khách Hàng (Customer Portal)        │ 06 APIs    │ 00 Authenticated + 6 Guest  │
-│ 8. Quản Trị Báo Cáo & Phân Tích KPI (Reporting)        │ 01 APIs    │ 01 Authenticated            │
-├────────────────────────────────────────────────────────┼────────────┼─────────────────────────────┤
-│ TỔNG CỘNG                                              │ 48 APIs    │ 22 Token-Auth + 26 Guest/HMAC│
-└────────────────────────────────────────────────────────┴────────────┴─────────────────────────────┘
+┌──────────────────────────────────────────────┬──────────┐
+│ Loại truy cập                                │ Số lượng │
+├──────────────────────────────────────────────┼──────────┤
+│ Frappe Session/Token + backend RBAC          │ {auth_count:>8} │
+│ Public Guest có cơ chế bảo vệ riêng          │ {guest_count:>8} │
+├──────────────────────────────────────────────┼──────────┤
+│ TỔNG CỘNG                                    │ {total:>8} │
+└──────────────────────────────────────────────┴──────────┘
 ```
 
 ---
@@ -620,8 +721,9 @@ def generate_api_inventory_md():
 ## 4. BẢNG KIỂM ĐỊNH TÍNH AN TOÀN TRUY CẬP (ACCESS SECURITY MATRIX)
 
 * **Nhóm 1 (Nhạy cảm - Nghiêm cấm Guest)**: Các tác vụ tạo/sửa đổi hồ sơ `PetCare Lead`, `PetCare Opportunity`, `Service Visit`, `Customer 360`, `Omnichannel Outbox` và `KPI Dashboard`. 100% bắt buộc Token Header hoặc Session Cookie.
-* **Nhóm 2 (Guest có Rate-limiting)**: Các tác vụ tra cứu bảng giá `get_available_plans`, `get_care_status`, `predict_next_service`, `submit_website_lead`. Giới hạn 5 - 120 requests/phút qua Frappe Redis Cache, tránh tấn công vét cạn tài nguyên.
-* **Nhóm 3 (Guest có Xác thực Chữ ký HMAC)**: `payment_webhook` mở cổng Guest nhưng kiểm tra chữ ký điện tử `HMAC-SHA256` trên Payload bằng khóa bí mật máy chủ `VIETQR_WEBHOOK_SECRET` và khóa khử trùng `Idempotency Key`.
+* **Nhóm 2 (Guest có Rate-limiting)**: `get_available_plans` và `submit_website_lead`; form Lead còn có honeypot.
+* **Nhóm 3 (Guest có token chủ nuôi)**: Bốn API `owner_portal_*` xác minh token hết hạn và quyền sở hữu Customer/Pet.
+* **Nhóm 4 (Guest có chữ ký HMAC)**: `payment_webhook` và `woocommerce_order_webhook` kiểm tra chữ ký trước khi xử lý dữ liệu.
 """
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(md)
@@ -1623,15 +1725,14 @@ Các endpoints phụ trợ hoặc cổng tự phục vụ đã được đọc, 
 12. `reset_demo_dataset`
 13. `analyze_pet_care_pattern`
 14. `get_pet_recommendations`
-15. `run_care_scan`
-16. `run_daily_automation`
-17. `run_hourly_workflow`
-18. `get_portal_overview`
-19. `get_customer_portal_details`
-20. `owner_portal_get_pets`
-21. `owner_portal_get_health_timeline`
-22. `owner_portal_get_membership_wallet`
-23. `owner_portal_book_appointment`
+15. `run_daily_automation`
+16. `run_hourly_workflow`
+17. `get_portal_overview`
+18. `get_customer_portal_details`
+19. `owner_portal_get_pets`
+20. `owner_portal_get_health_timeline`
+21. `owner_portal_get_membership_wallet`
+22. `owner_portal_book_appointment`
 """
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(md)

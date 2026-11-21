@@ -6,6 +6,7 @@ Enforces backend authorization and cross-entity access verification:
 - Input sanitization and sensitive field protection
 """
 
+import math
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -133,14 +134,9 @@ ROLE_PERMISSIONS: Dict[str, Dict[str, Set[str]]] = {
         "WooCommerce Order Sync": {"read", "report", "export"},
         "ToDo": {"read", "report"},
     },
-    ROLE_CUSTOMER_PORTAL: {
-        "Pet": {"read"},
-        "PetCare Service": {"read"},
-        "PetCare Appointment": {"read", "create"},
-        "Service Visit": {"read"},
-        "Customer Membership": {"read"},
-        "Care Recommendation": {"read"},
-    },
+    # Portal users must go through the ownership-aware owner_portal_* APIs.
+    # Generic DocType APIs have no row-level Customer filter and are denied here.
+    ROLE_CUSTOMER_PORTAL: {},
 }
 
 # Regex for Vietnamese phone number validation
@@ -285,6 +281,8 @@ def sanitize_number(val: Any, min_val: float = 0.0, max_val: Optional[float] = N
     """Validates and bounds numeric inputs."""
     try:
         n = float(val)
+        if not math.isfinite(n):
+            raise ValidationError("Giá trị phải là một số hữu hạn.")
         if n < min_val:
             raise ValidationError(f"Giá trị không được nhỏ hơn {min_val}.")
         if max_val is not None and n > max_val:

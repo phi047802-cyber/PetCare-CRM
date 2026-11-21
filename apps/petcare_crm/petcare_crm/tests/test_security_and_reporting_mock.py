@@ -42,6 +42,7 @@ mock_frappe.utils = mock_frappe_utils
 from petcare_crm.utils.security import (
     ROLE_ANALYST,
     ROLE_CRM_MANAGER,
+    ROLE_CUSTOMER_PORTAL,
     ROLE_SALES,
     ROLE_SYSTEM_MANAGER,
     ROLE_TECHNICIAN,
@@ -124,6 +125,10 @@ class TestSecurityAndReportingMock(unittest.TestCase):
             self.assertFalse(check_role_permission(dt, "write", user="analyst_user"))
             self.assertFalse(check_role_permission(dt, "delete", user="analyst_user"))
 
+        mock_frappe.get_roles.return_value = [ROLE_CUSTOMER_PORTAL]
+        for dt in ["Pet", "Service Visit", "Customer Membership"]:
+            self.assertFalse(check_role_permission(dt, "read", user="portal_user"))
+
     # ─────────────────────────────────────────────────────────────────
     # 2. Cross-Entity Ownership Validation Tests
     # ─────────────────────────────────────────────────────────────────
@@ -187,6 +192,11 @@ class TestSecurityAndReportingMock(unittest.TestCase):
         # Số âm -> Báo lỗi
         with self.assertRaises(ValidationError):
             sanitize_number("-1000", min_val=0.0)
+
+        # NaN/Infinity không được vượt qua so sánh min/max
+        for invalid_number in (float("nan"), float("inf"), float("-inf")):
+            with self.assertRaises(ValidationError):
+                sanitize_number(invalid_number, min_val=0.0)
 
     # ─────────────────────────────────────────────────────────────────
     # 4. Analytics & KPI Calculation Tests

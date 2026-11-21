@@ -89,6 +89,7 @@ from petcare_crm.utils.payment_gateway import (
     VietQRConfig,
 )
 from petcare_crm.utils import payment_gateway
+from petcare_crm.utils import email_service
 from petcare_crm.utils.analytics_service import AnalyticsService
 from petcare_crm.petcare_crm.doctype.petcare_appointment.petcare_appointment import PetCareAppointment
 from petcare_crm.petcare_crm.doctype.service_visit.service_visit import ServiceVisit
@@ -122,6 +123,13 @@ class TestAuditRemediation(unittest.TestCase):
         with self.assertRaises(Exception) as ctx:
             api.top_up_membership(membership_name="MEM-001", amount=500000)
         self.assertIn("đăng nhập", str(ctx.exception))
+
+        frappe.session.user = "owner@example.com"
+        frappe.get_roles = MagicMock(return_value=["PetCare Customer Portal"])
+        with self.assertRaises(Exception):
+            api.get_portal_overview()
+        with self.assertRaises(Exception):
+            api.get_customer_portal_details("0901234567")
 
     # ─────────────────────────────────────────────────────────────────
     # FINDING-02: Payment Webhook Signature Validation & Secret Isolation
@@ -174,6 +182,60 @@ class TestAuditRemediation(unittest.TestCase):
             verify_sig=False,
         )
         self.assertEqual(result["error_code"], "INVALID_AMOUNT")
+
+        for invalid_amount in (float("nan"), float("inf"), float("-inf")):
+            result = PaymentWebhookService.process_webhook_notification(
+                gateway_transaction_id="VCB-INVALID-NON-FINITE",
+                amount=invalid_amount,
+                content="PC-MEM-MEM-2026-00001",
+                verify_sig=False,
+            )
+            self.assertEqual(result["error_code"], "INVALID_AMOUNT")
+
+    def test_03c_api_rejects_non_finite_top_up_amount(self):
+        """Money APIs must reject NaN/Infinity before touching the database."""
+        for invalid_amount in (float("nan"), float("inf"), float("-inf")):
+            with self.assertRaises(Exception):
+                api.top_up_membership(membership_name="MEM-001", amount=invalid_amount)
+        self.assertEqual(
+            api._sanitize_string("<script>alert(1)</script>Tên hợp lệ"),
+            "alert(1)Tên hợp lệ",
+        )
+
+    def test_03f_email_credentials_are_config_only(self):
+        """Mailtrap credentials cannot fall back to values embedded in source code."""
+        frappe.conf = {}
+        with patch.dict(os.environ, {"MAILTRAP_USER": "", "MAILTRAP_PASS": ""}):
+            _, _, user, password = email_service._get_smtp_config()
+        self.assertEqual(user, "")
+        self.assertEqual(password, "")
+
+        with patch.dict(
+            os.environ,
+            {
+                "PETCARE_VIETQR_ACCOUNT_NO": "",
+                "PETCARE_VIETQR_BANK_BIN": "",
+                "PETCARE_VIETQR_ACCOUNT_NAME": "",
+            },
+        ):
+            with self.assertRaises(Exception):
+                VietQRGenerator.build_vietqr_url(100000, "PC-SVC-TEST")
+
+    def test_03g_customer_email_without_recipient_is_skipped(self):
+        """Missing customer email must not redirect private data to a demo inbox."""
+        contact = MockDocument(first_name="Khách không email", email_id=None, email_ids=[])
+        frappe.get_doc = MagicMock(return_value=contact)
+        plan = MockDocument(plan_name="Gold", duration_months=12, benefits=[])
+        with patch.object(email_service, "_send_smtp_email") as send_mock:
+            sent = email_service.send_membership_welcome_email("CUST-001", "MEM-001", plan)
+        self.assertFalse(sent)
+        send_mock.assert_not_called()
+
+    def test_03h_email_failure_is_not_reported_as_success(self):
+        """The diagnostic endpoint must truthfully report SMTP delivery failure."""
+        with patch.object(email_service, "_send_smtp_email", return_value=False):
+            result = email_service.send_demo_test_email("test@example.com")
+        self.assertFalse(result["success"])
 
     def test_03d_finding02_membership_webhook_updates_wallet_atomically(self):
         """FINDING-02: Top-up qua webhook phải tăng số dư và lưu trước/sau."""
@@ -241,6 +303,23 @@ class TestAuditRemediation(unittest.TestCase):
         # Access with valid token
         valid_token = api._generate_portal_token("CUST-999")
         self.assertTrue(api._verify_owner_portal_access("CUST-999", portal_token=valid_token))
+
+        # A valid portal token must also work through the complete pet-list flow.
+        # It must not call the public staff API, which requires Service Visit read.
+        frappe.db.exists.return_value = True
+        frappe.db.get_list.return_value = [
+            {"name": "PET-001", "pet_name": "Bơ", "species": "Dog"}
+        ]
+        with patch.object(
+            api,
+            "_predict_next_service",
+            return_value={"predicted_next_visit": "2026-12-01", "confidence": "HIGH"},
+        ) as internal_prediction, patch.object(api, "predict_next_service") as staff_api:
+            result = api.owner_portal_get_pets("CUST-999", portal_token=valid_token)
+        self.assertTrue(result["success"])
+        self.assertEqual(result["pets"][0]["care_confidence"], "HIGH")
+        internal_prediction.assert_called_once_with("PET-001", "Grooming")
+        staff_api.assert_not_called()
 
         # Access with forged / invalid token throws PermissionError
         with self.assertRaises(Exception):

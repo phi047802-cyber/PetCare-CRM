@@ -243,7 +243,11 @@ class ServiceVisitService:
                     candidate_benefits.sort(key=lambda x: priority_map.get(getattr(x, "discount_type", "FREE"), 0), reverse=True)
 
                     if candidate_benefits:
-                        matched_benefit = candidate_benefits[0]
+                        available_benefits = [
+                            b for b in candidate_benefits
+                            if (b.total_quantity or 0) - (b.used_quantity or 0) > 0
+                        ]
+                        matched_benefit = available_benefits[0] if available_benefits else candidate_benefits[0]
                         rem_qty = (matched_benefit.total_quantity or 0) - (matched_benefit.used_quantity or 0)
 
                         if rem_qty <= 0:
